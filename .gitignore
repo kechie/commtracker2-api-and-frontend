@@ -17,3 +17,4 @@ lerna-debug.log*
 # Local uploads directory (user-generated files)
 uploads/
 src/uploads/
+commtracker.departments.csv

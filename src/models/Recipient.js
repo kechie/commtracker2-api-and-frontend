@@ -3,6 +3,11 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {  // ← MUST accept BOTH parameters
   const Recipient = sequelize.define('Recipient', {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true
+    },
     recipientCode: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -20,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {  // ← MUST accept BOTH parameters
       field: 'recipient_name'
     },
     initial: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    mongo_id: {
       type: DataTypes.STRING,
       allowNull: true
     }
