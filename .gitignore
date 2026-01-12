@@ -18,3 +18,4 @@ lerna-debug.log*
 uploads/
 src/uploads/
 commtracker.departments.csv
+PSQL-commands.txt

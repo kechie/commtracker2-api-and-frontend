@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       field: 'date_received'
     },
-    // stores filename only (e.g. <uuid>.pdf). Public URL is constructed from env `STATIC_BASE_URL` or served path.
+    // stores filename only (e.g. <uuid>_attachment.pdf). Public URL is constructed from env `STATIC_BASE_URL` or served path.
     attachment: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -80,7 +80,7 @@ module.exports = (sequelize, DataTypes) => {
       field: 'recipient_id',
       references: {
         model: 'recipients',
-        key: 'recipient_code'
+        key: 'id'
       },
       onUpdate: 'CASCADE',  // Ensure updates cascade
       onDelete: 'CASCADE' // Ensure deletions cascade

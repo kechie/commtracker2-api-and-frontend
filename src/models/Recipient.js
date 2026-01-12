@@ -8,15 +8,11 @@ module.exports = (sequelize, DataTypes) => {  // ← MUST accept BOTH parameters
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true
     },
-    recipientCode: {
-      type: DataTypes.UUID,
+    recipientCode: {          // optional business identifier
+      type: DataTypes.STRING(50),  // ← or UUID if you really want
       allowNull: false,
       unique: true,
-      primaryKey: true,
-      field: 'recipient_code',
-      validate: {
-        min: 1
-      }
+      field: 'recipient_code'
     },
     recipientName: {
       type: DataTypes.STRING(100),
@@ -29,8 +25,10 @@ module.exports = (sequelize, DataTypes) => {  // ← MUST accept BOTH parameters
       allowNull: true
     },
     mongo_id: {
-      type: DataTypes.STRING,
-      allowNull: true
+      type: DataTypes.STRING(24),
+      allowNull: true,
+      unique: true,
+      field: 'mongo_id'
     }
   }, {
     tableName: 'recipients',
@@ -41,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {  // ← MUST accept BOTH parameters
 
   Recipient.associate = (models) => {
     Recipient.hasMany(models.User, {
-      foreignKey: 'recipientId',     // Matches the attribute name in User model
+      foreignKey: 'recipientId',
       as: 'users',
       onDelete: 'SET NULL',
       onUpdate: 'CASCADE'

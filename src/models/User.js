@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
       field: 'recipient_id', // Maps to underscored column name in DB
       references: {
         model: 'recipients',      // New table name
-        key: 'recipient_code'      // References the natural primary key
+        key: 'id'      // References the natural primary key
       },
       onUpdate: 'CASCADE',
       onDelete: 'SET NULL'
