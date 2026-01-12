@@ -66,6 +66,7 @@ async function startServer() {
       await db.sequelize.sync({ alter: true, force: SEQUELIZE_SYNC_FORCE });
       console.log('Database synchronized (alter mode).');
     } else {
+      //await db.sequelize.sync({ alter: true});
       console.log('Skipping database sync in production.');
     }
 
