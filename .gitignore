@@ -19,3 +19,5 @@ uploads/
 src/uploads/
 commtracker.departments.csv
 PSQL-commands.txt
+commtracker.users.csv
+commtracker.users-edited.csv
