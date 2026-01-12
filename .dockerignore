@@ -6,7 +6,9 @@
 
 **/.classpath
 **/.dockerignore
-**/.env
+#could be sensitive information
+#include in the image if needed but change the permissions accordingly $chmod 660 .env
+#**/.env
 **/.git
 **/.gitignore
 **/.project
