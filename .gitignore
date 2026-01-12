@@ -21,3 +21,6 @@ commtracker.departments.csv
 PSQL-commands.txt
 commtracker.users.csv
 commtracker.users-edited.csv
+
+# frontend build artifacts
+/src/local-env.js
