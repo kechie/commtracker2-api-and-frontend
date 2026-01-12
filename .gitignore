@@ -9,6 +9,8 @@
 node_modules
 dist
 build
+.yarn
+.yarn/*
 .DS_Store
 npm-debug.log*
 yarn-error.log*
@@ -23,4 +25,8 @@ commtracker.users.csv
 commtracker.users-edited.csv
 
 # frontend build artifacts
-/src/local-env.js
+#no need to track these files
+#/src/local-env.js
+#frontend/.yarn/install-state.gz
+frontend/.yarn
+frontend/.yarn/*
