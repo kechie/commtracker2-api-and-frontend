@@ -1,6 +1,8 @@
 // tests/integration/database/db.init.test.js
 
-const { sequelize, User /* , other models you want to test */ } = require('../../../models');
+require('dotenv').config({ path: '.env.test' });
+
+const { sequelize, User, Recipient, Tracker } = require('../../../db');
 
 describe('Database Initialization & Connection', () => {
   // Very important: close connection after all tests
@@ -24,7 +26,7 @@ describe('Database Initialization & Connection', () => {
 
     // Add checks for other important models
     it('should have loaded other expected models', () => {
-      const expectedModels = ['User' /* , 'Post', 'Comment', 'Profile', etc */];
+      const expectedModels = ['User', 'Recipient', 'Tracker'];
 
       expectedModels.forEach(modelName => {
         expect(sequelize.models).toHaveProperty(modelName);
