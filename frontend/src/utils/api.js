@@ -99,5 +99,48 @@ export const getRecipients = async () => {
   }
 };
 
+// User Management API calls (v2)
+export const getAllUsers = async () => {
+  try {
+    const response = await api.get('/users');
+    return response.data;
+  } catch (error) {
+    console.error('API Get All Users Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const createUser = async (userData) => {
+  try {
+    // This uses the existing register endpoint from authController
+    // It expects { name, username, password, email, userrole, deptId }
+    const response = await api.post('/auth/register', userData);
+    return response.data;
+  } catch (error) {
+    console.error('API Create User Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const updateUser = async (id, userData) => {
+  try {
+    const response = await api.put(`/users/${id}`, userData);
+    return response.data;
+  } catch (error) {
+    console.error('API Update User Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const deleteUser = async (id) => {
+  try {
+    const response = await api.delete(`/users/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('API Delete User Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
 
 export default api;

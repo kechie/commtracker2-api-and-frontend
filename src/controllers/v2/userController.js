@@ -71,17 +71,63 @@ exports.getUser = async (req, res) => {
   }
 };
 
+exports.getAllUsers = async (req, res) => {
+  try {
+    // Only superadmin and admin can get all users
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions.' });
+    }
+
+    const users = await User.findAll({
+      attributes: ['id', 'username', 'email', 'fullname', 'role', 'created_at']
+    });
+    res.json({ message: 'v2 Users retrieved', users, version: 'v2' });
+  } catch (error) {
+    console.error('v2 Get all users error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    // Only superadmin and admin can delete users
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions.' });
+    }
+
+    const { id } = req.params;
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    await user.destroy();
+    res.json({ message: 'v2 User deleted successfully', userId: id, version: 'v2' });
+  } catch (error) {
+    console.error('v2 Delete user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { email, fullname, role } = req.body;
 
+    // Only superadmin and admin can update other users or change roles
+    // A user can update their own profile via /profile route, not this route.
+    // This route is for admin/superadmin to manage other users.
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions to update users.' });
+    }
+    
     const user = await User.findByPk(id);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // v2: Validate role if provided
+    // Validate role if provided
     if (role && !['user', 'superadmin', 'admin', 'staff'].includes(role)) {
       return res.status(400).json({ error: 'Invalid role' });
     }

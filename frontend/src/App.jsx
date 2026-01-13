@@ -8,6 +8,7 @@ import AdminScreen from './screens/AdminScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import TrackersScreen from './screens/TrackersScreen';
 import ReceivingDashboardScreen from './screens/ReceivingDashboardScreen'; // Import ReceivingDashboardScreen
+import UserManagementScreen from './screens/UserManagementScreen'; // Import UserManagementScreen
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -58,6 +59,14 @@ const App = () => {
               element={
                 <ProtectedRoute allowedRoles={['receiving', 'admin', 'superadmin']}>
                   <ReceivingDashboardScreen />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users-management"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+                  <UserManagementScreen />
                 </ProtectedRoute>
               }
             />
