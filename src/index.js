@@ -74,8 +74,8 @@ app.get('/', (req, res) => {
 const PORT = process.env.API_PORT || 5007;
 const SEQUELIZE_SYNC_FORCE = process.env.SEQUELIZE_SYNC_FORCE === 'true';
 const SEQUELIZE_SYNC_ALTER = process.env.SEQUELIZE_SYNC_ALTER === 'true';
-console.log('SEQUELIZE_SYNC_FORCE:', SEQUELIZE_SYNC_FORCE);
-console.log('SEQUELIZE_SYNC_ALTER', SEQUELIZE_SYNC_ALTER);
+//console.log('SEQUELIZE_SYNC_FORCE:', SEQUELIZE_SYNC_FORCE);
+//console.log('SEQUELIZE_SYNC_ALTER', SEQUELIZE_SYNC_ALTER);
 // Import the shared, initialized db
 const db = require('./db');
 
