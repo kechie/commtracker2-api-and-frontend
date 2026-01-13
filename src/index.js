@@ -73,6 +73,9 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.API_PORT || 5007;
 const SEQUELIZE_SYNC_FORCE = process.env.SEQUELIZE_SYNC_FORCE === 'true';
+const SEQUELIZE_ALTER = process.env.SEQUELIZE_ALTER === 'true';
+console.log('SEQUELIZE_SYNC_FORCE:', SEQUELIZE_SYNC_FORCE);
+console.log('SEQUELIZE_ALTER', SEQUELIZE_ALTER);
 // Import the shared, initialized db
 const db = require('./db');
 
@@ -82,7 +85,7 @@ async function startServer() {
     console.log('Database connected successfully.');
 
     if (['development', 'test'].includes(process.env.NODE_ENV)) {
-      await db.sequelize.sync({ alter: true, force: SEQUELIZE_SYNC_FORCE });
+      await db.sequelize.sync({ alter: SEQUELIZE_ALTER, force: SEQUELIZE_SYNC_FORCE });
       console.log('Database synchronized (alter mode).');
     } else {
       //await db.sequelize.sync({ alter: true});

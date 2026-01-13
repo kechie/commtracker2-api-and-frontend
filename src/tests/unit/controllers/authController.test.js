@@ -51,6 +51,8 @@ describe('Auth Controller (v2)', () => {
     bcrypt.hash.mockResolvedValue('hashed_password');
     bcrypt.compare.mockResolvedValue(false);
     jwt.sign.mockReturnValue('jwt-token');
+    User.findOne.mockResolvedValue(null);
+    User.create.mockResolvedValue(null);
   });
 
   describe('POST /login', () => {
@@ -202,7 +204,9 @@ describe('Auth Controller (v2)', () => {
       };
 
       // First call returns null (username check), second call returns null (email check)
-      User.findOne.mockResolvedValue(null);
+      User.findOne
+        .mockResolvedValueOnce(null);
+      bcrypt.hash.mockResolvedValue('hashed_password_123');
 
       const createdUser = {
         id: 100,
@@ -212,11 +216,11 @@ describe('Auth Controller (v2)', () => {
       };
 
       User.create.mockResolvedValue(createdUser);
-      bcrypt.hash.mockResolvedValue('hashed_password_123');
       jwt.sign.mockReturnValue('brand-new-jwt-token');
 
       await authController.register(mockReq, mockRes);
 
+      expect(bcrypt.hash).toHaveBeenCalledWith('strongpass123', 10);
       expect(User.create).toHaveBeenCalledWith(
         expect.objectContaining({
           username: 'newuser123',
