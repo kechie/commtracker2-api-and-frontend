@@ -1,47 +1,51 @@
+import axios from 'axios';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const api = {
-  login: async (username, password) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-      return data;
-    } catch (error) {
-      console.error('API Login Error:', error);
-      throw error;
-    }
-  },
+const api = axios.create({
+  baseURL: API_BASE_URL,
+});
 
-  register: async (name, username, password) => {
+// Request interceptor to add the auth token to headers
+api.interceptors.request.use(
+  (config) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, username, password }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+      const userInfo = localStorage.getItem('userInfo');
+      if (userInfo) {
+        const { token } = JSON.parse(userInfo);
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
-      return data;
     } catch (error) {
-      console.error('API Register Error:', error);
-      throw error;
+      console.error('Failed to parse userInfo from localStorage', error);
+      // Optionally, handle error, e.g., clear localStorage or redirect to login
     }
+    return config;
   },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-  // Add more API calls here (e.g., getTrackers, createTracker, etc.)
+export const login = async (username, password) => {
+  try {
+    const response = await api.post('/auth/login', { username, password });
+    return response.data;
+  } catch (error) {
+    console.error('API Login Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const register = async (name, username, password) => {
+  try {
+    const response = await api.post('/auth/register', { name, username, password });
+    return response.data;
+  } catch (error) {
+    console.error('API Register Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
 };
 
 export default api;

@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Row, Col } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignInAlt } from '@fortawesome/free-solid-svg-icons';
-import api from '../utils/api'; // Import the API service
+import { useAuth } from '../context/AuthContext'; // Import useAuth
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
+  const { login } = useAuth(); // Use the login function from AuthContext
 
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.login(username, password);
-      // Assuming the API returns a token or user info
-      localStorage.setItem('userInfo', JSON.stringify(response)); // Store user info
+      await login(username, password); // Call login from AuthContext
       alert('Login successful!');
       navigate('/'); // Redirect to dashboard or home page
     } catch (error) {
