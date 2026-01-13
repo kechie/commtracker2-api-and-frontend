@@ -1,16 +1,16 @@
 import { Container } from 'react-bootstrap';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import DashboardScreen from './screens/DashboardScreen';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
-import AdminScreen from './screens/AdminScreen'; // Import AdminScreen
+import AdminScreen from './screens/AdminScreen';
+import ProfileScreen from './screens/ProfileScreen'; // Import ProfileScreen
 import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
   return (
-
     <AuthProvider>
       <Header />
       <main className="py-3">
@@ -35,11 +35,18 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfileScreen />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </Container>
       </main>
     </AuthProvider>
-
   );
 };
 
