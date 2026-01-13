@@ -21,7 +21,7 @@ const trackers = [
     dateReceived: '2024-07-05',
     status: 'approved',
   },
-    {
+  {
     id: 3,
     serialNumber: 'DOC-2024-003',
     documentTitle: 'Project Phoenix Kick-off',
@@ -35,7 +35,7 @@ const DashboardScreen = () => {
   return (
     <Container fluid>
       <Row className="align-items-center my-4">
-        <Col>
+        {/*         <Col>
           <h1>Dashboard</h1>
         </Col>
         <Col className="text-end">
@@ -43,9 +43,9 @@ const DashboardScreen = () => {
             <FontAwesomeIcon icon={faPlus} className="me-2" />
             New Document
           </Button>
-        </Col>
+        </Col> */}
       </Row>
-      <Table striped bordered hover responsive>
+      {/*       <Table striped bordered hover responsive>
         <thead>
           <tr>
             <th>Serial Number</th>
@@ -82,7 +82,7 @@ const DashboardScreen = () => {
             </tr>
           ))}
         </tbody>
-      </Table>
+      </Table> */}
     </Container>
   );
 };

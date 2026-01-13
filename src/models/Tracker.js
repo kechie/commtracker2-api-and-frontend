@@ -74,17 +74,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       field: 'lce_reply_date'
     },
-    recipientId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      field: 'recipient_id',
-      references: {
-        model: 'recipients',
-        key: 'id'
-      },
-      onUpdate: 'CASCADE',  // Ensure updates cascade
-      onDelete: 'CASCADE' // Ensure deletions cascade
-    }
   }, {
     tableName: 'trackers',
     timestamps: true,
@@ -93,9 +82,10 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Tracker.associate = (models) => {
-    Tracker.belongsTo(models.Recipient, {
-      foreignKey: 'recipientId',
-      as: 'recipient'
+    Tracker.belongsToMany(models.Recipient, {
+      through: 'TrackerRecipients', // Junction table
+      foreignKey: 'trackerId',
+      as: 'recipients'
     });
   };
 

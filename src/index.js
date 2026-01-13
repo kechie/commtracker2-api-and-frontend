@@ -43,6 +43,7 @@ const addDeprecationHeaders = (version, isDeprecated, deprecationDate) => {
 const authRoutesV2 = require('./routes/v2/auth');
 const userRoutesV2 = require('./routes/v2/users');
 const trackerRoutesV2 = require('./routes/v2/trackers');
+const recipientRoutesV2 = require('./routes/v2/recipients'); // Import recipient routes
 const path = require('path');
 
 //app.use('/v1/auth', addDeprecationHeaders('v1', true, '2025-12-31'), authRoutesV1);
@@ -50,6 +51,7 @@ const path = require('path');
 app.use('/v2/auth', addDeprecationHeaders('v2', false), authRoutesV2);
 app.use('/v2/users', addDeprecationHeaders('v2', false), userRoutesV2);
 app.use('/v2/trackers', addDeprecationHeaders('v2', false), trackerRoutesV2);
+app.use('/v2/recipients', addDeprecationHeaders('v2', false), recipientRoutesV2); // Use recipient routes
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
-import { getTrackers, createTracker, updateTracker, deleteTracker } from '../utils/api';
+import { getTrackers, createTracker, updateTracker, deleteTracker, getRecipients } from '../utils/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 const TrackersScreen = () => {
   const [trackers, setTrackers] = useState([]);
+  const [recipients, setRecipients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -16,24 +17,29 @@ const TrackersScreen = () => {
     documentTitle: '',
     dateReceived: '',
     isConfidential: false,
-    recipientId: '', // You might need a way to select recipients
+    recipientIds: [], // Changed to an array
   });
 
   useEffect(() => {
-    fetchTrackers();
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [trackersData, recipientsData] = await Promise.all([getTrackers(), getRecipients()]);
+        setTrackers(trackersData);
+        setRecipients(recipientsData);
+        setError(null);
+      } catch (err) {
+        setError(err.message || 'Failed to fetch data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, []);
 
   const fetchTrackers = async () => {
-    try {
-      setLoading(true);
-      const data = await getTrackers();
-      setTrackers(data);
-      setError(null);
-    } catch (err) {
-      setError(err.message || 'Failed to fetch trackers');
-    } finally {
-      setLoading(false);
-    }
+    const data = await getTrackers();
+    setTrackers(data);
   };
 
   const handleClose = () => {
@@ -45,7 +51,7 @@ const TrackersScreen = () => {
       documentTitle: '',
       dateReceived: '',
       isConfidential: false,
-      recipientId: '',
+      recipientIds: [],
     });
   };
 
@@ -53,23 +59,28 @@ const TrackersScreen = () => {
     if (tracker) {
       setEditingTracker(tracker);
       setFormData({
-        serialNumber: tracker.serialNumber,
-        fromName: tracker.fromName,
-        documentTitle: tracker.documentTitle,
+        serialNumber: tracker.serialNumber || '',
+        fromName: tracker.fromName || '',
+        documentTitle: tracker.documentTitle || '',
         dateReceived: tracker.dateReceived ? new Date(tracker.dateReceived).toISOString().split('T')[0] : '',
-        isConfidential: tracker.isConfidential,
-        recipientId: tracker.recipientId,
+        isConfidential: tracker.isConfidential || false,
+        recipientIds: tracker.recipients ? tracker.recipients.map(r => r.id) : [],
       });
     }
     setShowModal(true);
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    const { name, value, type, checked, options } = e.target;
+    if (name === 'recipientIds') {
+      const selectedIds = Array.from(options).filter(option => option.selected).map(option => option.value);
+      setFormData(prev => ({ ...prev, recipientIds: selectedIds }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -115,6 +126,7 @@ const TrackersScreen = () => {
               <th>Serial Number</th>
               <th>Document Title</th>
               <th>From</th>
+              <th>Recipients</th>
               <th>Date Received</th>
               <th>Confidential</th>
               <th>Actions</th>
@@ -126,6 +138,7 @@ const TrackersScreen = () => {
                 <td>{tracker.serialNumber}</td>
                 <td>{tracker.documentTitle}</td>
                 <td>{tracker.fromName}</td>
+                <td>{tracker.recipients.map(r => r.recipientName).join(', ')}</td>
                 <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
                 <td>{tracker.isConfidential ? 'Yes' : 'No'}</td>
                 <td>
@@ -165,9 +178,13 @@ const TrackersScreen = () => {
               <Form.Label>Date Received</Form.Label>
               <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="recipientId">
-              <Form.Label>Recipient ID</Form.Label>
-              <Form.Control type="text" name="recipientId" value={formData.recipientId} onChange={handleChange} required />
+            <Form.Group className="mb-3" controlId="recipientIds">
+              <Form.Label>Recipients</Form.Label>
+              <Form.Control as="select" multiple name="recipientIds" value={formData.recipientIds} onChange={handleChange}>
+                {recipients.map(r => (
+                  <option key={r.id} value={r.id}>{r.recipientName}</option>
+                ))}
+              </Form.Control>
             </Form.Group>
             <Form.Group className="mb-3" controlId="isConfidential">
               <Form.Check type="checkbox" name="isConfidential" label="Confidential" checked={formData.isConfidential} onChange={handleChange} />

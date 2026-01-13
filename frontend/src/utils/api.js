@@ -89,5 +89,15 @@ export const deleteTracker = async (id) => {
   }
 };
 
+export const getRecipients = async () => {
+  try {
+    const response = await api.get('/recipients');
+    return response.data;
+  } catch (error) {
+    console.error('API Get Recipients Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
 
 export default api;

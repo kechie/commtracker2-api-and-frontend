@@ -44,11 +44,10 @@ module.exports = (sequelize, DataTypes) => {  // ← MUST accept BOTH parameters
       onDelete: 'SET NULL',
       onUpdate: 'CASCADE'
     });
-    Recipient.hasMany(models.Tracker, {
+    Recipient.belongsToMany(models.Tracker, {
+      through: 'TrackerRecipients', // Junction table
       foreignKey: 'recipientId',
-      as: 'trackers',
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE'
+      as: 'trackers'
     });
   };
 
