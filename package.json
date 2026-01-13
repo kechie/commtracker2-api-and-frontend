@@ -3,6 +3,9 @@
   "packageManager": "yarn@4.6.0",
   "version": "2.0.0",
   "description": "A REST API server with user authentication using PostgreSQL.",
+  "workspaces": [
+    "frontend"
+  ],
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
