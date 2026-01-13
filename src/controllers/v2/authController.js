@@ -19,16 +19,21 @@ exports.login = async (req, res) => {
   console.log('User Model:', User ? 'Loaded' : 'Not Loaded');
   try {
     const { username, password } = req.body;
+    console.log('Login attempt for username:', username);
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
     const user = await User.findOne({ where: { username } });
+    console.log('User found in DB:', user ? user.username : 'None');
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    console.log('Plaintext password from request:', password);
+    console.log('Hashed password from DB:', user.password);
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('bcrypt.compare result:', isPasswordValid);
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -98,6 +103,9 @@ exports.register = async (req, res) => {
     res.status(201).json({ message: 'v2 Registration successful', token, userId: user.id });
   } catch (error) {
     console.error('v2 Register error:', error);
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(409).json({ error: 'Username or email already exists' });
+    }
     res.status(500).json({ error: 'Internal server error' });
   }
 };

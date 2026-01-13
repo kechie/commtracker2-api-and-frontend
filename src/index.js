@@ -2,7 +2,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-require('dotenv').config();
+// Conditionally load environment variables
+if (process.env.NODE_ENV === 'test') {
+  require('dotenv').config({ path: '.env.test' });
+} else {
+  require('dotenv').config();
+}
 
 const app = express();
 
@@ -93,4 +98,9 @@ async function startServer() {
   }
 }
 
-startServer();
+// Only start the server if this file is run directly
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = app;
