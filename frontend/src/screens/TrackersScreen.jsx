@@ -164,7 +164,14 @@ const TrackersScreen = () => {
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3" controlId="serialNumber">
               <Form.Label>Serial Number</Form.Label>
-              <Form.Control type="text" name="serialNumber" value={formData.serialNumber} onChange={handleChange} />
+              <Form.Control
+                type="text"
+                name="serialNumber"
+                value={formData.serialNumber}
+                onChange={handleChange}
+                readOnly={!editingTracker} // Make read-only for new trackers
+                placeholder={editingTracker ? '' : 'Auto-generated on creation'}
+              />
             </Form.Group>
             <Form.Group className="mb-3" controlId="documentTitle">
               <Form.Label>Document Title</Form.Label>

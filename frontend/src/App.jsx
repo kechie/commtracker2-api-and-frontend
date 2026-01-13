@@ -6,7 +6,8 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import AdminScreen from './screens/AdminScreen';
 import ProfileScreen from './screens/ProfileScreen';
-import TrackersScreen from './screens/TrackersScreen'; // Import TrackersScreen
+import TrackersScreen from './screens/TrackersScreen';
+import ReceivingDashboardScreen from './screens/ReceivingDashboardScreen'; // Import ReceivingDashboardScreen
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -49,6 +50,14 @@ const App = () => {
               element={
                 <ProtectedRoute allowedRoles={['receiving', 'admin', 'superadmin']}>
                   <TrackersScreen />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/receiving-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['receiving', 'admin', 'superadmin']}>
+                  <ReceivingDashboardScreen />
                 </ProtectedRoute>
               }
             />

@@ -1,20 +1,62 @@
 // src/controllers/v2/trackerController.js
-const { Tracker, Recipient } = require('../../db');
+const { Tracker, Recipient, sequelize } = require('../../db'); // Import sequelize for transactions
+const { Op } = require('sequelize'); // Import Op for operators
+
+// Helper function to generate serial number
+const generateSerialNumber = async (transaction) => {
+  const currentYear = new Date().getFullYear();
+  const prefix = `${currentYear}-DTS2-`;
+
+  // Find the highest serial number for the current year
+  const lastTracker = await Tracker.findOne({
+    where: {
+      serialNumber: {
+        [Op.like]: `${prefix}%`,
+      },
+    },
+    order: [
+      [sequelize.literal(`CAST(SUBSTRING("serial_number", LENGTH('${prefix}') + 1) AS INTEGER)`), 'DESC'],
+    ],
+    transaction, // Ensure this query is part of the transaction
+    paranoid: false,
+  });
+
+  let nextSequence = 1;
+  if (lastTracker && lastTracker.serialNumber) {
+    const lastSequence = parseInt(lastTracker.serialNumber.substring(prefix.length), 10);
+    if (!isNaN(lastSequence)) {
+      nextSequence = lastSequence + 1;
+    }
+  }
+
+  return `${prefix}${String(nextSequence).padStart(8, '0')}`;
+};
 
 // @desc    Create a tracker
 // @route   POST /api/v2/trackers
 // @access  Private (receiving role)
 exports.createTracker = async (req, res) => {
+  const transaction = await sequelize.transaction(); // Start a transaction
   try {
-    const { recipientIds, ...trackerData } = req.body;
+    const { recipientIds, serialNumber: incomingSerialNumber, ...trackerData } = req.body;
 
-    // Create the tracker
-    const tracker = await Tracker.create(trackerData);
+    let finalSerialNumber = incomingSerialNumber;
+    if (!finalSerialNumber) {
+      finalSerialNumber = await generateSerialNumber(transaction);
+    }
+
+    // Create the tracker within the transaction
+    const tracker = await Tracker.create({
+      ...trackerData,
+      serialNumber: finalSerialNumber,
+    }, { transaction });
 
     // Set recipients if provided
     if (recipientIds && recipientIds.length > 0) {
-      await tracker.setRecipients(recipientIds);
+      await tracker.setRecipients(recipientIds, { transaction });
     }
+
+    await transaction.commit(); // Commit the transaction
 
     // Reload the tracker with recipients to return in the response
     const result = await Tracker.findByPk(tracker.id, {
@@ -23,6 +65,7 @@ exports.createTracker = async (req, res) => {
 
     res.status(201).json(result);
   } catch (error) {
+    await transaction.rollback(); // Rollback on error
     console.error('Create tracker error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -73,6 +116,11 @@ exports.updateTracker = async (req, res) => {
     }
 
     const { recipientIds, ...trackerData } = req.body;
+
+    // serialNumber should not be updated after creation, unless specifically allowed by logic
+    if (trackerData.serialNumber) {
+      delete trackerData.serialNumber;
+    }
 
     // Update tracker's own fields
     await tracker.update(trackerData);
