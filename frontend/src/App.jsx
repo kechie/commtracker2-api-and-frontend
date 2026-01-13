@@ -5,7 +5,8 @@ import DashboardScreen from './screens/DashboardScreen';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import AdminScreen from './screens/AdminScreen';
-import ProfileScreen from './screens/ProfileScreen'; // Import ProfileScreen
+import ProfileScreen from './screens/ProfileScreen';
+import TrackersScreen from './screens/TrackersScreen'; // Import TrackersScreen
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -40,6 +41,14 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <ProfileScreen />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trackers"
+              element={
+                <ProtectedRoute allowedRoles={['receiving', 'admin', 'superadmin']}>
+                  <TrackersScreen />
                 </ProtectedRoute>
               }
             />

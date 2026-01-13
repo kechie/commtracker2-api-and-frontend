@@ -48,4 +48,46 @@ export const register = async (name, username, password) => {
   }
 };
 
+// Tracker API calls
+export const getTrackers = async () => {
+  try {
+    const response = await api.get('/trackers');
+    return response.data;
+  } catch (error) {
+    console.error('API Get Trackers Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const createTracker = async (trackerData) => {
+  try {
+    const response = await api.post('/trackers', trackerData);
+    return response.data;
+  } catch (error) {
+    console.error('API Create Tracker Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const updateTracker = async (id, trackerData) => {
+  try {
+    const response = await api.put(`/trackers/${id}`, trackerData);
+    return response.data;
+  } catch (error) {
+    console.error('API Update Tracker Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const deleteTracker = async (id) => {
+  try {
+    const response = await api.delete(`/trackers/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('API Delete Tracker Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+
 export default api;

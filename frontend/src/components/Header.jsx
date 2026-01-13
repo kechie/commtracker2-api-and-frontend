@@ -1,7 +1,7 @@
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap'; // Import NavDropdown
 import { LinkContainer } from 'react-router-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperPlane, faSignInAlt, faSignOutAlt, faUser, faUserCog } from '@fortawesome/free-solid-svg-icons'; // Import more icons
+import { faPaperPlane, faSignInAlt, faSignOutAlt, faUser, faUserCog, faFileAlt } from '@fortawesome/free-solid-svg-icons'; // Import more icons
 import { useAuth } from '../context/AuthContext'; // Import useAuth
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
@@ -13,6 +13,8 @@ const Header = () => {
     logout();
     navigate('/login'); // Redirect to login after logout
   };
+
+  const canAccessTrackers = ['receiving', 'admin', 'superadmin'].includes(role);
 
   return (
     <header>
@@ -28,6 +30,15 @@ const Header = () => {
             <Nav className="ms-auto">
               {isAuthenticated ? (
                 <>
+                  {/* Trackers Link */}
+                  {canAccessTrackers && (
+                    <LinkContainer to="/trackers">
+                      <Nav.Link>
+                        <FontAwesomeIcon icon={faFileAlt} className="me-1" /> Trackers
+                      </Nav.Link>
+                    </LinkContainer>
+                  )}
+
                   {/* Admin Link (only for admin/superadmin) */}
                   {(role === 'admin' || role === 'superadmin') && (
                     <LinkContainer to="/admin">
