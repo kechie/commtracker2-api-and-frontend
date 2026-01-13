@@ -94,8 +94,8 @@ exports.register = async (req, res) => {
     if (existingEmail) {
       return res.status(409).json({ error: 'Email already exists' });
     }
-
-    const user = await User.create({ username, password, email, fullname });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({ username, password: hashedPassword, email, fullname });
     const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
       expiresIn: '1h'
     });
