@@ -7,9 +7,9 @@ const { Recipient } = require('../../db');
 exports.getRecipients = async (req, res) => {
   try {
     const recipients = await Recipient.findAll({
-      order: [['name', 'ASC']],
+      order: [['recipient_name', 'ASC']],
     });
-    res.json({recipients});
+    res.json({ recipients });
   } catch (error) {
     console.error('Get recipients error:', error);
     res.status(500).json({ error: 'Internal server error' });
