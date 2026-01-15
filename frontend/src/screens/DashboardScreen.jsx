@@ -1,7 +1,8 @@
 import React from 'react';
 import { Container, Row, Col, Table, Button } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEye, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+//import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+//import { faPlus, faEye, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../context/useAuth';
 
 // Mock data until API is connected
 /* const trackers = [
@@ -32,9 +33,20 @@ import { faPlus, faEye, faEdit, faTrash } from '@fortawesome/free-solid-svg-icon
 ];
  */
 const DashboardScreen = () => {
+  const { user, role } = useAuth();
+  console.log('User info in DashboardScreen:', user, role);
   return (
     <Container fluid>
       <Row className="align-items-center my-4">
+        <h1>Dashboard</h1>
+        {user && (
+          <p>Welcome, {user.userId}!</p>
+        )}
+        <p></p>
+        {/* Add receiving-specific content here
+      Analytics, recent activities, quick actions, etc.
+      link to tracker management screen
+      */}
         {/*         <Col>
           <h1>Dashboard</h1>
         </Col>

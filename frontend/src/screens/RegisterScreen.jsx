@@ -6,29 +6,29 @@ import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import api from '../utils/api'; // Import the API service
 
 const RegisterScreen = () => {
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState(''); // Changed from email to username
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const navigate = useNavigate();
+  /*   const [name, setName] = useState('');
+    const [username, setUsername] = useState(''); // Changed from email to username
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const navigate = useNavigate(); */
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-    try {
-      await api.register(name, username, password); // Pass name, username, password
-      alert('Registration successful! Please log in.');
-      navigate('/login');
-    } catch (error) {
-      alert(error.message || 'Registration failed.');
-    }
-  };
-
+  /*   const submitHandler = async (e) => {
+      e.preventDefault();
+      if (password !== confirmPassword) {
+        alert("Passwords do not match");
+        return;
+      }
+      try {
+        await api.register(name, username, password); // Pass name, username, password
+        alert('Registration successful! Please log in.');
+        navigate('/login');
+      } catch (error) {
+        alert(error.message || 'Registration failed.');
+      }
+    };
+   */
   return (
-    <Container><h3>Contact App Development/ICT Office for account registration</h3><br /> <Link to="/login">Continue to Sign In</Link>
+    <Container><h5>Please contact App Development/ICT Office for account registration</h5><br /> <Link to="/login">Continue to Sign In</Link>
       {/* Added Link component to avoid unused import warning 
       <Row className="justify-content-md-center mt-5">
         <Col xs={12} md={6}>

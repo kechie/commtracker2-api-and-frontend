@@ -12,10 +12,9 @@ const ReceivingDashboardScreen = () => {
       {user && (
         <p>Welcome, {user.username}! Your role is: {role}</p>
       )}
-      <p>This is a dashboard specifically for users with the 'receiving' role.</p>
-      {/* Add receiving-specific content here
+      {/*<p>This is a dashboard specifically for users with the 'receiving' role.</p>
+       Add receiving-specific content here
       Analytics, recent activities, quick actions, etc.
-      link to tracker management screen
       */}
       <Link to="/trackers">Manage Document Trackers</Link>
     </div>

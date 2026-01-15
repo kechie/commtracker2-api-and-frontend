@@ -15,7 +15,7 @@ const LoginScreen = () => {
     e.preventDefault();
     try {
       await login(username, password); // Call login from AuthContext
-      alert('Login successful!');
+      //alert('Login successful!');
       navigate('/'); // Redirect to dashboard or home page
     } catch (error) {
       alert(error.message || 'Login failed. Please check your credentials.');

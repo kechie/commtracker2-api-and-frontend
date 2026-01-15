@@ -23,7 +23,7 @@ const Header = () => {
         <Container>
           <LinkContainer to="/">
             <Navbar.Brand>
-              <FontAwesomeIcon icon={faPaperPlane} /> CommTracker
+              <FontAwesomeIcon icon={faPaperPlane} /> DocTrkr2
             </Navbar.Brand>
           </LinkContainer>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
