@@ -8,8 +8,8 @@ module.exports = (sequelize, DataTypes) => {  // ← MUST accept BOTH parameters
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true
     },
-    recipientCode: {          // optional business identifier
-      type: DataTypes.STRING(50),  // ← or UUID if you really want
+    recipientCode: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       unique: true,
       field: 'recipient_code'

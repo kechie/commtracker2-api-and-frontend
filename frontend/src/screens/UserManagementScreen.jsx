@@ -43,15 +43,17 @@ const UserManagementScreen = () => {
     }
   }, [showAlert]);
 
-  const fetchUsers = async (pageNum = 1, pageLimit = 10) => {
+  const fetchUsers = async (targetPage, targetLimit) => {
+    setLoading(true);
+
     try {
-      const { data } = await api.get(`/users?page=${pageNum}&limit=${pageLimit}`);
+      const { data } = await api.get(`/users?page=${targetPage}&limit=${targetLimit}`);
+
+      // Batch updates - React 18+ will batch them anyway, but it's clearer
       setUsers(data.users);
       setTotal(data.pagination.total);
       setTotalPages(data.pagination.totalPages);
-      setPage(pageNum);
       setLoading(false);
-      //console.log('Fetched users:', data);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch users');
       setShowAlert(true);
@@ -61,18 +63,18 @@ const UserManagementScreen = () => {
 
   useEffect(() => {
     fetchUsers(page, limit);
-  }, [limit, page]);
+  }, [page, limit]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
-      fetchUsers(newPage, limit);
+      setPage(newPage);
     }
   };
 
   const handleLimitChange = (e) => {
     const newLimit = parseInt(e.target.value);
     setLimit(newLimit);
-    fetchUsers(1, newLimit);
+    setPage(1);
   };
 
   const deleteHandler = async (id) => {
@@ -159,7 +161,7 @@ const UserManagementScreen = () => {
         </Col>
         <Col className="text-end">
           <Button className="my-3" onClick={() => setShowCreateModal(true)}>
-            <i className="fas fa-plus"></i> <FontAwesomeIcon icon={faPlus} />
+            <i className="fas fa-plus"></i> <FontAwesomeIcon icon={faPlus} /> Create User
           </Button>
         </Col>
       </Row>

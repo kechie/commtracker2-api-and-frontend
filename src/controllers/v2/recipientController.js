@@ -1,5 +1,6 @@
 // src/controllers/v2/recipientController.js
 const { Recipient } = require('../../db');
+const { Op } = require('sequelize');
 
 // @desc    Get all recipients
 // @route   GET /api/v2/recipients
@@ -7,7 +8,12 @@ const { Recipient } = require('../../db');
 exports.getRecipients = async (req, res) => {
   try {
     const recipients = await Recipient.findAll({
-      order: [['recipient_name', 'ASC']],
+      where: {
+        recipient_code: {
+          [Op.lte]: '1000', // Example condition, adjust as needed
+        },
+      },
+      order: [['recipient_code', 'ASC']],
     });
     res.json({ recipients });
   } catch (error) {
@@ -21,9 +27,9 @@ exports.getRecipients = async (req, res) => {
 // @access  Private
 exports.createRecipient = async (req, res) => {
   try {
-    const { name, address, contactPerson, contactEmail, contactPhone } = req.body;
+    const { recipient_name, address, contactPerson, contactEmail, contactPhone } = req.body;
     const recipient = await Recipient.create({
-      name,
+      recipient_name,
       address,
       contactPerson,
       contactEmail,
