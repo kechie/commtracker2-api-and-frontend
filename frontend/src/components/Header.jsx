@@ -67,6 +67,15 @@ const Header = () => {
                     </LinkContainer>
                   )}
 
+                  {/* Recipient Management Link (only for admin/superadmin) */}
+                  {(role === 'admin' || role === 'superadmin') && (
+                    <LinkContainer to="/recipients-management">
+                      <Nav.Link>
+                        <FontAwesomeIcon icon={faUserCog} className="me-1" /> Recipient Management
+                      </Nav.Link>
+                    </LinkContainer>
+                  )}
+
                   <NavDropdown title={user?.username || 'Profile'} id="username">
                     <LinkContainer to="/profile">
                       <NavDropdown.Item>
