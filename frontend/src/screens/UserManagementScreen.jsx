@@ -47,7 +47,7 @@ const UserManagementScreen = () => {
 
   useEffect(() => {
     fetchUsers(page, limit);
-  }, []);
+  }, [limit, page]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
