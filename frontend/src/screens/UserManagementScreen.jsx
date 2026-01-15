@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Row, Col, Alert, Modal, Form, Pagination } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import api from '../utils/api';
 
 const UserManagementScreen = () => {
@@ -157,7 +159,7 @@ const UserManagementScreen = () => {
         </Col>
         <Col className="text-end">
           <Button className="my-3" onClick={() => setShowCreateModal(true)}>
-            <i className="fas fa-plus"></i> Create User
+            <i className="fas fa-plus"></i> <FontAwesomeIcon icon={faPlus} />
           </Button>
         </Col>
       </Row>
@@ -188,6 +190,7 @@ const UserManagementScreen = () => {
               <td>
                 <Button variant="light" className="btn-sm mx-1" onClick={() => handleEditClick(user)}>
                   <i className="fas fa-edit"></i>
+                  <FontAwesomeIcon icon={faEdit} />
                 </Button>
                 <Button
                   variant="danger"
@@ -195,6 +198,7 @@ const UserManagementScreen = () => {
                   onClick={() => deleteHandler(user.id)}
                 >
                   <i className="fas fa-trash"></i>
+                  <FontAwesomeIcon icon={faTrash} />
                 </Button>
               </td>
             </tr>
