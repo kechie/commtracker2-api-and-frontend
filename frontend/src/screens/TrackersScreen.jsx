@@ -188,7 +188,7 @@ const TrackersScreen = () => {
             <Form.Group className="mb-3" controlId="recipientIds">
               <Form.Label>Recipients</Form.Label>
               <Form.Control as="select" multiple name="recipientIds" value={formData.recipientIds} onChange={handleChange}>
-                {recipients.map(r => (
+                {recipients && Array.isArray(recipients) && recipients.map(r => (
                   <option key={r.id} value={r.id}>{r.recipientName}</option>
                 ))}
               </Form.Control>
