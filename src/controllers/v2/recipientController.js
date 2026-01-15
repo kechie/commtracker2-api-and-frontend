@@ -7,15 +7,42 @@ const { Op } = require('sequelize');
 // @access  Private
 exports.getRecipients = async (req, res) => {
   try {
-    const recipients = await Recipient.findAll({
+    // Get pagination parameters from query string
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    // Validate pagination parameters
+    if (page < 1 || limit < 1) {
+      return res.status(400).json({ error: 'Page and limit must be positive integers' });
+    }
+
+    // Fetch recipients with pagination, excluding codes greater than 1000
+    const { count, rows } = await Recipient.findAndCountAll({
       where: {
-        recipient_code: {
-          [Op.lte]: '1000', // Example condition, adjust as needed
-        },
+        recipientCode: {
+          [Op.lte]: 1000
+        }
       },
-      order: [['recipient_code', 'ASC']],
+      limit,
+      offset,
+      order: [['recipientCode', 'ASC']],
     });
-    res.json({ recipients });
+
+    // Calculate total pages
+    const totalPages = Math.ceil(count / limit);
+
+    res.json({
+      message: 'v2 Recipients retrieved',
+      recipients: rows,
+      pagination: {
+        page,
+        limit,
+        total: count,
+        totalPages
+      },
+      version: 'v2'
+    });
   } catch (error) {
     console.error('Get recipients error:', error);
     res.status(500).json({ error: 'Internal server error' });

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Row, Col, Alert, Modal, Form, Pagination } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import api from '../utils/api';
+import { Link, useNavigate } from 'react-router-dom';
 
 const UserManagementScreen = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -149,19 +151,35 @@ const UserManagementScreen = () => {
     }
   };
 
+  const handleBack = () => {
+    navigate('/admin');
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
     <Container>
+      <Row className="align-items-left mb-3">
+        <Col>
+          <Button
+            variant="light"
+            onClick={handleBack}
+            className="d-flex align-items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+            Back to Admin Dashboard
+          </Button>
+        </Col>
+      </Row>
       <Row className="align-items-center">
         <Col>
-          <h1>Users</h1>
+          <h5>Doc Tracker User Accounts</h5>
         </Col>
         <Col className="text-end">
           <Button className="my-3" onClick={() => setShowCreateModal(true)}>
-            <i className="fas fa-plus"></i> <FontAwesomeIcon icon={faPlus} /> Create User
+            <i className="fas fa-plus"></i> <FontAwesomeIcon icon={faPlus} /> Create User Account
           </Button>
         </Col>
       </Row>
