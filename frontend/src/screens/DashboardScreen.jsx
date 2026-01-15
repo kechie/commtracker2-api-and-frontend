@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEye, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 // Mock data until API is connected
-const trackers = [
+/* const trackers = [
   {
     id: 1,
     serialNumber: 'DOC-2024-001',
@@ -30,7 +30,7 @@ const trackers = [
     status: 'for review',
   },
 ];
-
+ */
 const DashboardScreen = () => {
   return (
     <Container fluid>

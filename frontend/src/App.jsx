@@ -26,7 +26,7 @@ const App = () => {
             <Route
               path="/"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['monitor', 'receiving', 'admin', 'superadmin']}>
                   <DashboardScreen />
                 </ProtectedRoute>
               }

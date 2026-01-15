@@ -111,10 +111,10 @@ const TrackersScreen = () => {
 
   return (
     <>
-      <h1>Trackers</h1>
+      <h1>Document Trackers</h1>
       {error && <Alert variant="danger">{error}</Alert>}
       <Button variant="primary" className="mb-3" onClick={() => handleShow()}>
-        <FontAwesomeIcon icon={faPlus} className="me-2" /> Create Tracker
+        <FontAwesomeIcon icon={faPlus} className="me-2" />New Doc Tracker
       </Button>
 
       {loading ? (
@@ -129,6 +129,7 @@ const TrackersScreen = () => {
               <th>Recipients</th>
               <th>Date Received</th>
               <th>Confidential</th>
+              <th>Is Seen?</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -141,6 +142,7 @@ const TrackersScreen = () => {
                 <td>{tracker.recipients.map(r => r.recipientName).join(', ')}</td>
                 <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
                 <td>{tracker.isConfidential ? 'Yes' : 'No'}</td>
+                <td>{tracker.isSeen ? 'Yes' : 'No'}</td>
                 <td>
                   <Button variant="light" size="sm" onClick={() => handleShow(tracker)}>
                     <FontAwesomeIcon icon={faEdit} />

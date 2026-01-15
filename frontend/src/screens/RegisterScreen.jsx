@@ -28,7 +28,8 @@ const RegisterScreen = () => {
   };
 
   return (
-    <Container>
+    <Container><h3>Contact App Development/ICT Office for account registration</h3><br /> <Link to="/login">Continue to Sign In</Link>
+      {/* Added Link component to avoid unused import warning 
       <Row className="justify-content-md-center mt-5">
         <Col xs={12} md={6}>
           <h1 className="text-center mb-4">
@@ -45,8 +46,8 @@ const RegisterScreen = () => {
               ></Form.Control>
             </Form.Group>
 
-            <Form.Group className="my-2" controlId="username"> {/* Changed from email to username */}
-              <Form.Label>Username</Form.Label> {/* Changed from Email Address to Username */}
+            <Form.Group className="my-2" controlId="username"> 
+              <Form.Label>Username</Form.Label> 
               <Form.Control
                 type="text" // Changed type from email to text
                 placeholder="Enter username" // Changed placeholder
@@ -78,16 +79,16 @@ const RegisterScreen = () => {
             <Button type="submit" variant="primary" className="mt-3 w-100">
               Register
             </Button>
-          </Form>
+          </Form >
 
-          <Row className="py-3">
-            <Col>
-              Have an Account? <Link to="/login">Login</Link>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </Container>
+  <Row className="py-3">
+    <Col>
+      Have an Account? <Link to="/login">Login</Link>
+    </Col>
+  </Row>
+        </Col >
+      </Row >*/}
+    </Container >
   );
 };
 

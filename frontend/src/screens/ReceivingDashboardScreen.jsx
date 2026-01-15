@@ -1,5 +1,7 @@
-import React from 'react';
+//frontend/src/screens/ReceivingDashboardScreen.jsx
+//import React from 'react';
 import { useAuth } from '../context/useAuth';
+import { Link } from 'react-router-dom';
 
 const ReceivingDashboardScreen = () => {
   const { user, role } = useAuth();
@@ -11,7 +13,11 @@ const ReceivingDashboardScreen = () => {
         <p>Welcome, {user.username}! Your role is: {role}</p>
       )}
       <p>This is a dashboard specifically for users with the 'receiving' role.</p>
-      {/* Add receiving-specific content here */}
+      {/* Add receiving-specific content here
+      Analytics, recent activities, quick actions, etc.
+      link to tracker management screen
+      */}
+      <Link to="/trackers">Manage Document Trackers</Link>
     </div>
   );
 };

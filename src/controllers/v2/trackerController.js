@@ -4,10 +4,12 @@ const { Op } = require('sequelize'); // Import Op for operators
 
 // Helper function to generate serial number
 const generateSerialNumber = async (transaction) => {
-  const currentYear = new Date().getFullYear();
-  const prefix = `${currentYear}-DTS2-`;
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = String(now.getMonth() + 1).padStart(2, '0'); // MM format (01-12)
+  const prefix = `${currentYear}-${currentMonth}-DTS2-`;
 
-  // Find the highest serial number for the current year
+  // Find the highest serial number for the current year and month
   const lastTracker = await Tracker.findOne({
     where: {
       serialNumber: {
@@ -18,7 +20,7 @@ const generateSerialNumber = async (transaction) => {
       [sequelize.literal(`CAST(SUBSTRING("serial_number", LENGTH('${prefix}') + 1) AS INTEGER)`), 'DESC'],
     ],
     transaction, // Ensure this query is part of the transaction
-    paranoid: false,
+    paranoid: true, // Consider soft-deleted records since serial numbers must be unique
   });
 
   let nextSequence = 1;
@@ -129,7 +131,7 @@ exports.updateTracker = async (req, res) => {
     if (recipientIds) {
       await tracker.setRecipients(recipientIds);
     }
-    
+
     // Reload the tracker with recipients
     const result = await Tracker.findByPk(tracker.id, {
       include: 'recipients',
