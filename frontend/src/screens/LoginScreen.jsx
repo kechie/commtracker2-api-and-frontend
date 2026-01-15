@@ -3,7 +3,7 @@ import { Container, Form, Button, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignInAlt } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '../context/AuthContext'; // Import useAuth
+import { useAuth } from '../context/useAuth'; // Import useAuth
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');

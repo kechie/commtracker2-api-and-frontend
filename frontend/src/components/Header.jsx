@@ -2,7 +2,7 @@ import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap'; // Import
 import { LinkContainer } from 'react-router-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faSignInAlt, faSignOutAlt, faUser, faUserCog, faFileAlt, faChartBar } from '@fortawesome/free-solid-svg-icons'; // Import more icons
-import { useAuth } from '../context/AuthContext'; // Import useAuth
+import { useAuth } from '../context/useAuth'; // Import useAuth
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const Header = () => {
