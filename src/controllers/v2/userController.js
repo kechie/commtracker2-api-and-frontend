@@ -71,7 +71,7 @@ exports.getUser = async (req, res) => {
   }
 };
 
-exports.getAllUsers = async (req, res) => {
+/* exports.getAllUsers = async (req, res) => {
   try {
     // Only superadmin and admin can get all users
     if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
@@ -82,6 +82,50 @@ exports.getAllUsers = async (req, res) => {
       attributes: ['id', 'username', 'email', 'fullname', 'role', 'created_at']
     });
     res.json({ message: 'v2 Users retrieved', users, version: 'v2' });
+  } catch (error) {
+    console.error('v2 Get all users error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}; */
+exports.getAllUsers = async (req, res) => {
+  try {
+    // Only superadmin and admin can get all users
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions.' });
+    }
+
+    // Get pagination parameters from query string
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    // Validate pagination parameters
+    if (page < 1 || limit < 1) {
+      return res.status(400).json({ error: 'Page and limit must be positive integers' });
+    }
+
+    // Fetch users with pagination
+    const { count, rows } = await User.findAndCountAll({
+      attributes: ['id', 'username', 'email', 'fullname', 'role', 'created_at'],
+      limit,
+      offset,
+      order: [['created_at', 'DESC']]
+    });
+
+    // Calculate total pages
+    const totalPages = Math.ceil(count / limit);
+
+    res.json({
+      message: 'v2 Users retrieved',
+      users: rows,
+      pagination: {
+        page,
+        limit,
+        total: count,
+        totalPages
+      },
+      version: 'v2'
+    });
   } catch (error) {
     console.error('v2 Get all users error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -121,7 +165,7 @@ exports.updateUser = async (req, res) => {
     if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions to update users.' });
     }
-    
+
     const user = await User.findByPk(id);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });

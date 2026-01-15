@@ -38,7 +38,7 @@ export const login = async (username, password) => {
   }
 };
 
-export const register = async (name, username, password) => {
+/* export const register = async (name, username, password) => {
   try {
     const response = await api.post('/auth/register', { name, username, password });
     return response.data;
@@ -46,7 +46,7 @@ export const register = async (name, username, password) => {
     console.error('API Register Error:', error.response?.data || error.message);
     throw error.response?.data || error;
   }
-};
+}; */
 
 // Tracker API calls
 export const getTrackers = async () => {

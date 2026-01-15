@@ -11,36 +11,31 @@ const RecipientManagementScreen = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [currentRecipient, setCurrentRecipient] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    address: '',
-    contactPerson: '',
-    contactEmail: '',
-    contactPhone: '',
+    recipientCode: '',
+    recipientName: '',
+    initial: '',
   });
 
   const [createFormData, setCreateFormData] = useState({
-    name: '',
-    address: '',
-    contactPerson: '',
-    contactEmail: '',
-    contactPhone: '',
+    recipientCode: '',
+    recipientName: '',
+    initial: '',
   });
 
   const fetchRecipients = async () => {
     try {
       const { data: { recipients } } = await api.get('/recipients');
-      setRecipients(recipients);
+      setRecipients(Array.isArray(recipients) ? recipients : []);
       setLoading(false);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch recipients');
+      setRecipients([]);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    (async () => {
-      await fetchRecipients();
-    })();
+    fetchRecipients();
   }, []);
 
   const deleteHandler = async (id) => {
@@ -58,11 +53,9 @@ const RecipientManagementScreen = () => {
     setCurrentRecipient(recipient);
     setFormData({
       id: recipient.id,
-      name: recipient.name,
-      address: recipient.address,
-      contactPerson: recipient.contactPerson,
-      contactEmail: recipient.contactEmail,
-      contactPhone: recipient.contactPhone,
+      recipientCode: recipient.recipientCode,
+      recipientName: recipient.recipientName,
+      initial: recipient.initial || '',
     });
     setShowEditModal(true);
   };
@@ -71,12 +64,14 @@ const RecipientManagementScreen = () => {
     setShowEditModal(false);
     setShowCreateModal(false);
     setCurrentRecipient(null);
+    setFormData({ recipientCode: '', recipientName: '', initial: '' });
+    setCreateFormData({ recipientCode: '', recipientName: '', initial: '' });
   };
 
   const handleFormChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  
+
   const handleCreateFormChange = (e) => {
     setCreateFormData({ ...createFormData, [e.target.name]: e.target.value });
   };
@@ -101,7 +96,6 @@ const RecipientManagementScreen = () => {
     }
   };
 
-
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -123,11 +117,9 @@ const RecipientManagementScreen = () => {
         <thead>
           <tr>
             <th>ID</th>
-            <th>NAME</th>
-            <th>ADDRESS</th>
-            <th>CONTACT PERSON</th>
-            <th>CONTACT EMAIL</th>
-            <th>CONTACT PHONE</th>
+            <th>RECIPIENT CODE</th>
+            <th>RECIPIENT NAME</th>
+            <th>INITIAL</th>
             <th></th>
           </tr>
         </thead>
@@ -135,11 +127,9 @@ const RecipientManagementScreen = () => {
           {recipients.map((recipient) => (
             <tr key={recipient.id}>
               <td>{recipient.id}</td>
-              <td>{recipient.name}</td>
-              <td>{recipient.address}</td>
-              <td>{recipient.contactPerson}</td>
-              <td>{recipient.contactEmail}</td>
-              <td>{recipient.contactPhone}</td>
+              <td>{recipient.recipientCode}</td>
+              <td>{recipient.recipientName}</td>
+              <td>{recipient.initial}</td>
               <td>
                 <Button variant="light" className="btn-sm mx-1" onClick={() => handleEditClick(recipient)}>
                   <i className="fas fa-edit"></i>
@@ -156,54 +146,39 @@ const RecipientManagementScreen = () => {
           ))}
         </tbody>
       </Table>
-       <Modal show={showEditModal} onHide={handleModalClose}>
+      {/* Edit Modal */}
+      <Modal show={showEditModal} onHide={handleModalClose}>
         <Modal.Header closeButton>
           <Modal.Title>Edit Recipient</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group className="mb-3" controlId="formName">
-              <Form.Label>Name</Form.Label>
+            <Form.Group className="mb-3" controlId="formRecipientCode">
+              <Form.Label>Recipient Code</Form.Label>
               <Form.Control
                 type="text"
-                name="name"
-                value={formData.name}
+                name="recipientCode"
+                value={formData.recipientCode}
                 onChange={handleFormChange}
+                required
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="formAddress">
-              <Form.Label>Address</Form.Label>
+            <Form.Group className="mb-3" controlId="formRecipientName">
+              <Form.Label>Recipient Name</Form.Label>
               <Form.Control
                 type="text"
-                name="address"
-                value={formData.address}
+                name="recipientName"
+                value={formData.recipientName}
                 onChange={handleFormChange}
+                required
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="formContactPerson">
-              <Form.Label>Contact Person</Form.Label>
+            <Form.Group className="mb-3" controlId="formInitial">
+              <Form.Label>Initial</Form.Label>
               <Form.Control
                 type="text"
-                name="contactPerson"
-                value={formData.contactPerson}
-                onChange={handleFormChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="formContactEmail">
-              <Form.Label>Contact Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="contactEmail"
-                value={formData.contactEmail}
-                onChange={handleFormChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="formContactPhone">
-              <Form.Label>Contact Phone</Form.Label>
-              <Form.Control
-                type="text"
-                name="contactPhone"
-                value={formData.contactPhone}
+                name="initial"
+                value={formData.initial}
                 onChange={handleFormChange}
               />
             </Form.Group>
@@ -218,55 +193,39 @@ const RecipientManagementScreen = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-      {/* Create Recipient Modal */}
+      {/* Create Modal */}
       <Modal show={showCreateModal} onHide={handleModalClose}>
         <Modal.Header closeButton>
           <Modal.Title>Create Recipient</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-          <Form.Group className="mb-3" controlId="formCreateName">
-              <Form.Label>Name</Form.Label>
+            <Form.Group className="mb-3" controlId="formCreateRecipientCode">
+              <Form.Label>Recipient Code</Form.Label>
               <Form.Control
                 type="text"
-                name="name"
-                value={createFormData.name}
+                name="recipientCode"
+                value={createFormData.recipientCode}
                 onChange={handleCreateFormChange}
+                required
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="formCreateAddress">
-              <Form.Label>Address</Form.Label>
+            <Form.Group className="mb-3" controlId="formCreateRecipientName">
+              <Form.Label>Recipient Name</Form.Label>
               <Form.Control
                 type="text"
-                name="address"
-                value={createFormData.address}
+                name="recipientName"
+                value={createFormData.recipientName}
                 onChange={handleCreateFormChange}
+                required
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="formCreateContactPerson">
-              <Form.Label>Contact Person</Form.Label>
+            <Form.Group className="mb-3" controlId="formCreateInitial">
+              <Form.Label>Initial</Form.Label>
               <Form.Control
                 type="text"
-                name="contactPerson"
-                value={createFormData.contactPerson}
-                onChange={handleCreateFormChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="formCreateContactEmail">
-              <Form.Label>Contact Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="contactEmail"
-                value={createFormData.contactEmail}
-                onChange={handleCreateFormChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="formCreateContactPhone">
-              <Form.Label>Contact Phone</Form.Label>
-              <Form.Control
-                type="text"
-                name="contactPhone"
-                value={createFormData.contactPhone}
+                name="initial"
+                value={createFormData.initial}
                 onChange={handleCreateFormChange}
               />
             </Form.Group>

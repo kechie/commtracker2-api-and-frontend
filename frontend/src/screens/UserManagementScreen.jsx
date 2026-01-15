@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Table, Button, Row, Col, Alert, Modal, Form } from 'react-bootstrap';
+import { Container, Table, Button, Row, Col, Alert, Modal, Form, Pagination } from 'react-bootstrap';
 import api from '../utils/api';
 
 const UserManagementScreen = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -24,11 +30,15 @@ const UserManagementScreen = () => {
     userrole: 'user',
   });
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (pageNum = 1, pageLimit = 10) => {
     try {
-      const { data: { users } } = await api.get('/users');
-      setUsers(users);
+      const { data } = await api.get(`/users?page=${pageNum}&limit=${pageLimit}`);
+      setUsers(data.users);
+      setTotal(data.pagination.total);
+      setTotalPages(data.pagination.totalPages);
+      setPage(pageNum);
       setLoading(false);
+      console.log('Fetched users:', data);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch users');
       setLoading(false);
@@ -36,16 +46,26 @@ const UserManagementScreen = () => {
   };
 
   useEffect(() => {
-    (async () => {
-      await fetchUsers();
-    })();
+    fetchUsers(page, limit);
   }, []);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      fetchUsers(newPage, limit);
+    }
+  };
+
+  const handleLimitChange = (e) => {
+    const newLimit = parseInt(e.target.value);
+    setLimit(newLimit);
+    fetchUsers(1, newLimit);
+  };
 
   const deleteHandler = async (id) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
         await api.delete(`/users/${id}`);
-        fetchUsers();
+        fetchUsers(page, limit);
       } catch (err) {
         setError(err.response?.data?.error || 'Failed to delete user');
       }
@@ -67,12 +87,19 @@ const UserManagementScreen = () => {
     setShowEditModal(false);
     setShowCreateModal(false);
     setCurrentUser(null);
+    setCreateFormData({
+      username: '',
+      password: '',
+      email: '',
+      fullname: '',
+      userrole: 'user',
+    });
   };
 
   const handleFormChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  
+
   const handleCreateFormChange = (e) => {
     setCreateFormData({ ...createFormData, [e.target.name]: e.target.value });
   };
@@ -80,7 +107,7 @@ const UserManagementScreen = () => {
   const handleSaveChanges = async () => {
     try {
       await api.put(`/users/${currentUser.id}`, formData);
-      fetchUsers();
+      fetchUsers(page, limit);
       handleModalClose();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update user');
@@ -90,13 +117,12 @@ const UserManagementScreen = () => {
   const handleCreateUser = async () => {
     try {
       await api.post('/auth/register', createFormData);
-      fetchUsers();
+      fetchUsers(1, limit);
       handleModalClose();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create user');
     }
   };
-
 
   if (loading) {
     return <div>Loading...</div>;
@@ -150,7 +176,47 @@ const UserManagementScreen = () => {
           ))}
         </tbody>
       </Table>
-       <Modal show={showEditModal} onHide={handleModalClose}>
+
+      {/* Pagination Controls */}
+      <Row className="align-items-center my-3">
+        <Col md={4}>
+          <Form.Group className="d-flex align-items-center">
+            <Form.Label className="me-2 mb-0">Items per page:</Form.Label>
+            <Form.Select style={{ width: '80px' }} value={limit} onChange={handleLimitChange}>
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </Form.Select>
+          </Form.Group>
+        </Col>
+        <Col md={4} className="text-center">
+          <span className="text-muted">
+            Page {page} of {totalPages} (Total: {total} users)
+          </span>
+        </Col>
+        <Col md={4} className="d-flex justify-content-end">
+          <Pagination className="mb-0">
+            <Pagination.First onClick={() => handlePageChange(1)} disabled={page === 1} />
+            <Pagination.Prev onClick={() => handlePageChange(page - 1)} disabled={page === 1} />
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1))
+              .map((p, idx, arr) => (
+                <React.Fragment key={p}>
+                  {idx > 0 && arr[idx - 1] !== p - 1 && <Pagination.Ellipsis disabled />}
+                  <Pagination.Item active={p === page} onClick={() => handlePageChange(p)}>
+                    {p}
+                  </Pagination.Item>
+                </React.Fragment>
+              ))}
+            <Pagination.Next onClick={() => handlePageChange(page + 1)} disabled={page === totalPages} />
+            <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={page === totalPages} />
+          </Pagination>
+        </Col>
+      </Row>
+
+      {/* Edit User Modal */}
+      <Modal show={showEditModal} onHide={handleModalClose}>
         <Modal.Header closeButton>
           <Modal.Title>Edit User</Modal.Title>
         </Modal.Header>
@@ -208,6 +274,7 @@ const UserManagementScreen = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
       {/* Create User Modal */}
       <Modal show={showCreateModal} onHide={handleModalClose}>
         <Modal.Header closeButton>
