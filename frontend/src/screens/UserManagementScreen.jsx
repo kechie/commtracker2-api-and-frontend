@@ -6,6 +6,7 @@ const UserManagementScreen = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAlert, setShowAlert] = useState(false);
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -30,6 +31,16 @@ const UserManagementScreen = () => {
     userrole: 'user',
   });
 
+  // Auto-close alert after 5 seconds
+  useEffect(() => {
+    if (showAlert) {
+      const timer = setTimeout(() => {
+        setShowAlert(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showAlert]);
+
   const fetchUsers = async (pageNum = 1, pageLimit = 10) => {
     try {
       const { data } = await api.get(`/users?page=${pageNum}&limit=${pageLimit}`);
@@ -41,6 +52,7 @@ const UserManagementScreen = () => {
       console.log('Fetched users:', data);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch users');
+      setShowAlert(true);
       setLoading(false);
     }
   };
@@ -68,6 +80,7 @@ const UserManagementScreen = () => {
         fetchUsers(page, limit);
       } catch (err) {
         setError(err.response?.data?.error || 'Failed to delete user');
+        setShowAlert(true);
       }
     }
   };
@@ -106,11 +119,18 @@ const UserManagementScreen = () => {
 
   const handleSaveChanges = async () => {
     try {
-      await api.put(`/users/${currentUser.id}`, formData);
+      // Send only updatable fields
+      const updateData = {
+        fullname: formData.fullname,
+        email: formData.email,
+        role: formData.role
+      };
+      await api.put(`/users/${currentUser.id}`, updateData);
       fetchUsers(page, limit);
       handleModalClose();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update user');
+      setShowAlert(true);
     }
   };
 
@@ -121,6 +141,7 @@ const UserManagementScreen = () => {
       handleModalClose();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create user');
+      setShowAlert(true);
     }
   };
 
@@ -140,13 +161,17 @@ const UserManagementScreen = () => {
           </Button>
         </Col>
       </Row>
-      {error && <Alert variant="danger">{error}</Alert>}
+      {showAlert && error && (
+        <Alert variant="danger" dismissible onClose={() => setShowAlert(false)}>
+          {error}
+        </Alert>
+      )}
       <Table striped bordered hover responsive className="table-sm">
         <thead>
           <tr>
             <th>ID</th>
             <th>USERNAME</th>
-            <th>FULLNAME</th>
+            <th>DEPT</th>
             <th>EMAIL</th>
             <th>ROLE</th>
             <th></th>
@@ -157,7 +182,7 @@ const UserManagementScreen = () => {
             <tr key={user.id}>
               <td>{user.id}</td>
               <td>{user.username}</td>
-              <td>{user.fullname}</td>
+              <td>{user.recipient?.recipientName || 'N/A'}</td>
               <td>{user.email}</td>
               <td>{user.role}</td>
               <td>
@@ -229,6 +254,7 @@ const UserManagementScreen = () => {
                 name="username"
                 value={formData.username}
                 onChange={handleFormChange}
+                disabled
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formFullname">

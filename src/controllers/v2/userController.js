@@ -104,12 +104,19 @@ exports.getAllUsers = async (req, res) => {
       return res.status(400).json({ error: 'Page and limit must be positive integers' });
     }
 
-    // Fetch users with pagination
+    // Fetch users with pagination and include related recipient data
     const { count, rows } = await User.findAndCountAll({
-      attributes: ['id', 'username', 'email', 'fullname', 'role', 'created_at'],
+      attributes: ['id', 'username', 'email', 'fullname', 'role', 'recipientId', 'created_at'],
+      include: [
+        {
+          association: 'recipient',
+          attributes: ['id', 'recipientCode', 'recipientName', 'initial']
+        }
+      ],
       limit,
       offset,
-      order: [['created_at', 'DESC']]
+      order: [['created_at', 'DESC']],
+      subQuery: false
     });
 
     // Calculate total pages
@@ -160,10 +167,8 @@ exports.updateUser = async (req, res) => {
     const { email, fullname, role } = req.body;
 
     // Only superadmin and admin can update other users or change roles
-    // A user can update their own profile via /profile route, not this route.
-    // This route is for admin/superadmin to manage other users.
     if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions to update users.' });
+      return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions.' });
     }
 
     const user = await User.findByPk(id);
@@ -171,13 +176,24 @@ exports.updateUser = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Validate role if provided
-    if (role && !['user', 'superadmin', 'admin', 'staff'].includes(role)) {
-      return res.status(400).json({ error: 'Invalid role' });
-    }
+    // Update allowed fields
+    if (fullname) user.fullname = fullname;
+    if (email) user.email = email;
+    if (role) user.role = role;
 
-    await user.update({ email, fullname, role });
-    res.json({ message: 'v2 User updated', userId: user.id, version: 'v2' });
+    await user.save();
+
+    res.json({
+      message: 'v2 User updated successfully',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullname: user.fullname,
+        role: user.role
+      },
+      version: 'v2'
+    });
   } catch (error) {
     console.error('v2 Update user error:', error);
     res.status(500).json({ error: 'Internal server error' });
