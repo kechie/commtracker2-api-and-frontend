@@ -169,18 +169,18 @@ const UserManagementScreen = () => {
       <Table striped bordered hover responsive className="table-sm">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>USERNAME</th>
-            <th>DEPT</th>
-            <th>EMAIL</th>
-            <th>ROLE</th>
+            {/* <th>ID</th> */}
+            <th>Username</th>
+            <th>Department/Office/Agency</th>
+            <th>Email</th>
+            <th>Role</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           {users.map((user) => (
             <tr key={user.id}>
-              <td>{user.id}</td>
+              {/* <td>{user.id}</td> */}
               <td>{user.username}</td>
               <td>{user.recipient?.recipientName || 'N/A'}</td>
               <td>{user.email}</td>
@@ -283,7 +283,7 @@ const UserManagementScreen = () => {
                 value={formData.role}
                 onChange={handleFormChange}
               >
-                <option value="user">User</option>
+                <option value="user">User/Receiving</option>
                 <option value="admin">Admin</option>
                 <option value="superadmin">Superadmin</option>
                 <option value="staff">Staff</option>

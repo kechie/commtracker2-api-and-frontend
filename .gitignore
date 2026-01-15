@@ -31,3 +31,6 @@ commtracker.users-edited.csv
 frontend/.yarn
 frontend/.yarn/*
 backup-jan14
+dts2-backup.sql
+dts2-recipients-backup.sql
+dts2-users-backup.sql
