@@ -3,7 +3,7 @@ import { Container, Table, Button, Row, Col, Alert, Modal, Form, Pagination } fr
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import api from '../utils/api';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const UserManagementScreen = () => {
   const navigate = useNavigate();

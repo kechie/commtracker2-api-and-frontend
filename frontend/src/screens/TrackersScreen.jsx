@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Alert } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Alert, Container, Row, Col } from 'react-bootstrap';
 import { getTrackers, createTracker, updateTracker, deleteTracker, getRecipients } from '../utils/api';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 const TrackersScreen = () => {
   const [trackers, setTrackers] = useState([]);
@@ -108,15 +109,32 @@ const TrackersScreen = () => {
       }
     }
   };
-
+  const navigate = useNavigate();
+  const handleBack = () => {
+    navigate('/');
+  }
   return (
-    <>
-      <h1>Document Trackers</h1>
-      {error && <Alert variant="danger">{error}</Alert>}
-      <Button variant="primary" className="mb-3" onClick={() => handleShow()}>
-        <FontAwesomeIcon icon={faPlus} className="me-2" />New Doc Tracker
-      </Button>
+    <Container>
+      <Row><h1>Document Trackers</h1></Row>
+      <Row className="align-items-left mb-3">
 
+        <Col>
+          <Button
+            variant="light"
+            onClick={handleBack}
+            className="d-flex align-items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+            Back
+          </Button>
+        </Col>
+      </Row>
+      {error && <Alert variant="danger">{error}</Alert>}
+      <Row>
+        <Button variant="primary" className="mb-3" onClick={() => handleShow()}>
+          <FontAwesomeIcon icon={faPlus} className="me-2" />New Doc Tracker
+        </Button>
+      </Row>
       {loading ? (
         <p>Loading trackers...</p>
       ) : (
@@ -204,7 +222,7 @@ const TrackersScreen = () => {
           </Form>
         </Modal.Body>
       </Modal>
-    </>
+    </Container>
   );
 };
 

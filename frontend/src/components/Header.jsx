@@ -44,7 +44,7 @@ const Header = () => {
                   {canAccessTrackers && (
                     <LinkContainer to="/trackers">
                       <Nav.Link>
-                        <FontAwesomeIcon icon={faFileAlt} className="me-1" /> Trackers
+                        <FontAwesomeIcon icon={faFileAlt} className="me-1" /> Tracker Management
                       </Nav.Link>
                     </LinkContainer>
                   )}
