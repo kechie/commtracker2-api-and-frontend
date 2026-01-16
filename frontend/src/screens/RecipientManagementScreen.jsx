@@ -62,8 +62,11 @@ const RecipientManagementScreen = () => {
   };
 
   useEffect(() => {
-    fetchRecipients(page, limit);
-  }, []);
+    const loadRecipients = async () => {
+      fetchRecipients(page, limit);
+    }
+    loadRecipients();
+  }, [page, limit]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {

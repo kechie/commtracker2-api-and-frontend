@@ -8,7 +8,8 @@ import { faPlus, faEdit, faTrash, faArrowLeft, faEye } from '@fortawesome/free-s
 import { useAuth } from '../context/useAuth';
 
 const TrackersScreen = () => {
-  const { user, role } = useAuth();
+  //const { user, role } = useAuth();
+  const { role } = useAuth();
   const [trackers, setTrackers] = useState([]);
   const [recipients, setRecipients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,6 +33,8 @@ const TrackersScreen = () => {
 
   useEffect(() => {
     const loadData = async () => {
+      setSortBy('dateReceived');
+      setSortOrder('DESC');
       try {
         setLoading(true);
         const [trackersData, recipientsData] = await Promise.all([

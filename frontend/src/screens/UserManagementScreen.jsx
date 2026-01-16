@@ -64,7 +64,10 @@ const UserManagementScreen = () => {
   };
 
   useEffect(() => {
-    fetchUsers(page, limit);
+    const loadUsers = async () => {
+      fetchUsers(page, limit);
+    };
+    loadUsers();
   }, [page, limit]);
 
   const handlePageChange = (newPage) => {
