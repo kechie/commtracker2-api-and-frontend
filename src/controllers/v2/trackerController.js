@@ -83,10 +83,73 @@ exports.createTracker = async (req, res) => {
   }
 };
 
-// @desc    Get all trackers
-// @route   GET /api/v2/trackers
+// @desc    Get trackers with pagination
+// @route   GET /api/v2/trackers?page=1&limit=10&sortBy=dateReceived&sortOrder=DESC
 // @access  Private (receiving role)
 exports.getTrackers = async (req, res) => {
+  try {
+    // Get pagination parameters from query
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limitParam = parseInt(req.query.limit, 10);
+    const limit = Math.max(1, Math.min(100, isNaN(limitParam) ? 10 : limitParam)); // Max 100 per page, default 10
+    const sortBy = req.query.sortBy || 'dateReceived';
+    const sortOrder = (req.query.sortOrder || 'DESC').toUpperCase();
+
+    // Validate sortOrder
+    if (!['ASC', 'DESC'].includes(sortOrder)) {
+      return res.status(400).json({ error: 'Invalid sortOrder. Must be ASC or DESC' });
+    }
+
+    // Calculate offset
+    const offset = (page - 1) * limit;
+
+    // Get total count and paginated results
+    // Use distinct: true to count unique trackers, not joined rows
+    const { count, rows } = await Tracker.findAndCountAll({
+      distinct: true,
+      col: 'id',
+      include: [
+        {
+          association: 'trackerRecipients',
+          include: [
+            {
+              association: 'recipient',
+              attributes: ['id', 'recipientName', 'recipientCode', 'initial']
+            }
+          ]
+        }
+      ],
+      order: [[sortBy, sortOrder]],
+      limit,
+      offset,
+    });
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(count / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    res.json({
+      data: rows,
+      pagination: {
+        page,
+        limit,
+        total: count,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+      },
+    });
+  } catch (error) {
+    console.error('Get trackers error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// @desc    Get all trackers without pagination (use with caution for large datasets)
+// @route   GET /api/v2/trackers/all
+// @access  Private (receiving role)
+exports.getAllTrackers = async (req, res) => {
   try {
     const trackers = await Tracker.findAll({
       include: [
@@ -102,9 +165,12 @@ exports.getTrackers = async (req, res) => {
       ],
       order: [['dateReceived', 'DESC']],
     });
-    res.json(trackers);
+    res.json({
+      data: trackers,
+      total: trackers.length
+    });
   } catch (error) {
-    console.error('Get trackers error:', error);
+    console.error('Get all trackers error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

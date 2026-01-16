@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Alert, Container, Row, Col, Badge } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Alert, Container, Row, Col, Badge, Pagination } from 'react-bootstrap';
 import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipients } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,6 +12,12 @@ const TrackersScreen = () => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingTracker, setEditingTracker] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalTrackers, setTotalTrackers] = useState(0);
+  const [sortBy, setSortBy] = useState('dateReceived');
+  const [sortOrder, setSortOrder] = useState('DESC');
   const [formData, setFormData] = useState({
     serialNumber: '',
     fromName: '',
@@ -25,11 +31,26 @@ const TrackersScreen = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [trackersData, recipientsData] = await Promise.all([getTrackers(), getAllRecipients()]);
-        //console.log('Fetched trackers:', trackersData);
-        //console.log('Fetched recipients:', recipientsData.recipients);
-        setTrackers(trackersData);
-        setRecipients(recipientsData.recipients);
+        const [trackersData, recipientsData] = await Promise.all([
+          getTrackers(currentPage, pageSize, sortBy, sortOrder),
+          getAllRecipients()
+        ]);
+
+        // Extract data correctly from response
+        const trackersList = trackersData.data || trackersData;
+        setTrackers(Array.isArray(trackersList) ? trackersList : []);
+        setRecipients(recipientsData.recipients || recipientsData);
+
+        // Handle pagination metadata if present
+        if (trackersData.pagination) {
+          setTotalPages(trackersData.pagination.totalPages);
+          setTotalTrackers(trackersData.pagination.total);
+        } else {
+          // Fallback for non-paginated response
+          const totalCount = Array.isArray(trackersList) ? trackersList.length : 0;
+          setTotalPages(1);
+          setTotalTrackers(totalCount);
+        }
         setError(null);
       } catch (err) {
         setError(err.message || 'Failed to fetch data');
@@ -38,11 +59,20 @@ const TrackersScreen = () => {
       }
     };
     loadData();
-  }, []);
+  }, [currentPage, pageSize, sortBy, sortOrder]);
 
   const fetchTrackers = async () => {
-    const data = await getTrackers();
-    setTrackers(data);
+    const data = await getTrackers(currentPage, pageSize, sortBy, sortOrder);
+    const trackersList = data.data || data;
+    setTrackers(Array.isArray(trackersList) ? trackersList : []);
+    if (data.pagination) {
+      setTotalPages(data.pagination.totalPages);
+      setTotalTrackers(data.pagination.total);
+    } else {
+      const totalCount = Array.isArray(trackersList) ? trackersList.length : 0;
+      setTotalPages(1);
+      setTotalTrackers(totalCount);
+    }
   };
 
   const handleClose = () => {
@@ -222,6 +252,82 @@ const TrackersScreen = () => {
             })}
           </tbody>
         </Table>
+      )}
+      {totalPages > 1 && (
+        <Row className="mt-4 mb-4 align-items-center">
+          <Col md={6}>
+            <Form.Group className="d-flex align-items-center gap-2">
+              <Form.Label className="mb-0">Items per page:</Form.Label>
+              <Form.Select
+                style={{ width: 'auto' }}
+                value={pageSize.toString()}
+                onChange={(e) => {
+                  setPageSize(parseInt(e.target.value, 10));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col md={6} className="text-end">
+            <small className="text-muted">
+              Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalTrackers)} of {totalTrackers} trackers
+            </small>
+          </Col>
+        </Row>
+      )}
+
+      {totalPages > 1 && (
+        <Row className="mb-4">
+          <Col>
+            <Pagination className="justify-content-center">
+              <Pagination.First
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+              />
+              <Pagination.Prev
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+              />
+
+              {/* Show page numbers */}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage > totalPages - 3) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                return (
+                  <Pagination.Item
+                    key={pageNum}
+                    active={pageNum === currentPage}
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </Pagination.Item>
+                );
+              })}
+
+              <Pagination.Next
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+              />
+              <Pagination.Last
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+              />
+            </Pagination>
+          </Col>
+        </Row>
       )}
 
       {/* Add/Edit Modal */}

@@ -49,12 +49,30 @@ export const login = async (username, password) => {
 }; */
 
 // Tracker API calls
-export const getTrackers = async () => {
+export const getTrackers = async (page = 1, limit = 10, sortBy = 'dateReceived', sortOrder = 'DESC') => {
   try {
-    const response = await api.get('/trackers');
+    // Ensure numeric parameters are actually numbers
+    const response = await api.get('/trackers', {
+      params: {
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
+        sortBy: sortBy || 'dateReceived',
+        sortOrder: sortOrder || 'DESC'
+      }
+    });
     return response.data;
   } catch (error) {
     console.error('API Get Trackers Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const getAllTrackers = async () => {
+  try {
+    const response = await api.get('/trackers/all');
+    return response.data;
+  } catch (error) {
+    console.error('API Get All Trackers Error:', error.response?.data || error.message);
     throw error.response?.data || error;
   }
 };
