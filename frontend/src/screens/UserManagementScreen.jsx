@@ -4,8 +4,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
 
 const UserManagementScreen = () => {
+  const { role } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +58,7 @@ const UserManagementScreen = () => {
       setTotal(data.pagination.total);
       setTotalPages(data.pagination.totalPages);
       setLoading(false);
+      console.log('Fetched users:', data);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch users');
       setShowAlert(true);
@@ -215,14 +218,15 @@ const UserManagementScreen = () => {
                   <i className="fas fa-edit"></i>
                   <FontAwesomeIcon icon={faEdit} />
                 </Button>
-                <Button
-                  variant="danger"
-                  className="btn-sm mx-1"
-                  onClick={() => deleteHandler(user.id)}
-                >
-                  <i className="fas fa-trash"></i>
-                  <FontAwesomeIcon icon={faTrash} />
-                </Button>
+                {role == 'superadmin' &&
+                  <Button
+                    variant="danger"
+                    className="btn-sm mx-1"
+                    onClick={() => deleteHandler(user.id)}
+                  >
+                    <i className="fas fa-trash"></i>
+                    <FontAwesomeIcon icon={faTrash} />
+                  </Button>}
               </td>
             </tr>
           ))}

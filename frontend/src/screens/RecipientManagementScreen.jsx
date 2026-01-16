@@ -52,7 +52,7 @@ const RecipientManagementScreen = () => {
       setTotalPages(data.pagination.totalPages);
       setPage(pageNum);
       setLoading(false);
-      console.log('Fetched recipients:', data);
+      //console.log('Fetched recipients:', data);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch recipients');
       setRecipients([]);
