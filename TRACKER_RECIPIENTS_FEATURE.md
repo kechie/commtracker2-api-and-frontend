@@ -77,7 +77,7 @@ All endpoints require authentication and at least one of these roles: `receiving
 
 #### 1. Get All Tracker-Recipients for a Tracker
 
-```
+```bash
 GET /trackers/:trackerId/recipients
 ```
 
@@ -104,13 +104,13 @@ GET /trackers/:trackerId/recipients
 
 #### 2. Get Specific Tracker-Recipient by ID
 
-```
+```bash
 GET /:id
 ```
 
 #### 3. Create or Update Tracker-Recipient Action
 
-```
+```bash
 POST /trackers/:trackerId/recipients/:recipientId/action
 ```
 
@@ -126,7 +126,7 @@ POST /trackers/:trackerId/recipients/:recipientId/action
 
 #### 4. Update Tracker-Recipient Status
 
-```
+```bash
 PATCH /:id/status
 ```
 
@@ -141,7 +141,7 @@ PATCH /:id/status
 
 #### 5. Bulk Update All Tracker-Recipients for a Tracker
 
-```
+```bash
 POST /trackers/:trackerId/recipients/bulk-update
 ```
 
@@ -156,7 +156,7 @@ POST /trackers/:trackerId/recipients/bulk-update
 
 #### 6. Delete a Tracker-Recipient
 
-```
+```bash
 DELETE /:id
 ```
 
@@ -303,7 +303,7 @@ The models will auto-load the new TrackerRecipient model.
 ## Status Values
 
 | Status | Description |
-|--------|-------------|
+| -------- | ------------- |
 | `pending` | Action not yet viewed by recipient |
 | `seen` | Recipient has seen the tracker (sets `seen_at`) |
 | `read` | Recipient has read the tracker (sets `read_at`) |

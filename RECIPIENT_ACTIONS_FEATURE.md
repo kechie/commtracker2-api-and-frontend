@@ -44,7 +44,7 @@ CREATE TABLE recipient_actions (
 ## Status Values
 
 | Status | Description |
-|--------|-------------|
+| -------- | ------------- |
 | `pending` | Action not yet viewed by recipient |
 | `seen` | Recipient has seen the tracker (sets `seen_at`) |
 | `read` | Recipient has read the tracker (sets `read_at`) |
@@ -60,7 +60,7 @@ All endpoints require authentication and at least one of these roles: `receiving
 
 #### 1. Get All Actions for a Tracker
 
-```
+```bash
 GET /trackers/:trackerId/recipient-actions
 ```
 
@@ -96,13 +96,13 @@ GET /trackers/:trackerId/recipient-actions
 
 #### 2. Get Specific Action by ID
 
-```
+```bash
 GET /:actionId
 ```
 
 #### 3. Create or Update Action for a Tracker-Recipient Pair
 
-```
+```bash
 POST /trackers/:trackerId/recipients/:recipientId/action
 ```
 
@@ -118,7 +118,7 @@ POST /trackers/:trackerId/recipients/:recipientId/action
 
 #### 4. Update Action Status
 
-```
+```bash
 PATCH /:actionId/status
 ```
 
@@ -133,7 +133,7 @@ PATCH /:actionId/status
 
 #### 5. Bulk Update All Actions for a Tracker
 
-```
+```bash
 POST /trackers/:trackerId/recipient-actions/bulk-update
 ```
 
@@ -148,7 +148,7 @@ POST /trackers/:trackerId/recipient-actions/bulk-update
 
 #### 6. Delete an Action
 
-```
+```bash
 DELETE /:actionId
 ```
 
