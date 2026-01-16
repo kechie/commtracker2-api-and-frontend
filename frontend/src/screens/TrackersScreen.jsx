@@ -5,8 +5,10 @@ import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash, faArrowLeft, faEye } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../context/useAuth';
 
 const TrackersScreen = () => {
+  const { user, role } = useAuth();
   const [trackers, setTrackers] = useState([]);
   const [recipients, setRecipients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -188,12 +190,12 @@ const TrackersScreen = () => {
         <Table striped bordered hover responsive>
           <thead>
             <tr>
-              <th>Serial Number</th>
-              <th>Document Title</th>
+              {/* <th>Serial Number</th> */}
               <th>From</th>
+              <th>Title</th>
               <th>Recipients & Status</th>
               <th>Date Received</th>
-              <th>Confidential</th>
+              {/* <th>Confidential</th> */}
               <th>Actions</th>
             </tr>
           </thead>
@@ -202,7 +204,7 @@ const TrackersScreen = () => {
               // Get recipient info from trackerRecipients
               const trackerRecipients = tracker.trackerRecipients || [];
               const recipientNames = trackerRecipients
-                .map(tr => tr.recipient?.recipientName)
+                .map(tr => tr.recipient?.initial)
                 .filter(Boolean)
                 .join(', ');
 
@@ -217,9 +219,9 @@ const TrackersScreen = () => {
 
               return (
                 <tr key={tracker.id}>
-                  <td>{tracker.serialNumber}</td>
-                  <td>{tracker.documentTitle}</td>
+                  {/* <td>{tracker.serialNumber}</td> */}
                   <td>{tracker.fromName}</td>
+                  <td>{tracker.documentTitle}</td>
                   <td>
                     <div className="mb-2">
                       <small className="text-muted d-block">{recipientNames}</small>
@@ -243,18 +245,17 @@ const TrackersScreen = () => {
                     </div>
                   </td>
                   <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
-                  <td>{tracker.isConfidential ? 'Yes' : 'No'}</td>
+                  {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
                   <td>
-                    <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
-                      <FontAwesomeIcon icon={faEdit} />
-                    </Button>
-                    <Button variant="light" size="sm" className="ms-2" title="View Details">
-                      <FontAwesomeIcon icon={faEye} />
-                    </Button>
-                    {/* <Button variant="danger" size="sm" className="ms-2" onClick={() => handleDelete(tracker.id)} disabled={tracker.isSeen}> */}
-                    <Button variant="danger" size="sm" className="ms-2" onClick={() => handleDelete(tracker.id)} disabled title="Delete">
-                      <FontAwesomeIcon icon={faTrash} />
-                    </Button>
+                    <div className="d-flex gap-1">
+                      <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
+                        <FontAwesomeIcon icon={faEdit} />
+                      </Button>
+                      <Button variant="light" size="sm" title="View Details">
+                        <FontAwesomeIcon icon={faEye} />
+                      </Button>
+                      {(role === 'admin' || role === 'superadmin') && <Button variant="danger" size="sm" onClick={() => handleDelete(tracker.id)} title="Delete"><FontAwesomeIcon icon={faTrash} /></Button>}
+                    </div>
                   </td>
                 </tr>
               );
@@ -363,24 +364,26 @@ const TrackersScreen = () => {
               </Row>
               <Row>
                 <Form.Group className="mb-3" controlId="documentTitle">
-                  <Form.Label>Title</Form.Label>
+                  {/* <Form.Label>Title</Form.Label> */}
                   <Form.Control type="text" name="documentTitle" value={formData.documentTitle} onChange={handleChange} required />
                   <Form.Text className="text-muted">Enter document title.</Form.Text>
                 </Form.Group>
               </Row>
               <Row>
-                <Form.Group className="mb-3" controlId="fromName">
-                  <Form.Label>From</Form.Label>
-                  <Form.Control type="text" name="fromName" value={formData.fromName} onChange={handleChange} required />
-                  <Form.Text className="text-muted">Enter sender's name or organization.</Form.Text>
-                </Form.Group>
-              </Row>
-              <Row>
-                <Form.Group className="mb-3" controlId="dateReceived">
-                  {/* <Form.Label>Date Received</Form.Label> */}
-                  <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required />
-                  <Form.Text className="text-muted">Select date the document was received.</Form.Text>
-                </Form.Group>
+                <Col md={6}>
+                  <Form.Group className="mb-3" controlId="fromName">
+                    {/* <Form.Label>From</Form.Label> */}
+                    <Form.Control type="text" name="fromName" value={formData.fromName} onChange={handleChange} required />
+                    <Form.Text className="text-muted">Enter sender's name or organization.</Form.Text>
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3" controlId="dateReceived">
+                    {/* <Form.Label>Date Received</Form.Label> */}
+                    <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required />
+                    <Form.Text className="text-muted">Select date the document was received.</Form.Text>
+                  </Form.Group>
+                </Col>
               </Row>
               <Form.Group className="mb-3" controlId="recipientIds">
                 {/* <Form.Label>Recipients</Form.Label> */}
@@ -400,7 +403,7 @@ const TrackersScreen = () => {
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="isConfidential">
-                <Form.Check type="switch" name="isConfidential" label="Confidential" checked={formData.isConfidential} onChange={handleChange} />
+                <Form.Check type="switch" name="isConfidential" label="Confidential" checked={formData.isConfidential} onChange={handleChange} disabled />
               </Form.Group>
               <Button variant="primary" type="submit">
                 {editingTracker ? 'Update' : 'Create'}
