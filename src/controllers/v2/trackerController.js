@@ -1,5 +1,5 @@
 // src/controllers/v2/trackerController.js
-const { Tracker, Recipient, sequelize } = require('../../db'); // Import sequelize for transactions
+const { Tracker, Recipient, TrackerRecipient, sequelize } = require('../../db'); // Import sequelize for transactions
 const { Op } = require('sequelize'); // Import Op for operators
 
 // Helper function to generate serial number
@@ -60,9 +60,19 @@ exports.createTracker = async (req, res) => {
 
     await transaction.commit(); // Commit the transaction
 
-    // Reload the tracker with recipients to return in the response
+    // Reload the tracker with nested trackerRecipients (includes recipients and their actions)
     const result = await Tracker.findByPk(tracker.id, {
-      include: 'recipients',
+      include: [
+        {
+          association: 'trackerRecipients',
+          include: [
+            {
+              association: 'recipient',
+              attributes: ['id', 'recipientName', 'recipientCode', 'initial']
+            }
+          ]
+        }
+      ],
     });
 
     res.status(201).json(result);
@@ -79,7 +89,17 @@ exports.createTracker = async (req, res) => {
 exports.getTrackers = async (req, res) => {
   try {
     const trackers = await Tracker.findAll({
-      include: 'recipients', // Eager-load recipients
+      include: [
+        {
+          association: 'trackerRecipients',
+          include: [
+            {
+              association: 'recipient',
+              attributes: ['id', 'recipientName', 'recipientCode', 'initial']
+            }
+          ]
+        }
+      ],
       order: [['dateReceived', 'DESC']],
     });
     res.json(trackers);
@@ -95,7 +115,17 @@ exports.getTrackers = async (req, res) => {
 exports.getTrackerById = async (req, res) => {
   try {
     const tracker = await Tracker.findByPk(req.params.id, {
-      include: 'recipients',
+      include: [
+        {
+          association: 'trackerRecipients',
+          include: [
+            {
+              association: 'recipient',
+              attributes: ['id', 'recipientName', 'recipientCode', 'initial']
+            }
+          ]
+        }
+      ],
     });
     if (!tracker) {
       return res.status(404).json({ error: 'Tracker not found' });
@@ -132,9 +162,19 @@ exports.updateTracker = async (req, res) => {
       await tracker.setRecipients(recipientIds);
     }
 
-    // Reload the tracker with recipients
+    // Reload the tracker with nested trackerRecipients
     const result = await Tracker.findByPk(tracker.id, {
-      include: 'recipients',
+      include: [
+        {
+          association: 'trackerRecipients',
+          include: [
+            {
+              association: 'recipient',
+              attributes: ['id', 'recipientName', 'recipientCode', 'initial']
+            }
+          ]
+        }
+      ],
     });
 
     res.json(result);

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Alert, Container, Row, Col } from 'react-bootstrap';
-import { getTrackers, createTracker, updateTracker, deleteTracker, getRecipients, getAllRecipients } from '../utils/api';
+import { Table, Button, Modal, Form, Alert, Container, Row, Col, Badge } from 'react-bootstrap';
+import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipients } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEdit, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft, faEye } from '@fortawesome/free-solid-svg-icons';
 
 const TrackersScreen = () => {
   const [trackers, setTrackers] = useState([]);
@@ -18,7 +18,7 @@ const TrackersScreen = () => {
     documentTitle: '',
     dateReceived: '',
     isConfidential: false,
-    recipientIds: [], // Changed to an array
+    recipientIds: [], // Array of recipient IDs to assign
   });
 
   useEffect(() => {
@@ -26,8 +26,10 @@ const TrackersScreen = () => {
       try {
         setLoading(true);
         const [trackersData, recipientsData] = await Promise.all([getTrackers(), getAllRecipients()]);
+        //console.log('Fetched trackers:', trackersData);
+        //console.log('Fetched recipients:', recipientsData.recipients);
         setTrackers(trackersData);
-        setRecipients(recipientsData);
+        setRecipients(recipientsData.recipients);
         setError(null);
       } catch (err) {
         setError(err.message || 'Failed to fetch data');
@@ -59,13 +61,17 @@ const TrackersScreen = () => {
   const handleShow = (tracker = null) => {
     if (tracker) {
       setEditingTracker(tracker);
+      // Extract recipient IDs from trackerRecipients array
+      const recipientIds = tracker.trackerRecipients
+        ? tracker.trackerRecipients.map(tr => tr.recipientId)
+        : [];
       setFormData({
         serialNumber: tracker.serialNumber || '',
         fromName: tracker.fromName || '',
         documentTitle: tracker.documentTitle || '',
         dateReceived: tracker.dateReceived ? new Date(tracker.dateReceived).toISOString().split('T')[0] : '',
         isConfidential: tracker.isConfidential || false,
-        recipientIds: tracker.recipients ? tracker.recipients.map(r => r.id) : [],
+        recipientIds: recipientIds,
       });
     }
     setShowModal(true);
@@ -116,7 +122,7 @@ const TrackersScreen = () => {
   return (
     <Container>
       {/*console.log('Rendering TrackersScreen with trackers:', trackers)*/}
-      {/*console.log('Recipients available:', recipients)*/}
+      {/*console.log('Recipients available:', recipients.recipients)*/}
       <Row><h1>Document Trackers</h1></Row>
       <Row className="align-items-left mb-3">
 
@@ -146,34 +152,74 @@ const TrackersScreen = () => {
               <th>Serial Number</th>
               <th>Document Title</th>
               <th>From</th>
-              <th>Recipients</th>
+              <th>Recipients & Status</th>
               <th>Date Received</th>
               <th>Confidential</th>
-              <th>Is Seen?</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {trackers.map((tracker) => (
-              <tr key={tracker.id}>
-                <td>{tracker.serialNumber}</td>
-                <td>{tracker.documentTitle}</td>
-                <td>{tracker.fromName}</td>
-                <td>{tracker.recipients.map(r => r.recipientName).join(', ')}</td>
-                <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
-                <td>{tracker.isConfidential ? 'Yes' : 'No'}</td>
-                <td>{tracker.isSeen ? 'Yes' : 'No'}</td>
-                <td>
-                  <Button variant="light" size="sm" onClick={() => handleShow(tracker)}>
-                    <FontAwesomeIcon icon={faEdit} />
-                  </Button>
-                  {/* <Button variant="danger" size="sm" className="ms-2" onClick={() => handleDelete(tracker.id)} disabled={tracker.isSeen}> */}
-                  <Button variant="danger" size="sm" className="ms-2" onClick={() => handleDelete(tracker.id)} disabled>
-                    <FontAwesomeIcon icon={faTrash} />
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {trackers.map((tracker) => {
+              // Get recipient info from trackerRecipients
+              const trackerRecipients = tracker.trackerRecipients || [];
+              const recipientNames = trackerRecipients
+                .map(tr => tr.recipient?.recipientName)
+                .filter(Boolean)
+                .join(', ');
+
+              // Count recipients by status
+              const statusCounts = {
+                pending: trackerRecipients.filter(tr => tr.status === 'pending').length,
+                seen: trackerRecipients.filter(tr => tr.status === 'seen').length,
+                read: trackerRecipients.filter(tr => tr.status === 'read').length,
+                acknowledged: trackerRecipients.filter(tr => tr.status === 'acknowledged').length,
+                completed: trackerRecipients.filter(tr => tr.status === 'completed').length,
+              };
+
+              return (
+                <tr key={tracker.id}>
+                  <td>{tracker.serialNumber}</td>
+                  <td>{tracker.documentTitle}</td>
+                  <td>{tracker.fromName}</td>
+                  <td>
+                    <div className="mb-2">
+                      <small className="text-muted d-block">{recipientNames}</small>
+                    </div>
+                    <div className="d-flex gap-1 flex-wrap">
+                      {statusCounts.pending > 0 && (
+                        <Badge bg="secondary">Pending: {statusCounts.pending}</Badge>
+                      )}
+                      {statusCounts.seen > 0 && (
+                        <Badge bg="info">Seen: {statusCounts.seen}</Badge>
+                      )}
+                      {statusCounts.read > 0 && (
+                        <Badge bg="primary">Read: {statusCounts.read}</Badge>
+                      )}
+                      {statusCounts.acknowledged > 0 && (
+                        <Badge bg="warning">Ack: {statusCounts.acknowledged}</Badge>
+                      )}
+                      {statusCounts.completed > 0 && (
+                        <Badge bg="success">Done: {statusCounts.completed}</Badge>
+                      )}
+                    </div>
+                  </td>
+                  <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
+                  <td>{tracker.isConfidential ? 'Yes' : 'No'}</td>
+                  <td>
+                    <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
+                      <FontAwesomeIcon icon={faEdit} />
+                    </Button>
+                    <Button variant="light" size="sm" className="ms-2" title="View Details">
+                      <FontAwesomeIcon icon={faEye} />
+                    </Button>
+                    {/* <Button variant="danger" size="sm" className="ms-2" onClick={() => handleDelete(tracker.id)} disabled={tracker.isSeen}> */}
+                    <Button variant="danger" size="sm" className="ms-2" onClick={() => handleDelete(tracker.id)} disabled title="Delete">
+                      <FontAwesomeIcon icon={faTrash} />
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </Table>
       )}

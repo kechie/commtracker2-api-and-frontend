@@ -82,9 +82,16 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Tracker.associate = (models) => {
-    Tracker.belongsToMany(models.Recipient, {
-      through: 'TrackerRecipients', // Junction table
+    Tracker.hasMany(models.TrackerRecipient, {
       foreignKey: 'trackerId',
+      as: 'trackerRecipients',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE'
+    });
+    Tracker.belongsToMany(models.Recipient, {
+      through: models.TrackerRecipient,
+      foreignKey: 'trackerId',
+      otherKey: 'recipientId',
       as: 'recipients'
     });
   };
