@@ -6,7 +6,14 @@ const Footer = () => {
       <hr />
       <footer className="mt-3">
         <Row className="text-center">
-
+          <Col className='md-3'>
+            <img
+              src="/aap-bp-logos.jpeg"
+              height="118"
+              className="d-inline-block"
+              alt="Alisto Asenso Progreso Logo"
+            />
+          </Col>
           <Col className='md-3'>
             <ListGroup variant="flush" as="ul" className="list-unstyled text-small">
               <ListGroup.Item as="li">
@@ -36,14 +43,7 @@ const Footer = () => {
               </ListGroup.Item>
             </ListGroup>
           </Col>
-          <Col className='md-3'>
-            <img
-              src="/aap-bp-logos.jpeg"
-              height="118"
-              className="d-inline-block"
-              alt="Alisto Asenso Progreso Logo"
-            />
-          </Col>
+
         </Row>
         <Container className="text-center">
           <p className='mt-3'>&copy; {new Date().getFullYear()} City Government of Laoag. All rights reserved.<br /></p>

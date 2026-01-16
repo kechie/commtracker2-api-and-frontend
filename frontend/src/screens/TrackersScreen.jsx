@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Alert, Container, Row, Col, Badge, Pagination } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Alert, Container, Card, Row, Col, Badge, Pagination } from 'react-bootstrap';
 import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipients } from '../utils/api';
 import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +27,10 @@ const TrackersScreen = () => {
     fromName: '',
     documentTitle: '',
     dateReceived: '',
+    lceAction: '',
+    lceReply: '',
+    lceReplyDate: '',
+    attachment: null,
     isConfidential: false,
     recipientIds: [], // Array of recipient IDs to assign
   });
@@ -198,6 +202,7 @@ const TrackersScreen = () => {
               <th>Title</th>
               <th>Recipients & Status</th>
               <th>Date Received</th>
+              <th>LCE Action/Date</th>
               {/* <th>Confidential</th> */}
               <th>LCE Reply, Date</th>
               <th>Actions</th>
@@ -249,6 +254,7 @@ const TrackersScreen = () => {
                     </div>
                   </td>
                   <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
+                  <td>{tracker.lceAction ? tracker.lceAction : <span className="text-muted">N/A</span>} / {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
                   {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
                   <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
                   <td>
@@ -349,65 +355,126 @@ const TrackersScreen = () => {
       {/* Add/Edit Modal */}
       <Modal show={showModal} onHide={handleClose} size='lg'>
         <Modal.Header closeButton>
-          <Modal.Title>{editingTracker ? 'Edit' : 'New'} Doc Tracker 2</Modal.Title>
+          <Modal.Title>{editingTracker ? 'Edit' : 'New'} DocTrkr2</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Col>
 
             <Form onSubmit={handleSubmit}>
-              <Row>
-                <Form.Group className="mb-3" controlId="serialNumber">
-                  <Form.Control
-                    type="text"
-                    name="serialNumber"
-                    value={formData.serialNumber}
-                    onChange={handleChange}
-                    disabled
-                    readOnly={!editingTracker} // Make read-only for new trackers
-                    placeholder={editingTracker ? '' : 'Auto-generated on creation'}
-                  />
-                </Form.Group>
-              </Row>
-              <Row>
-                <Form.Group className="mb-3" controlId="documentTitle">
-                  {/* <Form.Label>Title</Form.Label> */}
-                  <Form.Control type="text" name="documentTitle" value={formData.documentTitle} onChange={handleChange} required />
-                  <Form.Text className="text-muted">Enter document title.</Form.Text>
-                </Form.Group>
-              </Row>
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3" controlId="fromName">
-                    {/* <Form.Label>From</Form.Label> */}
-                    <Form.Control type="text" name="fromName" value={formData.fromName} onChange={handleChange} required />
-                    <Form.Text className="text-muted">Enter sender's name or organization.</Form.Text>
+              <Card><Card.Header>Tracker Details</Card.Header>
+                <Card.Body>
+                  {/*                   <Row>
+                    <Form.Group className="mb-3" controlId="serialNumber">
+                      <Form.Control
+                        type="text"
+                        name="serialNumber"
+                        value={formData.serialNumber}
+                        onChange={handleChange}
+                        disabled
+                        readOnly={!editingTracker} // Make read-only for new trackers
+                        placeholder={editingTracker ? '' : 'Auto-generated on creation'}
+                      />
+                    </Form.Group>
+                  </Row> */}
+                  <Row>
+                    <Form.Group className="mb-3" controlId="documentTitle">
+                      {/* <Form.Label>Title</Form.Label> */}
+                      <Form.Control type="text" name="documentTitle" value={formData.documentTitle} onChange={handleChange} required />
+                      <Form.Text className="text-muted">Document Tracker title.</Form.Text>
+                    </Form.Group>
+                  </Row>
+                  <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-3" controlId="fromName">
+                        {/* <Form.Label>From</Form.Label> */}
+                        <Form.Control type="text" name="fromName" value={formData.fromName} onChange={handleChange} required />
+                        <Form.Text className="text-muted">Sender's name or organization.</Form.Text>
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group className="mb-3" controlId="dateReceived">
+                        {/* <Form.Label>Date Received</Form.Label> */}
+                        <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required />
+                        <Form.Text className="text-muted">Date the document was received.</Form.Text>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
+              <br />
+              <Card>
+                <Card.Header>LCE Section</Card.Header>
+                <Card.Body>
+                  <Form.Group className="mb-3" controlId="lceActionDate">
+                    {/* <Form.Label>Date</Form.Label> */}
+                    <Form.Control type="date" name="lceActionDate" value={formData.lceActionDate} onChange={handleChange} />
+                    <Form.Text className="text-muted">LCE Action Date.</Form.Text>
                   </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3" controlId="dateReceived">
-                    {/* <Form.Label>Date Received</Form.Label> */}
-                    <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required />
-                    <Form.Text className="text-muted">Select date the document was received.</Form.Text>
+                  <Form.Group className="mb-3" controlId="lceAction">
+                    {/* <Form.Label>Action</Form.Label> */}
+                    {/*
+                type: DataTypes.ENUM('pending', 'approved', 'disapproved', 'for your comments', 'for review', 'for dissemination', 'for compliance', 'pls facilitate', 'noted', 'check availability of fund', 'others'),allowNull: true, */}
+                    <Form.Select name="lceAction" value={formData.lceAction} onChange={handleChange} placeholder="Enter LCE Action">
+                      <option value="">Select action</option>
+                      <option value="pending">Pending</option>
+                      <option value="approved">Approved</option>
+                      <option value="disapproved">Disapproved</option>
+                      <option value="for your comments">For Your Comments</option>
+                      <option value="for review">For Review</option>
+                      <option value="for dissemination">For Dissemination</option>
+                      <option value="for compliance">For Compliance</option>
+                      <option value="pls facilitate">Please Facilitate</option>
+                      <option value="noted">Noted</option>
+                      <option value="check availability of fund">Check Availability of Fund</option>
+                      <option value="others">Others</option>
+                    </Form.Select>
+                    <Form.Text className="text-muted">LCE Action.</Form.Text>
                   </Form.Group>
-                </Col>
-              </Row>
-              <Form.Group className="mb-3" controlId="recipientIds">
-                {/* <Form.Label>Recipients</Form.Label> */}
-                <DualListBox
-                  available={recipients}
-                  selected={recipients.filter(r => formData.recipientIds.includes(r.id))}
-                  onSelected={(selectedIds) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      recipientIds: selectedIds
-                    }));
-                  }}
-                  availableLabel="Available Recipients"
-                  selectedLabel="Selected Recipients"
-                  displayProp="recipientName"
-                  valueProp="id"
-                />
-              </Form.Group>
+                  {/*<Form.Group className="mb-3" controlId="lceReply">
+                  <Form.Label>LCE Reply</Form.Label> 
+                    <Form.Control type="text" name="lceReply" value={formData.lceReply} onChange={handleChange} placeholder="Enter LCE Reply" />
+                  </Form.Group>
+                  <Form.Group className="mb-3" controlId="lceReplyDate">
+                    <Form.Label>LCE Reply Date</Form.Label>
+                    <Form.Control type="date" name="lceReplyDate" value={formData.lceReplyDate} onChange={handleChange} />
+                  </Form.Group>*/}
+                </Card.Body>
+              </Card>
+              <br />
+              <Card>
+                <Card.Header>Recipients Assignment</Card.Header>
+                <Card.Body>
+
+                  <Form.Group className="mb-3" controlId="recipientIds">
+                    {/* <Form.Label>Recipients</Form.Label> */}
+                    <DualListBox
+                      available={recipients}
+                      selected={recipients.filter(r => formData.recipientIds.includes(r.id))}
+                      onSelected={(selectedIds) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          recipientIds: selectedIds
+                        }));
+                      }}
+                      availableLabel="Available Recipients"
+                      selectedLabel="Selected Recipients"
+                      displayProp="recipientName"
+                      valueProp="id"
+                    />
+                  </Form.Group>
+                  {/* <Form.Text className="text-muted">Select recipients to assign the document tracker to.</Form.Text> */}
+                </Card.Body>
+              </Card>
+              <br />
+              <Card>
+                <Card.Title>Attachment</Card.Title>
+                <Card.Body>
+                  <Form.Group className="mb-3" controlId="attachment">
+                    <Form.Control type="file" name="attachment" disabled />
+                    <Form.Text className="text-muted">File attachment upload coming soon...</Form.Text>
+                  </Form.Group>
+                </Card.Body>
+              </Card>
               <Form.Group className="mb-3" controlId="isConfidential">
                 <Form.Check type="switch" name="isConfidential" label="Confidential" checked={formData.isConfidential} onChange={handleChange} disabled />
               </Form.Group>

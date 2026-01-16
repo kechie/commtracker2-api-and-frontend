@@ -58,7 +58,7 @@ const UserManagementScreen = () => {
       setTotal(data.pagination.total);
       setTotalPages(data.pagination.totalPages);
       setLoading(false);
-      console.log('Fetched users:', data);
+      //console.log('Fetched users:', data);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch users');
       setShowAlert(true);

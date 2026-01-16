@@ -185,7 +185,7 @@ const DualListBox = ({
           </Col>
 
           {/* Buttons */}
-          <Col md={2} className="d-flex flex-column justify-content-center gap-2">
+          <Col md={1} className="d-flex flex-column justify-content-center gap-2">
             <Button
               variant="outline-primary"
               size="sm"
