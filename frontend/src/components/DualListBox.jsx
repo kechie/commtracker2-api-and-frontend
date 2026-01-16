@@ -35,6 +35,11 @@ const DualListBox = ({
       item[displayProp]?.toLowerCase().includes(searchAvailable.toLowerCase())
     );
 
+  // Filter items based on search
+  //const filteredAvailable = availableItems.filter(item =>
+  //  item[displayProp]?.toLowerCase().includes(searchAvailable.toLowerCase())
+  //);
+
   const filteredSelected = selectedItems.filter(item =>
     item[displayProp]?.toLowerCase().includes(searchSelected.toLowerCase())
   );
