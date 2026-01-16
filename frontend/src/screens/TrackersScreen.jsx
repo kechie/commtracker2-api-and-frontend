@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Alert, Container, Row, Col } from 'react-bootstrap';
-import { getTrackers, createTracker, updateTracker, deleteTracker, getRecipients } from '../utils/api';
+import { getTrackers, createTracker, updateTracker, deleteTracker, getRecipients, getAllRecipients } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -25,7 +25,7 @@ const TrackersScreen = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [trackersData, recipientsData] = await Promise.all([getTrackers(), getRecipients()]);
+        const [trackersData, recipientsData] = await Promise.all([getTrackers(), getAllRecipients()]);
         setTrackers(trackersData);
         setRecipients(recipientsData);
         setError(null);
@@ -115,6 +115,8 @@ const TrackersScreen = () => {
   }
   return (
     <Container>
+      {/*console.log('Rendering TrackersScreen with trackers:', trackers)*/}
+      {/*console.log('Recipients available:', recipients)*/}
       <Row><h1>Document Trackers</h1></Row>
       <Row className="align-items-left mb-3">
 
@@ -165,7 +167,8 @@ const TrackersScreen = () => {
                   <Button variant="light" size="sm" onClick={() => handleShow(tracker)}>
                     <FontAwesomeIcon icon={faEdit} />
                   </Button>
-                  <Button variant="danger" size="sm" className="ms-2" onClick={() => handleDelete(tracker.id)}>
+                  {/* <Button variant="danger" size="sm" className="ms-2" onClick={() => handleDelete(tracker.id)} disabled={tracker.isSeen}> */}
+                  <Button variant="danger" size="sm" className="ms-2" onClick={() => handleDelete(tracker.id)} disabled>
                     <FontAwesomeIcon icon={faTrash} />
                   </Button>
                 </td>
@@ -214,7 +217,7 @@ const TrackersScreen = () => {
               </Form.Control>
             </Form.Group>
             <Form.Group className="mb-3" controlId="isConfidential">
-              <Form.Check type="checkbox" name="isConfidential" label="Confidential" checked={formData.isConfidential} onChange={handleChange} />
+              <Form.Check type="switch" name="isConfidential" label="Confidential" checked={formData.isConfidential} onChange={handleChange} />
             </Form.Group>
             <Button variant="primary" type="submit">
               {editingTracker ? 'Update' : 'Create'}

@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const {
   getRecipients,
+  getAllRecipients,
   createRecipient,
   updateRecipient,
   deleteRecipient,
@@ -14,5 +15,5 @@ router
   .route('/:id')
   .put(verifyToken, updateRecipient)
   .delete(verifyToken, deleteRecipient);
-
+router.route('/all').get(verifyToken, getAllRecipients);
 module.exports = router;

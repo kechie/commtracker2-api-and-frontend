@@ -2,7 +2,7 @@
 const { Recipient } = require('../../db');
 const { Op } = require('sequelize');
 
-// @desc    Get all recipients
+// @desc    Get recipients with pagination
 // @route   GET /api/v2/recipients
 // @access  Private
 exports.getRecipients = async (req, res) => {
@@ -48,7 +48,20 @@ exports.getRecipients = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
+// @desc    Get all recipients
+// @route   GET /api/v2/recipients/all
+// @access  Private
+exports.getAllRecipients = async (req, res) => {
+  try {
+    const recipients = await Recipient.findAll({
+      order: [['recipientCode', 'ASC']],
+    });
+    res.json({ recipients });
+  } catch (error) {
+    console.error('Get all recipients error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 // @desc    Create a recipient
 // @route   POST /api/v2/recipients
 // @access  Private

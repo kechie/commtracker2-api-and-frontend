@@ -99,6 +99,16 @@ export const getRecipients = async () => {
   }
 };
 
+export const getAllRecipients = async () => {
+  try {
+    const response = await api.get('/recipients/all');
+    return response.data;
+  } catch (error) {
+    console.error('API Get All Recipients Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
 // User Management API calls (v2)
 export const getAllUsers = async () => {
   try {
