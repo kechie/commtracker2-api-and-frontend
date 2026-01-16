@@ -154,7 +154,7 @@ const RecipientManagementScreen = () => {
             className="d-flex align-items-center gap-2"
           >
             <FontAwesomeIcon icon={faArrowLeft} />
-            Back to Admin Dashboard
+            Back
           </Button>
         </Col>
       </Row>

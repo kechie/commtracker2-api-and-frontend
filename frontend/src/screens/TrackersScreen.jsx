@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Alert, Container, Row, Col, Badge, Pagination } from 'react-bootstrap';
 import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipients } from '../utils/api';
+import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash, faArrowLeft, faEye } from '@fortawesome/free-solid-svg-icons';
@@ -153,9 +154,8 @@ const TrackersScreen = () => {
     <Container>
       {/*console.log('Rendering TrackersScreen with trackers:', trackers)*/}
       {/*console.log('Recipients available:', recipients.recipients)*/}
-      <Row><h1>Document Trackers</h1></Row>
-      <Row className="align-items-left mb-3">
 
+      <Row className="align-items-left mb-3">
         <Col>
           <Button
             variant="light"
@@ -167,12 +167,19 @@ const TrackersScreen = () => {
           </Button>
         </Col>
       </Row>
-      {error && <Alert variant="danger">{error}</Alert>}
       <Row>
-        <Button variant="primary" className="mb-3" onClick={() => handleShow()}>
-          <FontAwesomeIcon icon={faPlus} className="me-2" />New Doc Tracker
-        </Button>
+        <Col>
+          <h1>Document Trackers</h1>
+        </Col>
+        <Col className="text-end">
+          <Button variant="primary" className="mb-3" onClick={() => handleShow()}>
+            <i className="fas fa-plus"></i>
+            <FontAwesomeIcon icon={faPlus} className="me-2" />New Doc Tracker
+          </Button>
+
+        </Col>
       </Row>
+      {error && <Alert variant="danger">{error}</Alert>}
       {loading ? (
         <p>Loading trackers...</p>
       ) : (
@@ -333,7 +340,7 @@ const TrackersScreen = () => {
       {/* Add/Edit Modal */}
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>{editingTracker ? 'Edit' : 'Create'} Tracker</Modal.Title>
+          <Modal.Title>{editingTracker ? 'Edit' : 'New'} Doc Tracker 2</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
@@ -362,11 +369,20 @@ const TrackersScreen = () => {
             </Form.Group>
             <Form.Group className="mb-3" controlId="recipientIds">
               <Form.Label>Recipients</Form.Label>
-              <Form.Control as="select" multiple name="recipientIds" value={formData.recipientIds} onChange={handleChange}>
-                {recipients && Array.isArray(recipients) && recipients.map(r => (
-                  <option key={r.id} value={r.id}>{r.recipientName}</option>
-                ))}
-              </Form.Control>
+              <DualListBox
+                available={recipients}
+                selected={recipients.filter(r => formData.recipientIds.includes(r.id))}
+                onSelected={(selectedIds) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    recipientIds: selectedIds
+                  }));
+                }}
+                availableLabel="Available Recipients"
+                selectedLabel="Selected Recipients"
+                displayProp="recipientName"
+                valueProp="id"
+              />
             </Form.Group>
             <Form.Group className="mb-3" controlId="isConfidential">
               <Form.Check type="switch" name="isConfidential" label="Confidential" checked={formData.isConfidential} onChange={handleChange} />

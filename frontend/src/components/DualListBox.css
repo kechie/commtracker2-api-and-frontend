@@ -1,0 +1,72 @@
+.dual-listbox {
+  width: 100%;
+}
+
+.dual-listbox-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dual-listbox-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+
+.dual-listbox-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  flex: 1;
+}
+
+.dual-listbox-item {
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-bottom: 1px solid #dee2e6;
+  user-select: none;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.dual-listbox-item:last-child {
+  border-bottom: none;
+}
+
+.dual-listbox-item:hover {
+  background-color: #f8f9fa;
+}
+
+.dual-listbox-item.active {
+  background-color: #0d6efd;
+  color: white;
+  border-bottom-color: #0d6efd;
+}
+
+.dual-listbox-item.active:hover {
+  background-color: #0b5ed7;
+}
+
+/* Scrollbar styling */
+.dual-listbox-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dual-listbox-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.dual-listbox-list::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.dual-listbox-list::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
