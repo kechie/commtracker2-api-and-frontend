@@ -338,25 +338,25 @@ const TrackersScreen = () => {
       )}
 
       {/* Add/Edit Modal */}
-      <Modal show={showModal} onHide={handleClose}>
+      <Modal show={showModal} onHide={handleClose} size='lg'>
         <Modal.Header closeButton>
           <Modal.Title>{editingTracker ? 'Edit' : 'New'} Doc Tracker 2</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3" controlId="serialNumber">
-              <Form.Label>Serial Number</Form.Label>
               <Form.Control
                 type="text"
                 name="serialNumber"
                 value={formData.serialNumber}
                 onChange={handleChange}
+                disabled
                 readOnly={!editingTracker} // Make read-only for new trackers
                 placeholder={editingTracker ? '' : 'Auto-generated on creation'}
               />
             </Form.Group>
             <Form.Group className="mb-3" controlId="documentTitle">
-              <Form.Label>Document Title</Form.Label>
+              <Form.Label>Title</Form.Label>
               <Form.Control type="text" name="documentTitle" value={formData.documentTitle} onChange={handleChange} required />
             </Form.Group>
             <Form.Group className="mb-3" controlId="fromName">

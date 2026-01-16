@@ -26,10 +26,14 @@ const DualListBox = ({
     setSelectedItems(selected);
   }, [available, selected]);
 
-  // Filter items based on search
-  const filteredAvailable = availableItems.filter(item =>
-    item[displayProp]?.toLowerCase().includes(searchAvailable.toLowerCase())
-  );
+  // Filter items based on search AND exclude selected items from available
+  const selectedIds = new Set(selectedItems.map(item => item[valueProp]));
+
+  const filteredAvailable = availableItems
+    .filter(item => !selectedIds.has(item[valueProp]))
+    .filter(item =>
+      item[displayProp]?.toLowerCase().includes(searchAvailable.toLowerCase())
+    );
 
   const filteredSelected = selectedItems.filter(item =>
     item[displayProp]?.toLowerCase().includes(searchSelected.toLowerCase())
