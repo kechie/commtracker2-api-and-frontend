@@ -111,7 +111,7 @@ const TrackersScreen = () => {
   };
   const navigate = useNavigate();
   const handleBack = () => {
-    navigate('/');
+    navigate('/receiving-dashboard');
   }
   return (
     <Container>

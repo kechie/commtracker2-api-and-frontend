@@ -310,7 +310,10 @@ const UserManagementScreen = () => {
                 <option value="user">User/Receiving</option>
                 <option value="admin">Admin</option>
                 <option value="superadmin">Superadmin</option>
+                <option value="viewer">Viewer</option>
+                <option value="monitor">Monitor</option>
                 <option value="staff">Staff</option>
+                {/*superadmin', 'admin', 'receiving', 'recipient', 'viewer', 'monitor', 'staff' */}
               </Form.Control>
             </Form.Group>
           </Form>

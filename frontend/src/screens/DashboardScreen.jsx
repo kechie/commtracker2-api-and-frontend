@@ -2,7 +2,7 @@ import React from 'react';
 import { Container, Row, Col, Table, Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEye, faEdit, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 
 
@@ -21,7 +21,11 @@ const DashboardScreen = () => {
         {user && (
           <p>Hello, {user.userId},{role}!</p>
         )}
-        <p>This will contain analytics and user-specific content.</p>
+        <Link to="/trackers">Manage Document Tracking</Link>
+        <br />
+        <Link to="/receiving-dashboard">Receiving Dashboard</Link>
+        {/* <p>This will contain analytics and user-specific content.</p> */}
+
         {/* Add receiving-specific content here
       Analytics, recent activities, quick actions, etc.
       link to tracker management screen
