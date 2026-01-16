@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ListGroup, Button, Container, Row, Col, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faChevronLeft, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+//import { faChevronRight, faChevronLeft, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import './DualListBox.css';
 
 const DualListBox = ({
@@ -22,6 +23,7 @@ const DualListBox = ({
 
   // Initialize items
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAvailableItems(available);
     setSelectedItems(selected);
   }, [available, selected]);
@@ -101,44 +103,44 @@ const DualListBox = ({
   };
 
   // Move selected up in selected list
-  const moveUp = () => {
-    if (selectedHighlighted.length === 0) return;
-
-    const newList = [...selectedItems];
-    const firstHighlightedIndex = newList.findIndex(item =>
-      selectedHighlighted.includes(item[valueProp])
-    );
-
-    if (firstHighlightedIndex > 0) {
-      [newList[firstHighlightedIndex], newList[firstHighlightedIndex - 1]] =
-        [newList[firstHighlightedIndex - 1], newList[firstHighlightedIndex]];
-      setSelectedItems(newList);
-      const newSelectedIds = newList.map(item => item[valueProp]);
-      onSelected(newSelectedIds);
-    }
-  };
-
-  // Move selected down in selected list
-  const moveDown = () => {
-    if (selectedHighlighted.length === 0) return;
-
-    const newList = [...selectedItems];
-    const lastHighlightedIndex = newList.findIndex((item, idx) =>
-      selectedHighlighted.includes(item[valueProp]) &&
-      idx === newList.length - 1 - newList.slice().reverse().findIndex(i => selectedHighlighted.includes(i[valueProp]))
-    );
-
-    if (lastHighlightedIndex < newList.length - 1) {
+  /*   const moveUp = () => {
+      if (selectedHighlighted.length === 0) return;
+  
+      const newList = [...selectedItems];
       const firstHighlightedIndex = newList.findIndex(item =>
         selectedHighlighted.includes(item[valueProp])
       );
-      [newList[firstHighlightedIndex], newList[firstHighlightedIndex + 1]] =
-        [newList[firstHighlightedIndex + 1], newList[firstHighlightedIndex]];
-      setSelectedItems(newList);
-      const newSelectedIds = newList.map(item => item[valueProp]);
-      onSelected(newSelectedIds);
-    }
-  };
+  
+      if (firstHighlightedIndex > 0) {
+        [newList[firstHighlightedIndex], newList[firstHighlightedIndex - 1]] =
+          [newList[firstHighlightedIndex - 1], newList[firstHighlightedIndex]];
+        setSelectedItems(newList);
+        const newSelectedIds = newList.map(item => item[valueProp]);
+        onSelected(newSelectedIds);
+      }
+    }; */
+
+  // Move selected down in selected list
+  /*   const moveDown = () => {
+      if (selectedHighlighted.length === 0) return;
+  
+      const newList = [...selectedItems];
+      const lastHighlightedIndex = newList.findIndex((item, idx) =>
+        selectedHighlighted.includes(item[valueProp]) &&
+        idx === newList.length - 1 - newList.slice().reverse().findIndex(i => selectedHighlighted.includes(i[valueProp]))
+      );
+  
+      if (lastHighlightedIndex < newList.length - 1) {
+        const firstHighlightedIndex = newList.findIndex(item =>
+          selectedHighlighted.includes(item[valueProp])
+        );
+        [newList[firstHighlightedIndex], newList[firstHighlightedIndex + 1]] =
+          [newList[firstHighlightedIndex + 1], newList[firstHighlightedIndex]];
+        setSelectedItems(newList);
+        const newSelectedIds = newList.map(item => item[valueProp]);
+        onSelected(newSelectedIds);
+      }
+    }; */
 
   return (
     <div className="dual-listbox">
