@@ -1,9 +1,10 @@
 // src/controllers/v2/trackerController.js
 const { Tracker, Recipient, TrackerRecipient, sequelize } = require('../../db'); // Import sequelize for transactions
-const { Op } = require('sequelize'); // Import Op for operators
+const { Op, fn, col, literal } = require('sequelize'); // Import Op for operators
+const { body, validationResult } = require('express-validator'); // ← add this dependency
 
 // Helper function to generate serial number
-const generateSerialNumber = async (transaction) => {
+const generateSerialNumberx = async (transaction) => {
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = String(now.getMonth() + 1).padStart(2, '0'); // MM format (01-12)
@@ -20,7 +21,8 @@ const generateSerialNumber = async (transaction) => {
       [sequelize.literal(`CAST(SUBSTRING("serial_number", LENGTH('${prefix}') + 1) AS INTEGER)`), 'DESC'],
     ],
     transaction, // Ensure this query is part of the transaction
-    paranoid: true, // Consider soft-deleted records since serial numbers must be unique
+    lock: transaction.LOCK.UPDATE, // row-level lock (postgresql)
+    paranoid: false, // Consider soft-deleted records since serial numbers must be unique
   });
 
   let nextSequence = 1;
@@ -34,6 +36,54 @@ const generateSerialNumber = async (transaction) => {
   return `${prefix}${String(nextSequence).padStart(8, '0')}`;
 };
 
+const generateSerialNumber = async (transaction) => {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+  const prefix = `${currentYear}-${currentMonth}-DTS2-`;
+
+  // Lock to prevent race conditions
+  await sequelize.query('SELECT pg_advisory_xact_lock(123456789)', { transaction });
+
+  const lastTracker = await Tracker.findOne({
+    where: {
+      serialNumber: {  // ← this is fine, Sequelize maps it to serial_number
+        [Op.like]: `${prefix}%`,
+      },
+    },
+    attributes: ['id', 'serialNumber'], // ← good (maps correctly)
+    order: [
+      [
+        // Fix is here ↓↓↓ use snake_case column name inside literal
+        literal(`CAST(SUBSTRING("serial_number", ${prefix.length + 1}) AS INTEGER)`),
+        'DESC'
+      ]
+    ],
+    transaction,
+    lock: transaction.LOCK.UPDATE,     // stronger row lock
+    paranoid: false,                   // usually better to consider soft-deleted for continuity
+  });
+
+  let nextSequence = 1;
+  if (lastTracker && lastTracker.serialNumber) {
+    const lastSeqStr = lastTracker.serialNumber.substring(prefix.length);
+    const lastSequence = parseInt(lastSeqStr, 10);
+    if (!isNaN(lastSequence)) {
+      nextSequence = lastSequence + 1;
+    }
+  }
+
+  return `${prefix}${String(nextSequence).padStart(8, '0')}`;
+};
+
+// Validation chain (you can export and reuse)
+const trackerValidation = [
+  body('title').trim().notEmpty().withMessage('Title is required'),
+  body('dateReceived').optional().isISO8601().toDate(),
+  body('recipientIds').optional().isArray().withMessage('recipientIds must be an array'),
+  body('recipientIds.*').isUUID(4).withMessage('Invalid recipient ID'),
+  // add more fields as needed: description, priority, etc.
+];
 // @desc    Create a tracker
 // @route   POST /api/v2/trackers
 // @access  Private (receiving role)

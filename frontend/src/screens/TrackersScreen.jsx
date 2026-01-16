@@ -28,9 +28,14 @@ const TrackersScreen = () => {
     documentTitle: '',
     dateReceived: '',
     lceAction: '',
-    lceReply: '',
-    lceReplyDate: '',
+    lceKeyedInAction: '',
+    lceActionDate: '',
+    lceRemarks: '',
+    lceReply: null,
+    lceKeyedInReply: null,
+    lceReplyDate: null,
     attachment: null,
+    attachmentMimeType: '',
     isConfidential: false,
     recipientIds: [], // Array of recipient IDs to assign
   });
@@ -194,10 +199,10 @@ const TrackersScreen = () => {
         {loading ? (
           <p>Loading trackers...</p>
         ) : (
-          <Table striped bordered hover responsive="md">
+          <Table striped bordered hover responsive="lg">
             <thead>
               <tr>
-                {/* <th>Serial Number</th> */}
+                <th>Serial Number</th>
                 <th>From</th>
                 <th>Title</th>
                 <th>Recipients & Status</th>
@@ -228,7 +233,7 @@ const TrackersScreen = () => {
 
                 return (
                   <tr key={tracker.id}>
-                    {/* <td>{tracker.serialNumber}</td> */}
+                    <td>{tracker.serialNumber}</td>
                     <td>{tracker.fromName}</td>
                     <td>{tracker.documentTitle}</td>
                     <td>
@@ -298,7 +303,7 @@ const TrackersScreen = () => {
           </Col>
           <Col md={6} className="text-end">
             <small className="text-muted">
-              Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalTrackers)} of {totalTrackers} trackers
+              Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalTrackers)} of {totalTrackers} {/* trackers */}
             </small>
           </Col>
         </Row>
@@ -440,7 +445,7 @@ const TrackersScreen = () => {
               <Card>
                 <Card.Header>Recipients Assignment</Card.Header>
                 <Card.Body>
-                  <Form.Group className="mb-3" controlId="recipientIds">
+                  <Form.Group className="mb-3 d-flex justify-content-center" controlId="recipientIds" style={{ maxWidth: '950px', width: '100%' }}>
                     {/* <Form.Label>Recipients</Form.Label> */}
                     <DualListBox
                       available={recipients}

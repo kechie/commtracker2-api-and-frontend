@@ -38,7 +38,6 @@ const ReceivingDashboardScreen = () => {
       </Row>
       <Link to="/trackers">Manage Document Trackers</Link>
       <br />
-      <Link to="/">Go to Main Dashboard</Link>
       <p>This will contain receiving-specific analytics</p>
     </Container>
   );
