@@ -196,6 +196,7 @@ const TrackersScreen = () => {
               <th>Recipients & Status</th>
               <th>Date Received</th>
               {/* <th>Confidential</th> */}
+              <th>LCE Reply, Date</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -246,6 +247,7 @@ const TrackersScreen = () => {
                   </td>
                   <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
                   {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
+                  <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
                   <td>
                     <div className="d-flex gap-1">
                       <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
@@ -257,6 +259,7 @@ const TrackersScreen = () => {
                       {(role === 'admin' || role === 'superadmin') && <Button variant="danger" size="sm" onClick={() => handleDelete(tracker.id)} title="Delete"><FontAwesomeIcon icon={faTrash} /></Button>}
                     </div>
                   </td>
+
                 </tr>
               );
             })}
