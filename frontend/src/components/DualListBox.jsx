@@ -241,7 +241,7 @@ const DualListBox = ({
               )}
             </div>
 
-            {/* Order Controls */}
+            {/* Order Controls 
             {selectedItems.length > 1 && (
               <div className="d-flex gap-1 mt-2 justify-content-end">
                 <Button
@@ -263,7 +263,7 @@ const DualListBox = ({
                   <FontAwesomeIcon icon={faChevronDown} />
                 </Button>
               </div>
-            )}
+            )}*/}
           </Col>
         </Row>
       </Container>
