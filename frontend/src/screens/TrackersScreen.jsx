@@ -165,7 +165,7 @@ const TrackersScreen = () => {
     <Container>
       {/*console.log('Rendering TrackersScreen with trackers:', trackers)*/}
       {/*console.log('Recipients available:', recipients.recipients)*/}
-
+      <h1>Document Trackers</h1>
       <Row className="align-items-left mb-3">
         <Col>
           <Button
@@ -178,103 +178,104 @@ const TrackersScreen = () => {
           </Button>
         </Col>
       </Row>
-      <Row>
+      <Row className="align-items-left mb-3">
         <Col>
-          <h1>Document Trackers</h1>
+          <p>Manage document trackers here.Create, edit, view, and delete trackers as needed.</p>
         </Col>
         <Col className="text-end">
           <Button variant="primary" className="mb-3" onClick={() => handleShow()}>
             <i className="fas fa-plus"></i>
-            <FontAwesomeIcon icon={faPlus} className="me-2" />New Doc Tracker
+            <FontAwesomeIcon icon={faPlus} className="me-2" />New DocTrkr2
           </Button>
-
         </Col>
       </Row>
-      {error && <Alert variant="danger">{error}</Alert>}
-      {loading ? (
-        <p>Loading trackers...</p>
-      ) : (
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              {/* <th>Serial Number</th> */}
-              <th>From</th>
-              <th>Title</th>
-              <th>Recipients & Status</th>
-              <th>Date Received</th>
-              <th>LCE Action/Date</th>
-              {/* <th>Confidential</th> */}
-              <th>LCE Reply, Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {trackers.map((tracker) => {
-              // Get recipient info from trackerRecipients
-              const trackerRecipients = tracker.trackerRecipients || [];
-              const recipientNames = trackerRecipients
-                .map(tr => tr.recipient?.initial)
-                .filter(Boolean)
-                .join(', ');
+      <Row>
+        {error && <Alert variant="danger">{error}</Alert>}
+        {loading ? (
+          <p>Loading trackers...</p>
+        ) : (
+          <Table striped bordered hover responsive="md">
+            <thead>
+              <tr>
+                {/* <th>Serial Number</th> */}
+                <th>From</th>
+                <th>Title</th>
+                <th>Recipients & Status</th>
+                <th>Date Received</th>
+                <th>LCE Action/Date</th>
+                {/* <th>Confidential</th> */}
+                <th>LCE Reply, Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trackers.map((tracker) => {
+                // Get recipient info from trackerRecipients
+                const trackerRecipients = tracker.trackerRecipients || [];
+                const recipientNames = trackerRecipients
+                  .map(tr => tr.recipient?.initial)
+                  .filter(Boolean)
+                  .join(', ');
 
-              // Count recipients by status
-              const statusCounts = {
-                pending: trackerRecipients.filter(tr => tr.status === 'pending').length,
-                seen: trackerRecipients.filter(tr => tr.status === 'seen').length,
-                read: trackerRecipients.filter(tr => tr.status === 'read').length,
-                acknowledged: trackerRecipients.filter(tr => tr.status === 'acknowledged').length,
-                completed: trackerRecipients.filter(tr => tr.status === 'completed').length,
-              };
+                // Count recipients by status
+                const statusCounts = {
+                  pending: trackerRecipients.filter(tr => tr.status === 'pending').length,
+                  seen: trackerRecipients.filter(tr => tr.status === 'seen').length,
+                  read: trackerRecipients.filter(tr => tr.status === 'read').length,
+                  acknowledged: trackerRecipients.filter(tr => tr.status === 'acknowledged').length,
+                  completed: trackerRecipients.filter(tr => tr.status === 'completed').length,
+                };
 
-              return (
-                <tr key={tracker.id}>
-                  {/* <td>{tracker.serialNumber}</td> */}
-                  <td>{tracker.fromName}</td>
-                  <td>{tracker.documentTitle}</td>
-                  <td>
-                    <div className="mb-2">
-                      <small className="text-muted d-block">{recipientNames}</small>
-                    </div>
-                    <div className="d-flex gap-1 flex-wrap">
-                      {statusCounts.pending > 0 && (
-                        <Badge bg="secondary">Pending: {statusCounts.pending}</Badge>
-                      )}
-                      {statusCounts.seen > 0 && (
-                        <Badge bg="info">Seen: {statusCounts.seen}</Badge>
-                      )}
-                      {statusCounts.read > 0 && (
-                        <Badge bg="primary">Read: {statusCounts.read}</Badge>
-                      )}
-                      {statusCounts.acknowledged > 0 && (
-                        <Badge bg="warning">Ack: {statusCounts.acknowledged}</Badge>
-                      )}
-                      {statusCounts.completed > 0 && (
-                        <Badge bg="success">Done: {statusCounts.completed}</Badge>
-                      )}
-                    </div>
-                  </td>
-                  <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
-                  <td>{tracker.lceAction ? tracker.lceAction : <span className="text-muted">N/A</span>} / {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
-                  {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
-                  <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
-                  <td>
-                    <div className="d-flex gap-1">
-                      <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
-                        <FontAwesomeIcon icon={faEdit} />
-                      </Button>
-                      <Button variant="light" size="sm" title="View Details">
-                        <FontAwesomeIcon icon={faEye} />
-                      </Button>
-                      {(role === 'admin' || role === 'superadmin') && <Button variant="danger" size="sm" onClick={() => handleDelete(tracker.id)} title="Delete"><FontAwesomeIcon icon={faTrash} /></Button>}
-                    </div>
-                  </td>
+                return (
+                  <tr key={tracker.id}>
+                    {/* <td>{tracker.serialNumber}</td> */}
+                    <td>{tracker.fromName}</td>
+                    <td>{tracker.documentTitle}</td>
+                    <td>
+                      <div className="mb-2">
+                        <small className="text-muted d-block">{recipientNames}</small>
+                      </div>
+                      <div className="d-flex gap-1 flex-wrap">
+                        {statusCounts.pending > 0 && (
+                          <Badge bg="secondary">Pending: {statusCounts.pending}</Badge>
+                        )}
+                        {statusCounts.seen > 0 && (
+                          <Badge bg="info">Seen: {statusCounts.seen}</Badge>
+                        )}
+                        {statusCounts.read > 0 && (
+                          <Badge bg="primary">Read: {statusCounts.read}</Badge>
+                        )}
+                        {statusCounts.acknowledged > 0 && (
+                          <Badge bg="warning">Ack: {statusCounts.acknowledged}</Badge>
+                        )}
+                        {statusCounts.completed > 0 && (
+                          <Badge bg="success">Done: {statusCounts.completed}</Badge>
+                        )}
+                      </div>
+                    </td>
+                    <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
+                    <td>{tracker.lceAction ? tracker.lceAction : <span className="text-muted">N/A</span>} / {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
+                    {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
+                    <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
+                    <td>
+                      <div className="d-flex gap-1">
+                        <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
+                          <FontAwesomeIcon icon={faEdit} />
+                        </Button>
+                        <Button variant="light" size="sm" title="View Details">
+                          <FontAwesomeIcon icon={faEye} />
+                        </Button>
+                        {(role === 'admin' || role === 'superadmin') && <Button variant="danger" size="sm" onClick={() => handleDelete(tracker.id)} title="Delete"><FontAwesomeIcon icon={faTrash} /></Button>}
+                      </div>
+                    </td>
 
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
-      )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
+        )}
+      </Row>
       {totalPages > 1 && (
         <Row className="mt-4 mb-4 align-items-center">
           <Col md={6}>
@@ -403,48 +404,42 @@ const TrackersScreen = () => {
               </Card>
               <br />
               <Card>
-                <Card.Header>LCE Section</Card.Header>
+                <Card.Header>LCE Action Section</Card.Header>
                 <Card.Body>
-                  <Form.Group className="mb-3" controlId="lceActionDate">
-                    {/* <Form.Label>Date</Form.Label> */}
-                    <Form.Control type="date" name="lceActionDate" value={formData.lceActionDate} onChange={handleChange} />
-                    <Form.Text className="text-muted">LCE Action Date.</Form.Text>
-                  </Form.Group>
-                  <Form.Group className="mb-3" controlId="lceAction">
-                    {/* <Form.Label>Action</Form.Label> */}
-                    {/*
-                type: DataTypes.ENUM('pending', 'approved', 'disapproved', 'for your comments', 'for review', 'for dissemination', 'for compliance', 'pls facilitate', 'noted', 'check availability of fund', 'others'),allowNull: true, */}
-                    <Form.Select name="lceAction" value={formData.lceAction} onChange={handleChange} placeholder="Enter LCE Action">
-                      <option value="">Select action</option>
-                      <option value="pending">Pending</option>
-                      <option value="approved">Approved</option>
-                      <option value="disapproved">Disapproved</option>
-                      <option value="for your comments">For Your Comments</option>
-                      <option value="for review">For Review</option>
-                      <option value="for dissemination">For Dissemination</option>
-                      <option value="for compliance">For Compliance</option>
-                      <option value="pls facilitate">Please Facilitate</option>
-                      <option value="noted">Noted</option>
-                      <option value="check availability of fund">Check Availability of Fund</option>
-                      <option value="others">Others</option>
-                    </Form.Select>
-                    <Form.Text className="text-muted">LCE Action.</Form.Text>
-                  </Form.Group>
-                  {/*<Form.Group className="mb-3" controlId="lceReply">
-                  <Form.Label>LCE Reply</Form.Label> 
-                    <Form.Control type="text" name="lceReply" value={formData.lceReply} onChange={handleChange} placeholder="Enter LCE Reply" />
-                  </Form.Group>
-                  <Form.Group className="mb-3" controlId="lceReplyDate">
-                    <Form.Label>LCE Reply Date</Form.Label>
-                    <Form.Control type="date" name="lceReplyDate" value={formData.lceReplyDate} onChange={handleChange} />
-                  </Form.Group>*/}
+                  <Row>
+                    <Col><Form.Group className="mb-3" controlId="lceActionDate">
+                      {/* <Form.Label>Date</Form.Label> */}
+                      <Form.Control type="date" name="lceActionDate" value={formData.lceActionDate} onChange={handleChange} />
+                      <Form.Text className="text-muted">LCE Action Date.</Form.Text>
+                    </Form.Group>
+                    </Col>
+                    <Col>
+                      <Form.Group className="mb-3" controlId="lceAction">
+                        {/* <Form.Label>Action</Form.Label> */}
+                        <Form.Select name="lceAction" value={formData.lceAction} onChange={handleChange} placeholder="Enter LCE Action">
+                          <option value="">Select action</option>
+                          <option value="pending">Pending</option>
+                          <option value="approved">Approved</option>
+                          <option value="disapproved">Disapproved</option>
+                          <option value="for your comments">For Your Comments</option>
+                          <option value="for review">For Review</option>
+                          <option value="for dissemination">For Dissemination</option>
+                          <option value="for compliance">For Compliance</option>
+                          <option value="pls facilitate">Please Facilitate</option>
+                          <option value="noted">Noted</option>
+                          <option value="check availability of fund">Check Availability of Fund</option>
+                          <option value="others">Others</option>
+                        </Form.Select>
+                        <Form.Text className="text-muted">LCE Action.</Form.Text>
+                      </Form.Group>
+                    </Col>
+                  </Row>
                 </Card.Body>
               </Card>
               <br />
               <Card>
                 <Card.Header>Recipients Assignment</Card.Header>
                 <Card.Body>
-
                   <Form.Group className="mb-3" controlId="recipientIds">
                     {/* <Form.Label>Recipients</Form.Label> */}
                     <DualListBox
@@ -467,11 +462,11 @@ const TrackersScreen = () => {
               </Card>
               <br />
               <Card>
-                <Card.Title>Attachment</Card.Title>
+                <Card.Header>Attachment</Card.Header>
                 <Card.Body>
                   <Form.Group className="mb-3" controlId="attachment">
-                    <Form.Control type="file" name="attachment" disabled />
-                    <Form.Text className="text-muted">File attachment upload coming soon...</Form.Text>
+                    <Form.Control type="file" name="attachment" />
+                    <Form.Text className="text-muted">DocTrkr2 Attachment (PDF)</Form.Text>
                   </Form.Group>
                 </Card.Body>
               </Card>

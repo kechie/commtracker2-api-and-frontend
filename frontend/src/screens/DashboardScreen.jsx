@@ -18,28 +18,28 @@ const DashboardScreen = () => {
   return (
     <Container>
       <Row className="align-items-left mb-3">
-        <Col><h1>Main Dashboard</h1></Col>
-        {user && (
-          <p>Hello, {user.userId},{role}!</p>
-        )}
-        <Link to="/trackers">Manage Document Tracking</Link>
-        <br />
-        <Link to="/receiving-dashboard">Receiving Dashboard</Link>
-        {/* <p>This will contain analytics and user-specific content.</p> */}
-
-        {/* Add receiving-specific content here
-      Analytics, recent activities, quick actions, etc.
-      link to tracker management screen
-      */}
-        {/*         <Col>
-          <h1>Dashboard</h1>
+        <Col>
+          <h1>Main Dashboard</h1>
+          {user && (
+            <p>Hello, {user.userId},{role}!</p>
+          )}<br />
+          {role === 'receiving' && <Link to="/trackers">Manage Document Tracking</Link>}<br />
+          {role === 'receiving' && <Link to="/receiving-dashboard">Receiving Dashboard</Link>}<br />
+          {role === 'receiving' &&
+            <Container className="mt-4">
+              Add receiving-specific content here
+              Analytics, recent activities, quick actions, etc.
+              link to tracker management screen
+            </Container>}
+          {(role === 'admin' || role === 'superadmin') && <Link to="/admin">Admin Panel</Link>}<br />
+          {(role === 'admin' || role === 'superadmin') &&
+            <Container className="mt-4">
+              Add admin -specific content here
+              recent activities, quick actions, etc.
+              link to tracker management screen
+            </Container>}
+          <p>This will contain analytics for the monitor role in the future.</p>
         </Col>
-        <Col className="text-end">
-          <Button variant="primary">
-            <FontAwesomeIcon icon={faPlus} className="me-2" />
-            New Document
-          </Button>
-        </Col> */}
       </Row>
     </Container>
   );

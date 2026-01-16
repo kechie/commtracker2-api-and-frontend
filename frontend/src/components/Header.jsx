@@ -23,7 +23,7 @@ const Header = () => {
         <Container>
           <LinkContainer to="/">
             <Navbar.Brand>
-              <FontAwesomeIcon icon={faPaperPlane} /> DocTrkr2
+              <FontAwesomeIcon icon={faPaperPlane} /> DocTrkr2MS
             </Navbar.Brand>
           </LinkContainer>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -35,7 +35,7 @@ const Header = () => {
                   {canAccessReceivingDashboard && (
                     <LinkContainer to="/receiving-dashboard">
                       <Nav.Link>
-                        <FontAwesomeIcon icon={faChartBar} className="me-1" /> Receiving Dashboard
+                        <FontAwesomeIcon icon={faChartBar} className="me-1" /> Receiving
                       </Nav.Link>
                     </LinkContainer>
                   )}
@@ -44,7 +44,7 @@ const Header = () => {
                   {canAccessTrackers && (
                     <LinkContainer to="/trackers">
                       <Nav.Link>
-                        <FontAwesomeIcon icon={faFileAlt} className="me-1" /> DocTrkr2 Management
+                        <FontAwesomeIcon icon={faFileAlt} className="me-1" /> DocTrkr2s
                       </Nav.Link>
                     </LinkContainer>
                   )}
