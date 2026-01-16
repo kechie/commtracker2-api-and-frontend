@@ -1,6 +1,6 @@
 // src/controllers/v2/recipientController.js
 const { Recipient } = require('../../db');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 
 // @desc    Get recipients with pagination
 // @route   GET /api/v2/recipients
@@ -54,6 +54,11 @@ exports.getRecipients = async (req, res) => {
 exports.getAllRecipients = async (req, res) => {
   try {
     const recipients = await Recipient.findAll({
+      where: {
+        recipientCode: {
+          [Op.lte]: 1000
+        }
+      },
       order: [['recipientCode', 'ASC']],
     });
     res.json({ recipients });

@@ -53,6 +53,8 @@ const TrackersScreen = () => {
           setTotalTrackers(totalCount);
         }
         setError(null);
+        //console.log('Fetched trackers:', trackersList);
+        //console.log('Fetched recipients:', recipientsData.recipients || recipientsData);
       } catch (err) {
         setError(err.message || 'Failed to fetch data');
       } finally {
