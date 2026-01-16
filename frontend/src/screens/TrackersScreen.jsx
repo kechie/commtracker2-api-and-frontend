@@ -345,54 +345,68 @@ const TrackersScreen = () => {
           <Modal.Title>{editingTracker ? 'Edit' : 'New'} Doc Tracker 2</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3" controlId="serialNumber">
-              <Form.Control
-                type="text"
-                name="serialNumber"
-                value={formData.serialNumber}
-                onChange={handleChange}
-                disabled
-                readOnly={!editingTracker} // Make read-only for new trackers
-                placeholder={editingTracker ? '' : 'Auto-generated on creation'}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="documentTitle">
-              <Form.Label>Title</Form.Label>
-              <Form.Control type="text" name="documentTitle" value={formData.documentTitle} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="fromName">
-              <Form.Label>From</Form.Label>
-              <Form.Control type="text" name="fromName" value={formData.fromName} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="dateReceived">
-              <Form.Label>Date Received</Form.Label>
-              <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="recipientIds">
-              <Form.Label>Recipients</Form.Label>
-              <DualListBox
-                available={recipients}
-                selected={recipients.filter(r => formData.recipientIds.includes(r.id))}
-                onSelected={(selectedIds) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    recipientIds: selectedIds
-                  }));
-                }}
-                availableLabel="Available Recipients"
-                selectedLabel="Selected Recipients"
-                displayProp="recipientName"
-                valueProp="id"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="isConfidential">
-              <Form.Check type="switch" name="isConfidential" label="Confidential" checked={formData.isConfidential} onChange={handleChange} />
-            </Form.Group>
-            <Button variant="primary" type="submit">
-              {editingTracker ? 'Update' : 'Create'}
-            </Button>
-          </Form>
+          <Col>
+
+            <Form onSubmit={handleSubmit}>
+              <Row>
+                <Form.Group className="mb-3" controlId="serialNumber">
+                  <Form.Control
+                    type="text"
+                    name="serialNumber"
+                    value={formData.serialNumber}
+                    onChange={handleChange}
+                    disabled
+                    readOnly={!editingTracker} // Make read-only for new trackers
+                    placeholder={editingTracker ? '' : 'Auto-generated on creation'}
+                  />
+                </Form.Group>
+              </Row>
+              <Row>
+                <Form.Group className="mb-3" controlId="documentTitle">
+                  <Form.Label>Title</Form.Label>
+                  <Form.Control type="text" name="documentTitle" value={formData.documentTitle} onChange={handleChange} required />
+                  <Form.Text className="text-muted">Enter document title.</Form.Text>
+                </Form.Group>
+              </Row>
+              <Row>
+                <Form.Group className="mb-3" controlId="fromName">
+                  <Form.Label>From</Form.Label>
+                  <Form.Control type="text" name="fromName" value={formData.fromName} onChange={handleChange} required />
+                  <Form.Text className="text-muted">Enter sender's name or organization.</Form.Text>
+                </Form.Group>
+              </Row>
+              <Row>
+                <Form.Group className="mb-3" controlId="dateReceived">
+                  {/* <Form.Label>Date Received</Form.Label> */}
+                  <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required />
+                  <Form.Text className="text-muted">Select date the document was received.</Form.Text>
+                </Form.Group>
+              </Row>
+              <Form.Group className="mb-3" controlId="recipientIds">
+                {/* <Form.Label>Recipients</Form.Label> */}
+                <DualListBox
+                  available={recipients}
+                  selected={recipients.filter(r => formData.recipientIds.includes(r.id))}
+                  onSelected={(selectedIds) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      recipientIds: selectedIds
+                    }));
+                  }}
+                  availableLabel="Available Recipients"
+                  selectedLabel="Selected Recipients"
+                  displayProp="recipientName"
+                  valueProp="id"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="isConfidential">
+                <Form.Check type="switch" name="isConfidential" label="Confidential" checked={formData.isConfidential} onChange={handleChange} />
+              </Form.Group>
+              <Button variant="primary" type="submit">
+                {editingTracker ? 'Update' : 'Create'}
+              </Button>
+            </Form>
+          </Col>
         </Modal.Body>
       </Modal>
     </Container>
