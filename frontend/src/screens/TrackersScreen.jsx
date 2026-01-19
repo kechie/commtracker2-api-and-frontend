@@ -32,9 +32,6 @@ const TrackersScreen = () => {
     lceKeyedInAction: '',
     lceActionDate: '',
     lceRemarks: '',
-    lceReply: null,
-    lceKeyedInReply: null,
-    lceReplyDate: null,
     attachment: null,
     attachmentMimeType: '',
     isConfidential: false,
@@ -271,7 +268,7 @@ const TrackersScreen = () => {
                     <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
                     <td>{tracker.lceAction === 'others' ? tracker.lceKeyedInAction : tracker.lceAction} / {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
                     {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
-                    <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
+                    <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply == 'pending' ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
                     <td>
                       <div className="d-flex gap-1">
                         <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
@@ -390,7 +387,7 @@ const TrackersScreen = () => {
                       placeholder={editingTracker ? '' : 'Auto-generated on creation'}
                     />
                   </FloatingLabel>
-                  {/*                   <Row>
+                  {/*<Row>
                     <Form.Group className="mb-3" controlId="serialNumber">
                       <Form.Control
                         type="text"
