@@ -81,7 +81,8 @@ export const createTracker = async (trackerData) => {
   try {
     const formData = new FormData();
     for (const key in trackerData) {
-      if (trackerData.hasOwnProperty(key)) {
+      if (Object.hasOwn(trackerData, key)) {
+        //if (trackerData.hasOwnProperty(key)) {
         if (key === 'recipientIds' && Array.isArray(trackerData[key])) {
           trackerData[key].forEach(id => formData.append('recipientIds[]', id));
         } else if (key === 'attachment' && trackerData[key]) {
