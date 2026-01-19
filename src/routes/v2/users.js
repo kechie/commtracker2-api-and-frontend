@@ -14,4 +14,6 @@ router.get('/:id', verifyToken, userController.getUser);
 router.put('/:id', verifyToken, userController.updateUser);
 router.delete('/:id', verifyToken, userController.deleteUser); // New route to delete a user
 
+router.put('/:id/reset-password', verifyToken, userController.resetUserPassword); // New route to reset user password
+
 module.exports = router;

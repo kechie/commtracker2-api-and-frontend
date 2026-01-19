@@ -102,6 +102,9 @@ const TrackersScreen = () => {
       documentTitle: '',
       dateReceived: '',
       isConfidential: false,
+      lceAction: '',
+      lceKeyedInAction: '',
+      lceActionDate: '',
       recipientIds: [],
     });
   };
@@ -148,6 +151,7 @@ const TrackersScreen = () => {
         await updateTracker(editingTracker.id, formData);
       } else {
         await createTracker(formData);
+        setSuccess('DocTrkr2 created successfully!');
       }
       fetchTrackers();
       handleClose();
@@ -160,6 +164,7 @@ const TrackersScreen = () => {
     if (window.confirm('Are you sure you want to delete this tracker?')) {
       try {
         await deleteTracker(id);
+        setSuccess('DocTrkr2 deleted successfully!');
         fetchTrackers();
       } catch (err) {
         setError(err.message || 'Failed to delete tracker');

@@ -175,6 +175,24 @@ exports.updateUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
+    // ──────────────────────────────────────────────
+    //           Very important security check
+    // ──────────────────────────────────────────────
+    if (req.user.role !== 'superadmin') {
+      // Normal admin cannot change role or upgrade privileges
+      if (role && role !== targetUser.role) {
+        return res.status(403).json({
+          error: 'Only superadmin can change user roles'
+        });
+      }
+
+      // Optional: prevent admin from modifying superadmin
+      if (targetUser.role === 'superadmin') {
+        return res.status(403).json({
+          error: 'Superadmin accounts can only be modified by another superadmin'
+        });
+      }
+    }
 
     // Update allowed fields
     if (fullname) user.fullname = fullname;
@@ -196,6 +214,31 @@ exports.updateUser = async (req, res) => {
     });
   } catch (error) {
     console.error('v2 Update user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.resetUserPassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    // Only superadmin and admin can reset user passwords
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions.' });
+    }
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.password = newPassword; // The 'beforeUpdate' hook will hash this password
+    await user.save();
+
+    res.json({ message: 'v2 Password reset successfully', userId: id, version: 'v2' });
+  } catch (error) {
+    console.error('v2 Reset password error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

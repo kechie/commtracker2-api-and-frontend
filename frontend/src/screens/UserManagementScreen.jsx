@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Row, Col, Alert, Modal, Form, Pagination } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEdit, faTrash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft, faKey } from '@fortawesome/free-solid-svg-icons';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
@@ -12,6 +12,7 @@ const UserManagementScreen = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
 
   // Pagination state
@@ -28,6 +29,11 @@ const UserManagementScreen = () => {
     email: '',
     role: '',
   });
+  // Password reset state
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetUserId, setResetUserId] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [createFormData, setCreateFormData] = useState({
     username: '',
@@ -58,6 +64,7 @@ const UserManagementScreen = () => {
       setTotal(data.pagination.total);
       setTotalPages(data.pagination.totalPages);
       setLoading(false);
+      setSuccess(null);
       //console.log('Fetched users:', data);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch users');
@@ -90,6 +97,7 @@ const UserManagementScreen = () => {
       try {
         await api.delete(`/users/${id}`);
         fetchUsers(page, limit);
+        setSuccess('User deleted successfully!');
       } catch (err) {
         setError(err.response?.data?.error || 'Failed to delete user');
         setShowAlert(true);
@@ -156,13 +164,42 @@ const UserManagementScreen = () => {
       setShowAlert(true);
     }
   };
+  const handleResetPasswordClick = (user) => {
+    setResetUserId(user.id);
+    setNewPassword('');
+    setConfirmPassword('');
+    setShowResetModal(true);
+  };
 
-  const handleBack = () => {
-    navigate('/admin');
+  const handleResetPasswordSubmit = async () => {
+    if (newPassword !== confirmPassword) {
+      setError("Passwords don't match");
+      setShowAlert(true);
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters");
+      setShowAlert(true);
+      return;
+    }
+
+    try {
+      await api.put(`/users/${resetUserId}/reset-password`, { newPassword });
+      alert('Password has been reset successfully');
+      setShowResetModal(false);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to reset password');
+      setShowAlert(true);
+    }
   };
 
   if (loading) {
     return <div>Loading...</div>;
+  }
+
+  const handleBack = () => {
+    navigate('/admin');
   }
 
   return (
@@ -194,6 +231,11 @@ const UserManagementScreen = () => {
           {error}
         </Alert>
       )}
+      {showAlert && success && (
+        <Alert variant="success" dismissible onClose={() => setShowAlert(false)}>
+          {success}
+        </Alert>
+      )}
       <Table striped bordered hover responsive className="table-sm">
         <thead>
           <tr>
@@ -217,6 +259,15 @@ const UserManagementScreen = () => {
                 <Button variant="light" className="btn-sm mx-1" onClick={() => handleEditClick(user)}>
                   <i className="fas fa-edit"></i>
                   <FontAwesomeIcon icon={faEdit} />
+                </Button>
+                <Button
+                  variant="outline-warning"
+                  size="sm"
+                  className="btn-sm mx-1"
+                  onClick={() => handleResetPasswordClick(user)}
+                  title="Reset password"
+                >
+                  <FontAwesomeIcon icon={faKey} />
                 </Button>
                 {role == 'superadmin' &&
                   <Button
@@ -400,6 +451,45 @@ const UserManagementScreen = () => {
           </Button>
           <Button variant="primary" onClick={handleCreateUser}>
             Create User
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showResetModal} onHide={() => setShowResetModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Reset Password</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>New Password</Form.Label>
+              <Form.Control
+                type="password"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                autoFocus
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Confirm Password</Form.Label>
+              <Form.Control
+                type="password"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowResetModal(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleResetPasswordSubmit}
+            disabled={!newPassword || newPassword !== confirmPassword}
+          >
+            Reset Password
           </Button>
         </Modal.Footer>
       </Modal>
