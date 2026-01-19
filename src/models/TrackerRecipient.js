@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       field: 'recipient_id'
     },
     status: {
-      type: DataTypes.ENUM('pending', 'seen', 'read', 'acknowledged', 'action_required', 'completed'),
+      type: DataTypes.ENUM('pending', 'approved', 'noted', 'in-progress', 'rejected', 'forwarded', 'completed'),
       defaultValue: 'pending',
       allowNull: false,
       field: 'status'
