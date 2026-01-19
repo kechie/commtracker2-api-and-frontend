@@ -87,11 +87,12 @@ exports.getUser = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 }; */
+
 exports.getAllUsers = async (req, res) => {
   try {
     // Only superadmin and admin can get all users
     if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions.' });
+      return res.status(403).json({ error: 'Access denied. insufficient permissions.' });
     }
 
     // Get pagination parameters from query string
@@ -143,7 +144,7 @@ exports.deleteUser = async (req, res) => {
   try {
     // Only superadmin and admin can delete users
     if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions.' });
+      return res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
     }
 
     const { id } = req.params;
@@ -168,7 +169,7 @@ exports.updateUser = async (req, res) => {
 
     // Only superadmin and admin can update other users or change roles
     if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions.' });
+      return res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
     }
 
     const user = await User.findByPk(id);
@@ -176,7 +177,7 @@ exports.updateUser = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     // ──────────────────────────────────────────────
-    //           Very important security check
+    //           Very important security check!!!
     // ──────────────────────────────────────────────
     if (req.user.role !== 'superadmin') {
       // Normal admin cannot change role or upgrade privileges
@@ -225,7 +226,7 @@ exports.resetUserPassword = async (req, res) => {
 
     // Only superadmin and admin can reset user passwords
     if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. You do not have sufficient permissions.' });
+      return res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
     }
 
     const user = await User.findByPk(id);

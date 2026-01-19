@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Row, Col, Alert, Modal, Form, Pagination } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash, faArrowLeft, faKey } from '@fortawesome/free-solid-svg-icons';
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
 import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
@@ -25,6 +26,7 @@ const UserManagementScreen = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [formData, setFormData] = useState({
+    username: '',
     fullname: '',
     email: '',
     role: '',
@@ -243,6 +245,7 @@ const UserManagementScreen = () => {
             <th>Username</th>
             <th>Department/Office/Agency</th>
             <th>Email</th>
+            <th>Account Name (Full)</th>
             <th>Role</th>
             <th></th>
           </tr>
@@ -254,6 +257,7 @@ const UserManagementScreen = () => {
               <td>{user.username}</td>
               <td>{user.recipient?.recipientName || 'N/A'}</td>
               <td>{user.email}</td>
+              <td>{user.fullname}</td>
               <td>{user.role}</td>
               <td>
                 <Button variant="light" className="btn-sm mx-1" onClick={() => handleEditClick(user)}>
@@ -365,9 +369,10 @@ const UserManagementScreen = () => {
                 value={formData.role}
                 onChange={handleFormChange}
               >
-                <option value="user">User/Receiving</option>
+                <option value="user">User</option>
+                <option value="receiving">Receiving</option>
+                <option value="recipient">Recipient</option>
                 <option value="admin">Admin</option>
-                <option value="superadmin">Superadmin</option>
                 <option value="viewer">Viewer</option>
                 <option value="monitor">Monitor</option>
                 <option value="staff">Staff</option>
@@ -410,6 +415,7 @@ const UserManagementScreen = () => {
                 value={createFormData.password}
                 onChange={handleCreateFormChange}
               />
+              <PasswordStrengthMeter password={createFormData.password} />
             </Form.Group>
             <Form.Group className="mb-3" controlId="formCreateFullname">
               <Form.Label>Full Name</Form.Label>
@@ -438,8 +444,11 @@ const UserManagementScreen = () => {
                 onChange={handleCreateFormChange}
               >
                 <option value="user">User</option>
-                <option value="admin">Admin</option>
-                <option value="superadmin">Superadmin</option>
+                <option value="receiving">Receiving</option>
+                <option value="recipient">Recipient</option>
+                {role === 'superadmin' && <option value="admin">Admin</option>}
+                <option value="viewer">Viewer</option>
+                <option value="monitor">Monitor</option>
                 <option value="staff">Staff</option>
               </Form.Control>
             </Form.Group>
@@ -477,6 +486,7 @@ const UserManagementScreen = () => {
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
               />
+              <PasswordStrengthMeter password={newPassword} />
             </Form.Group>
           </Form>
         </Modal.Body>
