@@ -10,6 +10,20 @@ const {
   deleteTracker,
 } = require('../../controllers/v2/trackerController');
 const { verifyToken, requireRole } = require('../../middleware/authMiddleware');
+const multer = require('multer');
+const path = require('path');
+
+// Multer storage configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  },
+});
+
+const upload = multer({ storage });
 
 // All routes in this file are protected and require a role of 'receiving', 'admin', or 'superadmin'
 router.use(verifyToken, requireRole(['receiving', 'admin', 'superadmin']));
@@ -18,7 +32,7 @@ router.use(verifyToken, requireRole(['receiving', 'admin', 'superadmin']));
 router.get('/all', getAllTrackers);
 
 // Get paginated trackers and create new tracker
-router.route('/').post(createTracker).get(getTrackers);
+router.route('/').post(upload.single('attachment'), createTracker).get(getTrackers);
 
 // Get, update, delete specific tracker
 router

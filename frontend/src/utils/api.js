@@ -79,7 +79,24 @@ export const getAllTrackers = async () => {
 
 export const createTracker = async (trackerData) => {
   try {
-    const response = await api.post('/trackers', trackerData);
+    const formData = new FormData();
+    for (const key in trackerData) {
+      if (trackerData.hasOwnProperty(key)) {
+        if (key === 'recipientIds' && Array.isArray(trackerData[key])) {
+          trackerData[key].forEach(id => formData.append('recipientIds[]', id));
+        } else if (key === 'attachment' && trackerData[key]) {
+          formData.append('attachment', trackerData[key]);
+        } else {
+          formData.append(key, trackerData[key]);
+        }
+      }
+    }
+
+    const response = await api.post('/trackers', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('API Create Tracker Error:', error.response?.data || error.message);

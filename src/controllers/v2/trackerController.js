@@ -97,6 +97,12 @@ exports.createTracker = async (req, res) => {
       finalSerialNumber = await generateSerialNumber(transaction);
     }
 
+    // Handle file upload
+    if (req.file) {
+      trackerData.attachment = req.file.filename;
+      trackerData.attachmentMimeType = req.file.mimetype;
+    }
+
     // Create the tracker within the transaction
     const tracker = await Tracker.create({
       ...trackerData,
