@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Alert, Container, Card, Row, Col, Badge, Pagination } from 'react-bootstrap';
+import { Table, Button, Modal, Form, FloatingLabel, Alert, Container, Card, Row, Col, Badge, Pagination } from 'react-bootstrap';
 import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipients } from '../utils/api';
 import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,7 @@ const TrackersScreen = () => {
   const [recipients, setRecipients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingTracker, setEditingTracker] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -118,6 +119,9 @@ const TrackersScreen = () => {
         documentTitle: tracker.documentTitle || '',
         dateReceived: tracker.dateReceived ? new Date(tracker.dateReceived).toISOString().split('T')[0] : '',
         isConfidential: tracker.isConfidential || false,
+        lceAction: tracker.lceAction || '',
+        lceKeyedInAction: tracker.lceKeyedInAction || '',
+        lceActionDate: tracker.lceActionDate ? new Date(tracker.lceActionDate).toISOString().split('T')[0] : '',
         recipientIds: recipientIds,
       });
     }
@@ -148,7 +152,7 @@ const TrackersScreen = () => {
       fetchTrackers();
       handleClose();
     } catch (err) {
-      setError(err.message || 'Failed to save tracker');
+      setError(err.message || 'Error saving DocTrkr2');
     }
   };
 
@@ -195,7 +199,8 @@ const TrackersScreen = () => {
         </Col>
       </Row>
       <Row>
-        {error && <Alert variant="danger">{error}</Alert>}
+        {error && <Alert variant="danger" dismissible>{error}</Alert>}
+        {success && <Alert variant="success" dismissible>{success}</Alert>}
         {loading ? (
           <p>Loading trackers...</p>
         ) : (
@@ -259,7 +264,7 @@ const TrackersScreen = () => {
                       </div>
                     </td>
                     <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
-                    <td>{tracker.lceAction ? tracker.lceAction : <span className="text-muted">N/A</span>} / {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
+                    <td>{tracker.lceAction === 'others' ? tracker.lceKeyedInAction : tracker.lceAction} / {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
                     {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
                     <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
                     <td>
@@ -369,6 +374,17 @@ const TrackersScreen = () => {
             <Form onSubmit={handleSubmit}>
               <Card><Card.Header>Tracker Details</Card.Header>
                 <Card.Body>
+                  <FloatingLabel controlId="serialNumber" label="Serial Number" className="mb-3">
+                    <Form.Control
+                      type="text"
+                      name="serialNumber"
+                      value={formData.serialNumber}
+                      onChange={handleChange}
+                      disabled
+                      readOnly={!editingTracker} // Make read-only for new trackers
+                      placeholder={editingTracker ? '' : 'Auto-generated on creation'}
+                    />
+                  </FloatingLabel>
                   {/*                   <Row>
                     <Form.Group className="mb-3" controlId="serialNumber">
                       <Form.Control
@@ -383,28 +399,45 @@ const TrackersScreen = () => {
                     </Form.Group>
                   </Row> */}
                   <Row>
+                    <FloatingLabel controlId="documentTitle" label="Document Title" className="mb-3">
+                      <Form.Control type="text" name="documentTitle" value={formData.documentTitle} onChange={handleChange} required placeholder="Document Title" />
+                    </FloatingLabel>
+                  </Row>
+                  {/* <Row>
                     <Form.Group className="mb-3" controlId="documentTitle">
-                      {/* <Form.Label>Title</Form.Label> */}
+                      <Form.Label>Title</Form.Label> 
                       <Form.Control type="text" name="documentTitle" value={formData.documentTitle} onChange={handleChange} required />
                       <Form.Text className="text-muted">Document Tracker title.</Form.Text>
                     </Form.Group>
-                  </Row>
+                  </Row>*/}
                   <Row>
                     <Col md={6}>
-                      <Form.Group className="mb-3" controlId="fromName">
-                        {/* <Form.Label>From</Form.Label> */}
-                        <Form.Control type="text" name="fromName" value={formData.fromName} onChange={handleChange} required />
-                        <Form.Text className="text-muted">Sender's name or organization.</Form.Text>
-                      </Form.Group>
+                      <FloatingLabel controlId="fromName" label="From" className="mb-3">
+                        <Form.Control type="text" name="fromName" value={formData.fromName} onChange={handleChange} required placeholder="From" />
+                      </FloatingLabel>
                     </Col>
                     <Col md={6}>
-                      <Form.Group className="mb-3" controlId="dateReceived">
-                        {/* <Form.Label>Date Received</Form.Label> */}
-                        <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required />
-                        <Form.Text className="text-muted">Date the document was received.</Form.Text>
-                      </Form.Group>
+                      <FloatingLabel controlId="dateReceived" label="Date Received" className="mb-3">
+                        <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required placeholder="Date Received" />
+                      </FloatingLabel>
                     </Col>
                   </Row>
+                  {/* <Row>
+                    <Col md={6}>
+                      <Form.Group className="mb-3" controlId="fromName">
+                
+                  <Form.Control type="text" name="fromName" value={formData.fromName} onChange={handleChange} required />
+                  <Form.Text className="text-muted">Sender's name or organization.</Form.Text>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3" controlId="dateReceived">
+                
+                  <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required />
+                  <Form.Text className="text-muted">Date the document was received.</Form.Text>
+                </Form.Group>
+              </Col>
+                </Row>*/}
                 </Card.Body>
               </Card>
               <br />
@@ -412,15 +445,51 @@ const TrackersScreen = () => {
                 <Card.Header>LCE Action Section</Card.Header>
                 <Card.Body>
                   <Row>
-                    <Col><Form.Group className="mb-3" controlId="lceActionDate">
-                      {/* <Form.Label>Date</Form.Label> */}
+                    <Col md={6}>
+                      <FloatingLabel controlId='lceAction' label='LCE Action' className='mb-3'>
+                        <Form.Select name="lceAction" value={formData.lceAction} onChange={handleChange} placeholder="Enter LCE Action">
+                          <option value="">Select action</option>
+                          <option value="pending">Pending</option>
+                          <option value="approved">Approved</option>
+                          <option value="disapproved">Disapproved</option>
+                          <option value="for your comments">For Your Comments</option>
+                          <option value="for review">For Review</option>
+                          <option value="for dissemination">For Dissemination</option>
+                          <option value="for compliance">For Compliance</option>
+                          <option value="pls facilitate">Please Facilitate</option>
+                          <option value="noted">Noted</option>
+                          <option value="check availability of fund">Check Availability of Fund</option>
+                          <option value="others">Others</option>
+                        </Form.Select>
+                      </FloatingLabel>
+                    </Col>
+                    <Col md={6}>
+
+                      <FloatingLabel controlId='lcdActionDate' label='LCE Action Date' className='mb-3'>
+                        <Form.Control type="date" name="lceActionDate" value={formData.lceActionDate} onChange={handleChange} />
+                      </FloatingLabel>
+                    </Col>
+                    <Col md={12} hidden={formData.lceAction !== 'others'}>
+                      {formData.lceAction === 'others' && (
+                        <FloatingLabel controlId="lceKeyedInAction" label="Please specify LCE Action" className="mb-3">
+                          <Form.Control
+                            type="text"
+                            name="lceKeyedInAction"
+                            value={formData.lceKeyedInAction}
+                            onChange={handleChange}
+                            placeholder="Enter LCE Action"
+                          />
+                        </FloatingLabel>
+                      )}
+                    </Col>
+                    {/*/<Col ><Form.Group className="mb-3" controlId="lceActionDate">
                       <Form.Control type="date" name="lceActionDate" value={formData.lceActionDate} onChange={handleChange} />
                       <Form.Text className="text-muted">LCE Action Date.</Form.Text>
                     </Form.Group>
                     </Col>
-                    <Col>
+                    *<Col>
                       <Form.Group className="mb-3" controlId="lceAction">
-                        {/* <Form.Label>Action</Form.Label> */}
+                        <Form.Label>Action</Form.Label> 
                         <Form.Select name="lceAction" value={formData.lceAction} onChange={handleChange} placeholder="Enter LCE Action">
                           <option value="">Select action</option>
                           <option value="pending">Pending</option>
@@ -437,7 +506,7 @@ const TrackersScreen = () => {
                         </Form.Select>
                         <Form.Text className="text-muted">LCE Action.</Form.Text>
                       </Form.Group>
-                    </Col>
+                    </Col>*/}
                   </Row>
                 </Card.Body>
               </Card>
@@ -469,10 +538,21 @@ const TrackersScreen = () => {
               <Card>
                 <Card.Header>Attachment</Card.Header>
                 <Card.Body>
+                  <FloatingLabel controlId="attachment" label="Attachment" className="mb-3">
+                    <Form.Control type="file" name="attachment" onChange={(e) => {
+                      const file = e.target.files[0];
+                      setFormData(prev => ({
+                        ...prev,
+                        attachment: file,
+                        attachmentMimeType: file ? file.type : '',
+                      }));
+                    }} />
+                  </FloatingLabel>
+                  {/* 
                   <Form.Group className="mb-3" controlId="attachment">
                     <Form.Control type="file" name="attachment" />
                     <Form.Text className="text-muted">DocTrkr2 Attachment (PDF)</Form.Text>
-                  </Form.Group>
+                  </Form.Group>*/}
                 </Card.Body>
               </Card>
               <Form.Group className="mb-3" controlId="isConfidential">
@@ -483,9 +563,9 @@ const TrackersScreen = () => {
               </Button>
             </Form>
           </Col>
-        </Modal.Body>
-      </Modal>
-    </Container>
+        </Modal.Body >
+      </Modal >
+    </Container >
   );
 };
 

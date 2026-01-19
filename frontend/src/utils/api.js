@@ -116,7 +116,7 @@ export const getRecipients = async () => {
     throw error.response?.data || error;
   }
 };
-
+//Use with caution - returns all recipients without pagination
 export const getAllRecipients = async () => {
   try {
     const response = await api.get('/recipients/all');

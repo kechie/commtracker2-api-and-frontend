@@ -48,6 +48,7 @@ exports.getRecipients = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+// Use with caution - returns all recipients without pagination
 // @desc    Get all recipients
 // @route   GET /api/v2/recipients/all
 // @access  Private
