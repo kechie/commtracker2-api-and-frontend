@@ -53,8 +53,14 @@ const LoginScreen = () => {
         case 'superadmin':
           navigate('/admin', { replace: true });
           break;
+        case 'recipient':
+          navigate('/recipient-dashboard', { replace: true });
+          break;
+        case 'monitor':
+          navigate('/', { replace: true });
+          break;
         default:
-          navigate('/dashboard', { replace: true });
+          navigate('/', { replace: true });
       }
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');

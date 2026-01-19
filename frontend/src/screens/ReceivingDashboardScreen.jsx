@@ -4,11 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Button } from 'react-bootstrap';
-import { useAuth } from '../context/useAuth';
+//import { useAuth } from '../context/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 const ReceivingDashboardScreen = () => {
-  const { user, role } = useAuth();
+  //const { user, role } = useAuth();
   const navigate = useNavigate();
   const handleBack = () => {
     //navigate(-1);

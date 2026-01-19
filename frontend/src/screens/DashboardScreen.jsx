@@ -25,20 +25,31 @@ const DashboardScreen = () => {
           )}<br />
           {role === 'receiving' && <Link to="/trackers">Manage Document Tracking</Link>}<br />
           {role === 'receiving' && <Link to="/receiving-dashboard">Receiving Dashboard</Link>}<br />
-          {role === 'receiving' &&
+          {/*(role === 'receiving' &&
             <Container className="mt-4">
               Add receiving-specific content here
               Analytics, recent activities, quick actions, etc.
               link to tracker management screen
-            </Container>}
+            </Container>*/}
           {(role === 'admin' || role === 'superadmin') && <Link to="/admin">Admin Panel</Link>}<br />
-          {(role === 'admin' || role === 'superadmin') &&
+          {/*(role === 'admin' || role === 'superadmin') &&
             <Container className="mt-4">
               Add admin -specific content here
               recent activities, quick actions, etc.
               link to tracker management screen
-            </Container>}
-          <p>This will contain analytics for the monitor role in the future.</p>
+            </Container>*/}
+          {role === 'recipient' && <Link to="/recipient-dashboard">Your DocTrkr2s</Link>}<br />
+          {/*role === 'recipient' &&
+            <Container className="mt-4">
+              Add recipient-specific content here
+              brief analytics, recent activities, quick actions, etc.
+            </Container>*/}
+          {/*role === 'monitor' &&
+            <Container className="mt-4">
+              Add monitor-specific content here
+              brief analytics, recent activities, quick actions, etc.
+            </Container>*/}
+          <p>This will contain analytics for the monitor and recipient role in the future.</p>
         </Col>
       </Row>
     </Container>
