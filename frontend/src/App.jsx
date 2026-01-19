@@ -13,6 +13,7 @@ import RecipientDashboardScreen from './screens/RecipientDashboardScreen';
 import UserManagementScreen from './screens/UserManagementScreen'; // Import UserManagementScreen
 import RecipientManagementScreen from './screens/RecipientManagementScreen';
 import { AuthProvider } from './context/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
