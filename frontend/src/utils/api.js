@@ -188,5 +188,25 @@ export const deleteUser = async (id) => {
   }
 };
 
+export const getRecipientTrackers = async (recipientId) => {
+  try {
+    const response = await api.get(`/recipients/${recipientId}/trackers`);
+    return response.data;
+  } catch (error) {
+    console.error('API Get Recipient Trackers Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const updateRecipientTrackerStatus = async (recipientId, trackerId, status) => {
+  try {
+    const response = await api.put(`/recipients/${recipientId}/trackers/${trackerId}`, { status });
+    return response.data;
+  } catch (error) {
+    console.error('API Update Recipient Tracker Status Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
 
 export default api;
