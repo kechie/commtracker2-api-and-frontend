@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
       field: 'is_confidential'
     },
     lceAction: {
-      type: DataTypes.ENUM('pending', 'approved', 'disapproved', 'for your comments', 'for review', 'for dissemination', 'for compliance', 'pls facilitate', 'noted', 'check availability of fund', 'others'),
+      type: DataTypes.ENUM('pending', 'approved', 'disapproved', 'for your comments', 'for review', 'for dissemination', 'for compliance', 'pls facilitate', 'noted', 'check availability of funds', 'others'),
       allowNull: true,
       field: 'lce_action'
     },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, FloatingLabel, Alert, Container, Card, Row, Col, Badge, Pagination } from 'react-bootstrap';
+import { Table, Button, Modal, Form, FloatingLabel, Alert, Container, Card, Row, Col, Badge, Pagination, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipients } from '../utils/api';
 import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ const TrackersScreen = () => {
   const [success, setSuccess] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingTracker, setEditingTracker] = useState(null);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -65,7 +66,7 @@ const TrackersScreen = () => {
           setTotalTrackers(totalCount);
         }
         setError(null);
-        //console.log('Fetched trackers:', trackersList);
+        console.log('Fetched trackers:', trackersList);
         //console.log('Fetched recipients:', recipientsData.recipients || recipientsData);
       } catch (err) {
         setError(err.message || 'Failed to fetch data');
@@ -191,7 +192,7 @@ const TrackersScreen = () => {
       </Row>
       <Row className="align-items-left mb-3">
         <Col>
-          <p>Manage document trackers here.Create, edit, view, and delete trackers as needed.</p>
+          <p>Manage DocTrkr2s. Create, Update them here.</p>
         </Col>
         <Col className="text-end">
           <Button variant="primary" className="mb-3" onClick={() => handleShow()}>
@@ -214,7 +215,7 @@ const TrackersScreen = () => {
                 <th>Title</th>
                 <th>Recipients & Status</th>
                 <th>Date Received</th>
-                <th>LCE Action/Date</th>
+                <th>LCE Action, Date</th>
                 {/* <th>Confidential</th> */}
                 <th>LCE Reply, Date</th>
                 <th>Actions</th>
@@ -225,7 +226,7 @@ const TrackersScreen = () => {
                 // Get recipient info from trackerRecipients
                 const trackerRecipients = tracker.trackerRecipients || [];
                 const recipientNames = trackerRecipients
-                  .map(tr => tr.recipient?.initial)
+                  .map(tr => tr.recipient?.recipientName)
                   .filter(Boolean)
                   .join(', ');
 
@@ -249,7 +250,7 @@ const TrackersScreen = () => {
                       </div>
                       <div className="d-flex gap-1 flex-wrap">
                         {statusCounts.pending > 0 && (
-                          <Badge bg="secondary">Pending: {statusCounts.pending}</Badge>
+                          <Badge bg="secondary">Unseen: {statusCounts.pending}</Badge>
                         )}
                         {statusCounts.seen > 0 && (
                           <Badge bg="info">Seen: {statusCounts.seen}</Badge>
@@ -263,10 +264,13 @@ const TrackersScreen = () => {
                         {statusCounts.completed > 0 && (
                           <Badge bg="success">Done: {statusCounts.completed}</Badge>
                         )}
+                        {statusCounts.rejected > 0 && (
+                          <Badge bg="danger">Rejected: {statusCounts.rejected}</Badge>
+                        )}
                       </div>
                     </td>
                     <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
-                    <td>{tracker.lceAction === 'others' ? tracker.lceKeyedInAction : tracker.lceAction} / {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
+                    <td>{tracker.lceAction === 'others' ? tracker.lceKeyedInAction : tracker.lceAction} , {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
                     {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
                     <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply == 'pending' ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
                     <td>
@@ -274,9 +278,33 @@ const TrackersScreen = () => {
                         <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
                           <FontAwesomeIcon icon={faEdit} />
                         </Button>
-                        <Button variant="light" size="sm" title="View Details">
-                          <FontAwesomeIcon icon={faEye} />
-                        </Button>
+                        <OverlayTrigger
+                          placement="top"
+                          delay={{ show: 250, hide: 400 }}
+                          overlay={
+                            <Tooltip id={`tooltip-view-${tracker.id}`}>
+                              <strong>Recipients & Status:</strong><br />
+                              {tracker.trackerRecipients?.length || 0} assigned<br />
+                              Pending: {statusCounts.pending} | Completed: {statusCounts.completed}<br />
+                              {/* Add more summary info if needed */}
+                              {tracker.trackerRecipients.map(tr => (
+                                <div key={tr.id}>
+                                  {tr.recipient?.initial || '—'} —
+                                  <span className={tr.status === 'pending' ? 'text-warning' : 'text-success'}>
+                                    {tr.status}
+                                  </span>
+                                  {tr.completedAt && ` (done ${new Date(tr.completedAt).toLocaleDateString()})`}
+                                  {tr.remarks && ` — Remarks: ${tr.remarks}`}
+                                </div>
+                              ))}
+                              {/* <small>Hover to see quick overview</small> */}
+                            </Tooltip>
+                          }
+                        >
+                          <Button variant="light" size="sm" title="View Details">
+                            <FontAwesomeIcon icon={faEye} />
+                          </Button>
+                        </OverlayTrigger>
                         {(role === 'admin' || role === 'superadmin') && <Button variant="danger" size="sm" onClick={() => handleDelete(tracker.id)} title="Delete"><FontAwesomeIcon icon={faTrash} /></Button>}
                       </div>
                     </td>
@@ -460,7 +488,7 @@ const TrackersScreen = () => {
                           <option value="for compliance">For Compliance</option>
                           <option value="pls facilitate">Please Facilitate</option>
                           <option value="noted">Noted</option>
-                          <option value="check availability of fund">Check Availability of Fund</option>
+                          <option value="check availability of funds">Check Availability of Funds</option>
                           <option value="others">Others</option>
                         </Form.Select>
                       </FloatingLabel>

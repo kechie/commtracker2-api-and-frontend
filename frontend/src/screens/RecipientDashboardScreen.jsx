@@ -1,6 +1,6 @@
 // frontend/src/screens/RecipientDashboardScreen.jsx
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faSearch, faSpinner, faCheck, faEye, faTimes, faCheckDouble } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faSearch, faSpinner, faCheck, faEye, faTimes, faCheckDouble, faPaperclip } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -118,7 +118,7 @@ const RecipientDashboardScreen = () => {
     fetchData();
   }, [recipientId, currentPage, pageSize, sortBy, sortOrder, searchTerm, dateFrom, dateTo]);
   //TODO refactor duplicated fetchData function and logic and refactor function below to mark documents as seen not completed
-  const handleMarkAsCompleted = async (trackerId) => {
+  const handleViewAttachmentAndMarkAsSeen = async (trackerId) => {
     if (!window.confirm('Mark this document as completed?')) return;
     console.log('Marking tracker as completed:', trackerId);
     setActionLoading(prev => ({ ...prev, [trackerId]: true }));
@@ -327,7 +327,8 @@ const RecipientDashboardScreen = () => {
               <th>Document Title</th>
               <th>From</th>
               <th>Date Received</th>
-              <th>Status</th>
+              <th className="text-center"><FontAwesomeIcon icon={faPaperclip} className="me-2" /></th>
+              <th className="text-center">Status</th>
               <th>LCE Action / Date</th>
               <th>Last Updated</th>
               <th>Actions</th>
@@ -335,7 +336,7 @@ const RecipientDashboardScreen = () => {
           </thead>
           <tbody>{console.log('Rendering recipientTrackers:', recipientTrackers)}
             {recipientTrackers.map((item, index) => (
-              <tr key={item.id}>
+              <tr key={item.id} index={index}>
                 {/* <td>{(currentPage - 1) * pageSize + index + 1}</td> 
                 <td>{item.tracker?.id || '-'},{item.tracker?.trackerId}</td>*/}
                 <td>{item.tracker?.serialNumber || '-'}</td>
@@ -347,39 +348,35 @@ const RecipientDashboardScreen = () => {
                     : '—'}
                 </td>
                 <td>
-                  {item.status === 'pending' ? (
-                    <Button
-                      size="sm"
-                      variant="success"
-                      onClick={() => handleMarkAsCompleted(item.tracker.id)}
-                    >
-                      Mark Completed
-                    </Button>
-                  ) : (
-                    <Badge
-                      bg={
-                        item.status === 'approved' ? 'success' :
-                          item.status === 'noted' ? 'info' :
-                            item.status === 'in-progress' ? 'primary' :
-                              item.status === 'rejected' ? 'danger' :
-                                item.status === 'forwarded' ? 'secondary' :
-                                  item.status === 'completed' ? 'dark' :
-                                    'secondary'
-                      }
-                      className="text-uppercase"
-                    >
-                      {item.status || 'unknown'}
-                    </Badge>
-                  )}
+                  <Button
+                    size="sm"
+                    variant="info"
+                    onClick={() => handleMarkAsCompleted(item.tracker.id)}
+                  ><FontAwesomeIcon icon={faPaperclip} className="me-2" /></Button>
 
+
+                </td>
+                <td><Badge
+                  bg={
+                    item.status === 'approved' ? 'success' :
+                      item.status === 'noted' ? 'info' :
+                        item.status === 'in-progress' ? 'primary' :
+                          item.status === 'rejected' ? 'danger' :
+                            item.status === 'forwarded' ? 'secondary' :
+                              item.status === 'completed' ? 'success' :
+                                'secondary'
+                  }
+                  className="text-uppercase"
+                >
+                  {item.status || 'unknown'}
+                </Badge>
                   {item.status === 'completed' && item.completedAt && (
                     <div className="mt-1">
                       <small>
                         {new Date(item.completedAt).toLocaleDateString()}
                       </small>
                     </div>
-                  )}
-                </td>
+                  )}  </td>
                 <td>
                   {item.tracker?.dateReceived
                     ? new Date(item.tracker.dateReceived).toLocaleDateString()
