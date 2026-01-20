@@ -1,3 +1,4 @@
+//utils/api.js
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -207,9 +208,21 @@ export const getRecipientTrackers = async (recipientId) => {
   }
 };
 
-export const updateRecipientTrackerStatus = async (recipientId, trackerId, status) => {
+export const updateRecipientTrackerStatus = async (recipientId, trackerId, status, extraPayload = {}) => {
+  console.log('Updating status for recipientId:', recipientId);
+  console.log('trackerId:', trackerId);
+  console.log('status:', status);
+  console.log('extra payload:', extraPayload);
+  const body = {
+    status,
+    ...extraPayload
+  };
+  const endpoint = `/recipients/${recipientId}/trackers/${trackerId}`;
+  console.log('Sending PUT to:', endpoint);
+  console.log('Body:', body);
+
   try {
-    const response = await api.put(`/recipients/${recipientId}/trackers/${trackerId}`, { status });
+    const response = await api.put(`/recipients/${recipientId}/trackers/${trackerId}`, { status, ...extraPayload });
     return response.data;
   } catch (error) {
     console.error('API Update Recipient Tracker Status Error:', error.response?.data || error.message);
