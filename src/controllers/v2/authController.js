@@ -37,7 +37,18 @@ exports.login = async (req, res) => {
       { expiresIn: JWT_EXPIRATION }
     );
 
-    res.json({ message: 'v2 Login successful', token, userId: user.id });
+    res.json({
+      message: 'v2 Login successful',
+      token,
+      user: {
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+        fullname: user.fullname,
+        email: user.email,
+        recipientId: user.recipientId  // Include recipientId in response
+      }
+    });
   } catch (error) {
     console.error('v2 Login error');
     res.status(500).json({ error: 'Internal server error' });
@@ -121,7 +132,7 @@ exports.register = async (req, res) => {
       expiresIn: JWT_EXPIRATION
     });
 
-    res.status(201).json({ message: 'v2 Registration successful', token, userId: user.id });
+    res.status(201).json({ message: 'v2 Registration successful', token, user: { userId: user.id, username: user.username, role: user.role, fullname: user.fullname, email: user.email, recipientId: user.recipientId } });
   } catch (error) {
     console.error('v2 Register error:', error);
     if (error.name === 'SequelizeUniqueConstraintError') {

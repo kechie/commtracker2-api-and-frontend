@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { login as apiLogin } from '../utils/api'; // Import the login function from api.js
 import { AuthContext } from './useAuth';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
+  //const [recipientId, setRecipientId] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +38,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await apiLogin(username, password);
       localStorage.setItem('userInfo', JSON.stringify(response));
-      setUser(response);
+      setUser(response.user);
       setRole(response.role || (response.token ? JSON.parse(atob(response.token.split('.')[1])).role : null));
       setIsAuthenticated(true);
       return response;
