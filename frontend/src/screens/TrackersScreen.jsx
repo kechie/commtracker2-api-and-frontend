@@ -28,7 +28,7 @@ const TrackersScreen = () => {
     fromName: '',
     documentTitle: '',
     dateReceived: '',
-    lceAction: '',
+    lceAction: null,
     lceKeyedInAction: '',
     lceActionDate: '',
     lceRemarks: '',

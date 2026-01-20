@@ -7,7 +7,8 @@ const {
   upsertTrackerRecipient,
   updateTrackerRecipientStatus,
   bulkUpdateTrackerRecipients,
-  deleteTrackerRecipient
+  deleteTrackerRecipient,
+  getRecipientTrackers
 } = require('../../controllers/v2/trackerRecipientController');
 const { verifyToken, requireRole } = require('../../middleware/authMiddleware');
 
@@ -16,7 +17,7 @@ router.use(verifyToken, requireRole(['receiving', 'admin', 'superadmin']));
 
 // Get all tracker-recipients for a specific tracker
 router.get('/trackers/:trackerId/recipients', getTrackerRecipients);
-
+router.get('/trackers/:trackerId/trackers', getRecipientTrackers);
 // Bulk update tracker-recipients for a tracker
 router.post('/trackers/:trackerId/recipients/bulk-update', bulkUpdateTrackerRecipients);
 

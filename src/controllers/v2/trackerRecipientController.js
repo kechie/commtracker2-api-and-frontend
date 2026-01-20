@@ -2,6 +2,149 @@
 const { TrackerRecipient, Tracker, Recipient, sequelize } = require('../../db');
 const { Op } = require('sequelize');
 
+// ───────────────────────────────────────────────
+//  NEW: List all trackers assigned to a specific recipient
+//  GET /api/v2/recipient-trackers
+//  Query params supported:
+//    ?status=pending,approved,completed,...
+//    ?search=keyword (searches documentTitle + fromName + remarks)
+//    ?sort=createdAt,dateReceived,updatedAt,status
+//    ?order=ASC,DESC
+//    ?page=1
+//    ?limit=10
+// ───────────────────────────────────────────────
+// src/controllers/v2/trackerRecipientController.js
+// ... (other imports)
+
+exports.getRecipientTrackers = async (req, res) => {
+  try {
+    const { user } = req; // assuming middleware attaches user
+    const recipientId = user?.recipientId;
+
+    if (!recipientId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Recipient ID not found in user context',
+      });
+    }
+
+    // Query parameters
+    const {
+      status,
+      search,
+      sort = 'createdAt',
+      order = 'DESC',
+      page = 1,
+      limit = 10,
+      dateFrom,
+      dateTo,
+    } = req.query;
+
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const offset = (pageNum - 1) * limitNum;
+
+    // WHERE conditions
+    const where = { recipientId };
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (search) {
+      const searchTerm = `%${search.trim()}%`;
+      where[Op.or] = [
+        { '$tracker.documentTitle$': { [Op.iLike]: searchTerm } },
+        { '$tracker.fromName$': { [Op.iLike]: searchTerm } },
+        { remarks: { [Op.iLike]: searchTerm } },
+      ];
+    }
+
+    // Date range filter on Tracker.dateReceived
+    if (dateFrom || dateTo) {
+      where['$tracker.dateReceived$'] = {};
+      if (dateFrom) {
+        where['$tracker.dateReceived$'][Op.gte] = new Date(dateFrom);
+      }
+      if (dateTo) {
+        where['$tracker.dateReceived$'][Op.lte] = new Date(`${dateTo}T23:59:59.999Z`);
+      }
+    }
+
+    // Sorting
+    const allowedSortFields = [
+      'createdAt', 'updatedAt', 'status', 'seenAt', 'readAt', 'acknowledgedAt', 'completedAt', // TrackerRecipient fields
+      'dateReceived', // Tracker fields
+    ];
+
+    const sortField = allowedSortFields.includes(sort) ? sort : 'createdAt';
+    const sortDirection = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    let orderClause;
+    if (sortField === 'dateReceived') {
+      orderClause = [[{ model: Tracker, as: 'tracker' }, sortField, sortDirection]];
+    } else {
+      orderClause = [[sortField, sortDirection]];
+    }
+
+    // Query
+    const { count, rows } = await TrackerRecipient.findAndCountAll({
+      where,
+      include: [
+        {
+          model: Tracker,
+          as: 'tracker',
+          attributes: [
+            'id',
+            'serialNumber',
+            'documentTitle',
+            'fromName',
+            'dateReceived',
+          ],
+          required: true,
+        },
+      ],
+      attributes: [
+        'id',
+        'status',
+        'remarks',
+        'action',
+        'seenAt',
+        'readAt',
+        'acknowledgedAt',
+        'completedAt',
+        'createdAt',
+        'updatedAt',
+      ],
+      order: orderClause,
+      limit: limitNum,
+      offset,
+    });
+
+    const totalPages = Math.ceil(count / limitNum);
+
+    res.json({
+      success: true,
+      data: rows,
+      pagination: {
+        total: count,
+        page: pageNum,
+        limit: limitNum,
+        totalPages,
+        hasNext: pageNum < totalPages,
+        hasPrev: pageNum > 1,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching recipient trackers:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch trackers',
+      error: error.message,
+    });
+  }
+};
+
 // @desc    Get all tracker-recipient actions for a specific tracker
 // @route   GET /api/v2/trackers/:trackerId/recipients
 // @access  Private
