@@ -117,8 +117,17 @@ const RecipientDashboardScreen = () => {
 
     fetchData();
   }, [recipientId, currentPage, pageSize, sortBy, sortOrder, searchTerm, dateFrom, dateTo]);
-  //TODO refactor duplicated fetchData function and logic and refactor function below to mark documents as seen not completed
-  const handleViewAttachmentAndMarkAsSeen = async (trackerId) => {
+
+  const handleViewDetails = (trackerId) => {
+    //navigate(`/recipient/tracker/${trackerId}`);
+    console.log('handleViewDetails TODO', trackerId);
+  }
+  const handleViewAttachmentAndMarkAsSeen = (trackerId) => {
+    //navigate(`/recipient/tracker/${trackerId}/attachment`);
+    console.log('handleViewAttachmentAndMarkAsSeen TODO', trackerId);
+  }
+
+  const handleMarkAsCompleted = async (trackerId) => {
     if (!window.confirm('Mark this document as completed?')) return;
     console.log('Marking tracker as completed:', trackerId);
     setActionLoading(prev => ({ ...prev, [trackerId]: true }));
@@ -232,7 +241,7 @@ const RecipientDashboardScreen = () => {
       {/* Filters Row */}
       <Row className="mb-4 g-3">
         <Col md={3}>
-          <Form.Label className="mb-1 small">Search</Form.Label>
+          <Form.Label className="mb-1 small" name="search">Search</Form.Label>
           <InputGroup>
             <InputGroup.Text>
               <FontAwesomeIcon icon={faSearch} size="sm" />
@@ -351,7 +360,7 @@ const RecipientDashboardScreen = () => {
                   <Button
                     size="sm"
                     variant="info"
-                    onClick={() => handleMarkAsCompleted(item.tracker.id)}
+                    onClick={() => handleViewAttachmentAndMarkAsSeen(item.tracker.id)}
                   ><FontAwesomeIcon icon={faPaperclip} className="me-2" /></Button>
 
 
