@@ -230,5 +230,26 @@ export const updateRecipientTrackerStatus = async (recipientId, trackerId, statu
   }
 };
 
+export const downloadAttachment = async (recipientId, trackerId) => {
+  try {
+    const response = await api.get(`/recipients/${recipientId}/trackers/${trackerId}/attachment`, {
+      responseType: 'blob', // Important for file downloads
+    });
+    return response.data;
+  } catch (error) {
+    console.error('API Download Attachment Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const getTrackerDetails = async (recipientId, trackerId) => {
+  try {
+    const response = await api.get(`/recipients/${recipientId}/trackers/${trackerId}`);
+    return response.data;
+  } catch (error) {
+    console.error('API Get Tracker Details Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
 
 export default api;

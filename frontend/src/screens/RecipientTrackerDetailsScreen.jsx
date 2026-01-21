@@ -1,0 +1,303 @@
+import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Badge,
+  Card,
+  Form,
+  Spinner,
+  Alert
+} from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faPaperclip, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../context/useAuth';
+import { getTrackerDetails } from '../utils/api';
+
+const RecipientTrackerDetailsScreen = () => {
+  const { recipientId, trackerId } = useParams();
+  console.log('Recipient ID from params:', recipientId);
+  console.log('Tracker ID from params:', trackerId);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  //const recipientId = user?.recipientId;
+
+  const [tracker, setTracker] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [remarks, setRemarks] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchTrackerDetails = async (recipientId, trackerId) => {
+      console.log('Recipient ID from params:', recipientId);
+      console.log('Tracker ID from params:', trackerId);
+      if (!recipientId) {
+        setError('No recipient ID found. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await getTrackerDetails(recipientId, trackerId);
+        console.log('Tracker details response:', response);
+
+        const trackerData = response.data;
+
+        if (!trackerData) {
+          setError('Tracker not found.');
+          setLoading(false);
+          return;
+        }
+
+        setTracker(trackerData);
+      } catch (err) {
+        console.error('Error fetching tracker details:', err);
+        setError('Failed to load tracker details. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrackerDetails(recipientId, trackerId);
+  }, [recipientId, trackerId]);
+
+  const handleDownloadAttachment = () => {
+    if (tracker?.tracker?.attachmentUrl) {
+      window.open(tracker.tracker.attachmentUrl, '_blank');
+    }
+  };
+
+  const handleBack = () => {
+    navigate('/recipient-dashboard');
+  };
+
+  if (loading) {
+    return (
+      <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+        <div className="text-center">
+          <Spinner animation="border" role="status" />
+          <p className="mt-2">Loading tracker details...</p>
+        </div>
+      </Container>
+    );
+  }
+
+  if (!tracker) {
+    return (
+      <Container>
+        <Row className="mb-3">
+          <Col>
+            <Button variant="light" onClick={handleBack} className="d-flex align-items-center gap-2">
+              <FontAwesomeIcon icon={faArrowLeft} />
+              Back
+            </Button>
+          </Col>
+        </Row>
+        <Alert variant="danger">
+          Tracker not found. Please check the ID and try again.
+        </Alert>
+      </Container>
+    );
+  }
+
+  const trackerData = tracker.tracker || {};
+
+  return (
+    <Container>
+      <Row className="mb-4">
+        <Col>
+          <Button variant="light" onClick={handleBack} className="d-flex align-items-center gap-2">
+            <FontAwesomeIcon icon={faArrowLeft} />
+            Back to Dashboard
+          </Button>
+        </Col>
+      </Row>
+
+      {error && <Alert variant="danger" onClose={() => setError(null)} dismissible>{error}</Alert>}
+      {success && <Alert variant="success" onClose={() => setSuccess(null)} dismissible>{success}</Alert>}
+
+      <Card className="mb-4">
+        <Card.Header className="bg-light">
+          <h2 className="mb-0">{trackerData.documentTitle || 'Document Details'}</h2>
+        </Card.Header>
+        <Card.Body>
+          <Row className="mb-3">
+            <Col md={6}>
+              <h5>Serial/Reference Number</h5>
+              <p className="text-muted">{trackerData.serialNumber || '—'}</p>
+            </Col>
+            <Col md={6}>
+              <h5>Status</h5>
+              <p>
+                <Badge
+                  bg={
+                    tracker.status === 'approved' ? 'success' :
+                      tracker.status === 'noted' ? 'info' :
+                        tracker.status === 'in-progress' ? 'primary' :
+                          tracker.status === 'rejected' ? 'danger' :
+                            tracker.status === 'forwarded' ? 'secondary' :
+                              tracker.status === 'completed' ? 'success' :
+                                'secondary'
+                  }
+                  className="text-uppercase fs-6"
+                >
+                  {tracker.status || 'unknown'}
+                </Badge>
+              </p>
+            </Col>
+          </Row>
+
+          <Row className="mb-3">
+            <Col md={6}>
+              <h5>From</h5>
+              <p className="text-muted">{trackerData.fromName || '—'}</p>
+            </Col>
+            <Col md={6}>
+              <h5>Date Received</h5>
+              <p className="text-muted">
+                {trackerData.dateReceived
+                  ? new Date(trackerData.dateReceived).toLocaleDateString()
+                  : '—'}
+              </p>
+            </Col>
+          </Row>
+
+          <Row className="mb-3">
+            <Col md={6}>
+              <h5>Created At</h5>
+              <p className="text-muted">
+                {tracker.createdAt
+                  ? new Date(tracker.createdAt).toLocaleDateString()
+                  : '—'}
+              </p>
+            </Col>
+            <Col md={6}>
+              <h5>Last Updated</h5>
+              <p className="text-muted">
+                {tracker.updatedAt
+                  ? new Date(tracker.updatedAt).toLocaleDateString()
+                  : '—'}
+              </p>
+            </Col>
+          </Row>
+
+          {tracker.completedAt && (
+            <Row className="mb-3">
+              <Col md={6}>
+                <h5>Completed At</h5>
+                <p className="text-muted">
+                  {new Date(tracker.completedAt).toLocaleDateString()}
+                </p>
+              </Col>
+            </Row>
+          )}
+
+          <Row className="mb-3">
+            <Col>
+              <h5>Description / Remarks</h5>
+              <p className="text-muted">{trackerData.remarks || '—'}</p>
+            </Col>
+          </Row>
+
+          {trackerData.attachmentUrl && (
+            <Row className="mb-3">
+              <Col>
+                <h5>Attachment</h5>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  onClick={handleDownloadAttachment}
+                  className="d-flex align-items-center gap-2"
+                >
+                  <FontAwesomeIcon icon={faPaperclip} />
+                  Download Attachment
+                </Button>
+              </Col>
+            </Row>
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* Action Section */}
+      <Card className="mb-4">
+        <Card.Header className="bg-light">
+          <h5 className="mb-0">Actions</h5>
+        </Card.Header>
+        <Card.Body>
+          <Form.Group className="mb-3">
+            <Form.Label>Add Remarks (Optional)</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              placeholder="Add any remarks or notes..."
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              disabled={submitting}
+            />
+          </Form.Group>
+
+          <div className="d-flex gap-2 flex-wrap">
+            <Button
+              variant="success"
+              onClick={() => handleStatusUpdate('approved')}
+              disabled={tracker.status === 'approved' || submitting}
+            >
+              {submitting ? <Spinner animation="border" size="sm" className="me-2" /> : null}
+              Approve
+            </Button>
+            <Button
+              variant="info"
+              onClick={() => handleStatusUpdate('noted')}
+              disabled={tracker.status === 'noted' || submitting}
+            >
+              {submitting ? <Spinner animation="border" size="sm" className="me-2" /> : null}
+              Note
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => handleStatusUpdate('in-progress')}
+              disabled={tracker.status === 'in-progress' || submitting}
+            >
+              {submitting ? <Spinner animation="border" size="sm" className="me-2" /> : null}
+              Set In Progress
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => handleStatusUpdate('rejected')}
+              disabled={tracker.status === 'rejected' || submitting}
+            >
+              {submitting ? <Spinner animation="border" size="sm" className="me-2" /> : null}
+              Reject
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => handleStatusUpdate('forwarded')}
+              disabled={tracker.status === 'forwarded' || submitting}
+            >
+              {submitting ? <Spinner animation="border" size="sm" className="me-2" /> : null}
+              Forward
+            </Button>
+            {tracker.status === 'pending' && (
+              <Button
+                variant="outline-success"
+                onClick={() => handleStatusUpdate('completed')}
+                disabled={submitting}
+              >
+                {submitting ? <Spinner animation="border" size="sm" className="me-2" /> : null}
+                Mark Completed
+              </Button>
+            )}
+          </div>
+        </Card.Body>
+      </Card>
+    </Container>
+  );
+};
+
+export default RecipientTrackerDetailsScreen;

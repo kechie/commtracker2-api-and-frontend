@@ -10,6 +10,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import TrackersScreen from './screens/TrackersScreen';
 import ReceivingDashboardScreen from './screens/ReceivingDashboardScreen'; // Import ReceivingDashboardScreen
 import RecipientDashboardScreen from './screens/RecipientDashboardScreen';
+import RecipientTrackerDetailsScreen from './screens/RecipientTrackerDetailsScreen';
 import UserManagementScreen from './screens/UserManagementScreen'; // Import UserManagementScreen
 import RecipientManagementScreen from './screens/RecipientManagementScreen';
 import { AuthProvider } from './context/AuthContext';
@@ -86,6 +87,11 @@ const App = () => {
                 <ProtectedRoute allowedRoles={['recipient', 'admin', 'superadmin']}>
                   <RecipientDashboardScreen />
                 </ProtectedRoute>
+              }
+            />
+            <Route path="/recipients/:recipientId/trackers/:trackerId"
+              element={
+                <RecipientTrackerDetailsScreen />
               }
             />
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
