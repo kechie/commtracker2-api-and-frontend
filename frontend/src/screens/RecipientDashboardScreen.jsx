@@ -56,7 +56,8 @@ const RecipientDashboardScreen = () => {
   const [sortOrder, setSortOrder] = useState('DESC');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-
+// TODO: send {	"status":"seen" } payload to mark as seen when downloading/viewing attachment
+// TODO: send { "status":"read" } payload when opening details page
   useEffect(() => {
     const fetchTrackers = async () => {
       if (!recipientId) {
@@ -143,7 +144,10 @@ const RecipientDashboardScreen = () => {
     console.log('View details →', trackerId);
     console.log('Recipient ID:', recipientId);
     //http://localhost:3007/v2/recipients/721587c5-7e32-4d83-a71c-2f2105039ff9/trackers/[object%20Object]
-    navigate(`/recipient/${recipientId}trackers/${trackerId}`);
+    navigate(`/recipients/${recipientId}/trackers/${trackerId}`);
+    updateRecipientTrackerStatus(recipientId, trackerId, 'read').catch(err => {
+      console.error('Failed to mark as read:', err);
+    });
   };
 
   const handleViewAttachment = (trackerId) => {
@@ -338,7 +342,7 @@ const RecipientDashboardScreen = () => {
                         return (
                           <Dropdown.Item
                             key={st}
-                            onClick={() => openConfirmModal(item.id, st)}
+                            onClick={() => openConfirmModal(item.tracker.id, st)}
                             disabled={disabled}
                           >
                             <FontAwesomeIcon icon={icon} className={`me-2 text-${color}`} />
@@ -363,7 +367,7 @@ const RecipientDashboardScreen = () => {
                       )}
 
                       <Dropdown.Divider />
-                      <Dropdown.Item onClick={() => handleViewDetails(item.id)} className="text-info">
+                      <Dropdown.Item onClick={() => handleViewDetails(recipientId,item.tracker.id)} className="text-info">
                         View Details / Remarks
                       </Dropdown.Item>
                     </DropdownButton>

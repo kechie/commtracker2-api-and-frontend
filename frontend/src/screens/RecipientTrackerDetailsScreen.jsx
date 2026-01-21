@@ -67,6 +67,35 @@ const RecipientTrackerDetailsScreen = () => {
     fetchTrackerDetails(recipientId, trackerId);
   }, [recipientId, trackerId]);
 
+  const handleStatusUpdate = async (newStatus) => {
+    if (!tracker) return;
+
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      await updateRecipientTrackerStatus(tracker.id, {
+        status: newStatus,
+        remarks: remarks || undefined
+      });
+
+      setSuccess(`Status updated to ${newStatus} successfully!`);
+      setTracker(prev => ({
+        ...prev,
+        status: newStatus
+      }));
+      setRemarks('');
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Error updating status:', err);
+      setError('Failed to update status. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleDownloadAttachment = () => {
     if (tracker?.tracker?.attachmentUrl) {
       window.open(tracker.tracker.attachmentUrl, '_blank');

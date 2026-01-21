@@ -90,9 +90,9 @@ const App = () => {
               }
             />
             <Route path="/recipients/:recipientId/trackers/:trackerId"
-              element={
+              element={<ProtectedRoute allowedRoles={['recipient', 'admin', 'superadmin', 'monitor', 'receiving']}>
                 <RecipientTrackerDetailsScreen />
-              }
+              </ProtectedRoute>}
             />
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
           </Routes>

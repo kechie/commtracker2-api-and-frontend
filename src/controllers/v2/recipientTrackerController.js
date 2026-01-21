@@ -198,3 +198,36 @@ exports.updateReceivedTracker = async (req, res) => {
     });
   }
 };
+exports.downloadAttachment = async (req, res) => {
+  try {
+    const { recipientId, trackerId } = req.params;
+
+    const trackerRecipient = await TrackerRecipient.findOne({
+      where: { recipientId, trackerId },
+      include: [
+        {
+          model: Tracker,
+          as: 'tracker',
+        },
+      ],
+    });
+
+    if (!trackerRecipient || !trackerRecipient.tracker.attachmentPath) {
+      return res.status(404).json({
+        success: false,
+        message: 'Attachment not found',
+      });
+    }
+
+    const filePath = trackerRecipient.tracker.attachmentPath;
+    res.download(filePath);
+  } catch (error) {
+    console.error('Error downloading attachment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error downloading attachment',
+      error: error.message,
+    });
+  }
+};
+
