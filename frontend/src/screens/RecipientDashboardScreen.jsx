@@ -56,8 +56,8 @@ const RecipientDashboardScreen = () => {
   const [sortOrder, setSortOrder] = useState('DESC');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-// TODO: send {	"status":"seen" } payload to mark as seen when downloading/viewing attachment
-// TODO: send { "status":"read" } payload when opening details page
+  // TODO: send {	"status":"seen" } payload to mark as seen when downloading/viewing attachment
+  // TODO: send { "status":"read" } payload when opening details page
   useEffect(() => {
     const fetchTrackers = async () => {
       if (!recipientId) {
@@ -143,16 +143,16 @@ const RecipientDashboardScreen = () => {
   const handleViewDetails = (recipientId, trackerId) => {
     console.log('View details →', trackerId);
     console.log('Recipient ID:', recipientId);
-    //http://localhost:3007/v2/recipients/721587c5-7e32-4d83-a71c-2f2105039ff9/trackers/[object%20Object]
+    //http://localhost:3007/v2/recipients/721587c5-7e32-4d83-a71c-2f2105039ff9/trackers/{trackerId}
+    updateRecipientTrackerStatus(recipientId, trackerId, 'read').catch(err => { console.warn('Failed to mark as read:', err); });
     navigate(`/recipients/${recipientId}/trackers/${trackerId}`);
-    updateRecipientTrackerStatus(recipientId, trackerId, 'read').catch(err => {
-      console.error('Failed to mark as read:', err);
-    });
   };
 
-  const handleViewAttachment = (trackerId) => {
+  const handleViewAttachment = (recipientId, trackerId) => {
     console.log('View attachment →', trackerId);
-    // navigate(`/recipient/tracker/${trackerId}/attachment`);
+    updateRecipientTrackerStatus(recipientId, trackerId, 'seen').catch(err => { console.warn('Failed to mark as read:', err); });
+    //navigate(`/recipients/${recipientId}/trackers/${trackerId}`);
+    alert('Attachment preview not implemented yet.');
   };
 
   const handleBack = () => navigate('/');
@@ -286,7 +286,7 @@ const RecipientDashboardScreen = () => {
               const isLoading = actionLoading[item.id];
               return (
                 <tr key={item.id} index={index}>
-                  <td>{item.tracker?.id || '—'}</td>
+                  <td>{item.tracker?.serialNumber || '—'}</td>
                   <td>{item.tracker?.documentTitle || '—'}</td>
                   <td>{item.tracker?.fromName || '—'}</td>
                   <td>
@@ -336,7 +336,7 @@ const RecipientDashboardScreen = () => {
                       variant="outline-primary"
                       disabled={isLoading}
                     >
-                      {['approved', 'noted', 'in-progress', 'rejected', 'forwarded'].map(st => {
+                      {['approved', 'noted', 'in-progress', 'rejected'].map(st => {
                         const { icon, color, label } = getActionConfig(st);
                         const disabled = item.status === st || isLoading;
                         return (
@@ -367,7 +367,7 @@ const RecipientDashboardScreen = () => {
                       )}
 
                       <Dropdown.Divider />
-                      <Dropdown.Item onClick={() => handleViewDetails(recipientId,item.tracker.id)} className="text-info">
+                      <Dropdown.Item onClick={() => handleViewDetails(recipientId, item.tracker.id)} className="text-info">
                         View Details / Remarks
                       </Dropdown.Item>
                     </DropdownButton>
