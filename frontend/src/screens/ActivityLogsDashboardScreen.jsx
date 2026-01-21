@@ -4,8 +4,8 @@ import { useAuth } from '../context/useAuth';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft} from '@fortawesome/free-solid-svg-icons';
-import { Table, Button, Modal, Form, Row,Col } from 'react-bootstrap';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { Table, Button, Modal, Form, Row, Col } from 'react-bootstrap';
 import { getActivityLogs } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 const ActivityLogsDashboardScreen = () => {
@@ -49,9 +49,9 @@ const ActivityLogsDashboardScreen = () => {
           <tr>
             <th>ID</th>
             <th>Entity Type</th>
+            <th>User, Action</th>
             <th>Entity ID</th>
-            <th>Action</th>
-            <th>User</th>
+            <th>Description</th>
             <th>Timestamp</th>
           </tr>
         </thead>
@@ -60,9 +60,9 @@ const ActivityLogsDashboardScreen = () => {
             <tr key={log.id}>
               <td>{log.id}</td>
               <td>{log.entityType}</td>
+              <td>{log.user ? log.user.username : 'N/A'}, {log.action}</td>
               <td>{log.entityId}</td>
-              <td>{log.action}</td>
-              <td>{log.user ? log.user.username : 'N/A'}</td>
+              <td>{log.description}</td>
               <td>{new Date(log.createdAt).toLocaleString()}</td>
             </tr>
           ))}
