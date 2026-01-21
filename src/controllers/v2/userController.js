@@ -1,5 +1,6 @@
 // file: src/controllers/v2/userController.js
 const { User } = require('../../db');
+const { logUserActivity } = require('../../utils/activityLogger');
 
 // Get the authenticated user's profile
 exports.getProfile = async (req, res) => {
@@ -29,6 +30,7 @@ exports.updateProfile = async (req, res) => {
     }
 
     const { fullname, email, password } = req.body;
+    const oldValues = { fullname: user.fullname, email: user.email };
 
     user.fullname = fullname || user.fullname;
     user.email = email || user.email;
@@ -40,6 +42,18 @@ exports.updateProfile = async (req, res) => {
 
     await user.save();
 
+    // Log profile update
+    await logUserActivity({
+      userId: req.user.id,
+      action: 'UPDATE',
+      entityId: user.id,
+      description: `Updated user profile: ${user.username}`,
+      details: { oldValues, newValues: { fullname: user.fullname, email: user.email, passwordChanged: !!password } },
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
+
     res.json({
       id: user.id,
       username: user.username,
@@ -49,6 +63,14 @@ exports.updateProfile = async (req, res) => {
     });
   } catch (error) {
     console.error('v2 Update profile error:', error);
+    await logUserActivity({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      description: `Failed to update user profile: ${error.message}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'failure'
+    });
     res.status(500).json({ error: 'Internal server error' });
   }
 };

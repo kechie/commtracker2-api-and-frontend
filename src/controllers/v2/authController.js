@@ -2,6 +2,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../../db');  // This now returns the full db object with all models
+const { logAuthActivity } = require('../../utils/activityLogger');
 
 const { User, Recipient } = db;  // Destructure models used here
 
@@ -18,16 +19,40 @@ exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
     if (!username || !password) {
+      await logAuthActivity({
+        userId: null,
+        action: 'LOGIN',
+        description: `Login attempt failed: missing credentials`,
+        ipAddress: req.clientIp,
+        userAgent: req.clientUserAgent,
+        status: 'failure'
+      });
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
     const user = await User.findOne({ where: { username } });
     if (!user) {
+      await logAuthActivity({
+        userId: null,
+        action: 'LOGIN',
+        description: `Login attempt failed: user not found (${username})`,
+        ipAddress: req.clientIp,
+        userAgent: req.clientUserAgent,
+        status: 'failure'
+      });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     // Don't log plaintext or hashed passwords
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      await logAuthActivity({
+        userId: user.id,
+        action: 'LOGIN',
+        description: `Login attempt failed: invalid password for user ${username}`,
+        ipAddress: req.clientIp,
+        userAgent: req.clientUserAgent,
+        status: 'failure'
+      });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -36,6 +61,17 @@ exports.login = async (req, res) => {
       JWT_SECRET,
       { expiresIn: JWT_EXPIRATION }
     );
+
+    // Log successful login
+    await logAuthActivity({
+      userId: user.id,
+      action: 'LOGIN',
+      description: `User logged in: ${username}`,
+      details: { role: user.role },
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
 
     res.json({
       message: 'v2 Login successful',
@@ -51,51 +87,56 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error('v2 Login error');
+    await logAuthActivity({
+      userId: null,
+      action: 'LOGIN',
+      description: `Login error: ${error.message}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'failure'
+    });
     res.status(500).json({ error: 'Internal server error' });
   }
-  //  try {
-
-  //   const { username, password } = req.body;
-  //   if (!username || !password) {
-  //     return res.status(400).json({ error: 'Username and password are required' });
-  //   }
-
-  //   const user = await User.findOne({ where: { username } });
-  //   if (!user) {
-  //     return res.status(401).json({ error: 'Invalid credentials' });
-  //   }
-
-  //   const isPasswordValid = await bcrypt.compare(password, user.password);
-  //   if (!isPasswordValid) {
-  //     return res.status(401).json({ error: 'Invalid credentials' });
-  //   }
-
-  //   // Generate JWT for v2
-  //   const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
-  //     expiresIn: JWT_EXPIRATION
-  //   });
-
-  //   res.json({ message: 'v2 Login successful', token, userId: user.id });
-  // } catch (error) {
-  //   console.error('v2 Login error:', error);
-  //   res.status(500).json({ error: 'Internal server error' });
-  // }
 };
 
 exports.register = async (req, res) => {
   try {
     const { username, password, email, fullname, userrole, deptId } = req.body;
     if (!username || !password || !email) {
+      await logAuthActivity({
+        userId: null,
+        action: 'REGISTER',
+        description: `Registration attempt failed: missing required fields`,
+        ipAddress: req.clientIp,
+        userAgent: req.clientUserAgent,
+        status: 'failure'
+      });
       return res.status(400).json({ error: 'Username, password, and email are required' });
     }
 
     const existingUser = await User.findOne({ where: { username } });
     if (existingUser) {
+      await logAuthActivity({
+        userId: null,
+        action: 'REGISTER',
+        description: `Registration attempt failed: username already exists (${username})`,
+        ipAddress: req.clientIp,
+        userAgent: req.clientUserAgent,
+        status: 'failure'
+      });
       return res.status(409).json({ error: 'Username already exists' });
     }
 
     const existingEmail = await User.findOne({ where: { email } });
     if (existingEmail) {
+      await logAuthActivity({
+        userId: null,
+        action: 'REGISTER',
+        description: `Registration attempt failed: email already exists (${email})`,
+        ipAddress: req.clientIp,
+        userAgent: req.clientUserAgent,
+        status: 'failure'
+      });
       return res.status(409).json({ error: 'Email already exists' });
     }
     // The User model has beforeCreate hook which hashes the password.
@@ -109,21 +150,6 @@ exports.register = async (req, res) => {
     // map optional role from the request
     if (userrole) createPayload.role = userrole;
 
-    // Handle deptId: API may send a mongo-style id (24 hex) — our Recipient primary key is UUID.
-    // if (deptId) {
-    //   const isUUID = (s) => /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(s);
-    //   if (isUUID(deptId)) {
-    //     createPayload.recipientId = deptId;
-    //   } else {
-    //     // Try to resolve by Recipient.mongo_id
-    //     const recipient = await Recipient.findOne({ where: { mongo_id: deptId } });
-    //     if (!recipient) {
-    //       return res.status(400).json({ error: 'Invalid deptId: no matching recipient found' });
-    //     }
-    //     createPayload.recipientId = recipient.id;
-    //   }
-    // }
-
     const user = await User.create(createPayload);
     if (!JWT_SECRET) {
       console.error('JWT_SECRET is not set. Registration completed but token is not secure.');
@@ -132,9 +158,28 @@ exports.register = async (req, res) => {
       expiresIn: JWT_EXPIRATION
     });
 
+    // Log successful registration
+    await logAuthActivity({
+      userId: user.id,
+      action: 'REGISTER',
+      description: `User registered: ${username}`,
+      details: { email, fullname, role: user.role },
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
+
     res.status(201).json({ message: 'v2 Registration successful', token, user: { userId: user.id, username: user.username, role: user.role, fullname: user.fullname, email: user.email, recipientId: user.recipientId } });
   } catch (error) {
     console.error('v2 Register error:', error);
+    await logAuthActivity({
+      userId: null,
+      action: 'REGISTER',
+      description: `Registration error: ${error.message}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'failure'
+    });
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(409).json({ error: 'Username or email already exists' });
     }

@@ -1,6 +1,7 @@
 // src/controllers/v2/recipientController.js
 const { Recipient } = require('../../db');
 const { Op, where } = require('sequelize');
+const { logRecipientActivity } = require('../../utils/activityLogger');
 
 // @desc    Get recipients with pagination
 // @route   GET /api/v2/recipients
@@ -81,9 +82,32 @@ exports.createRecipient = async (req, res) => {
       contactEmail,
       contactPhone,
     });
+
+    // Log recipient creation
+    await logRecipientActivity({
+      userId: req.user?.id,
+      action: 'CREATE',
+      entityId: recipient.id,
+      description: `Created recipient: ${recipient_name}`,
+      details: { contactPerson, contactEmail, contactPhone },
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
+
     res.status(201).json(recipient);
   } catch (error) {
     console.error('Create recipient error:', error);
+    
+    await logRecipientActivity({
+      userId: req.user?.id,
+      action: 'CREATE',
+      description: `Failed to create recipient: ${error.message}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'failure'
+    });
+
     res.status(500).json({ error: 'Internal server error' });
   }
 };

@@ -2,6 +2,7 @@
 const { Tracker, Recipient, TrackerRecipient, sequelize } = require('../../db'); // Import sequelize for transactions
 const { Op, fn, col, literal } = require('sequelize'); // Import Op for operators
 const { body, validationResult } = require('express-validator'); // ← add this dependency
+const { logTrackerActivity } = require('../../utils/activityLogger');
 
 // Helper function to generate serial number
 const generateSerialNumberx = async (transaction) => {
@@ -131,10 +132,37 @@ exports.createTracker = async (req, res) => {
       ],
     });
 
+    // Log tracker creation
+    await logTrackerActivity({
+      userId: req.user?.id,
+      action: 'CREATE',
+      entityId: tracker.id,
+      description: `Created tracker: ${trackerData.documentTitle || 'Untitled'}`,
+      details: { 
+        serialNumber: finalSerialNumber,
+        recipients: recipientIds,
+        documentTitle: trackerData.documentTitle
+      },
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
+
     res.status(201).json(result);
   } catch (error) {
     await transaction.rollback(); // Rollback on error
     console.error('Create tracker error:', error);
+    
+    // Log failed tracker creation
+    await logTrackerActivity({
+      userId: req.user?.id,
+      action: 'CREATE',
+      description: `Failed to create tracker: ${error.message}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'failure'
+    });
+    
     res.status(500).json({ error: 'Internal server error' });
   }
 };

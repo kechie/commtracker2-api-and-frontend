@@ -1,6 +1,7 @@
 // src/controllers/v2/trackerRecipientController.js
 const { TrackerRecipient, Tracker, Recipient, sequelize } = require('../../db');
 const { Op } = require('sequelize');
+const { logRecipientTrackerActivity } = require('../../utils/activityLogger');
 
 // ───────────────────────────────────────────────
 //  NEW: List all trackers assigned to a specific recipient
@@ -236,6 +237,15 @@ exports.upsertTrackerRecipient = async (req, res) => {
 
     if (!tracker || !recipient) {
       await transaction.rollback();
+      await logRecipientTrackerActivity({
+        userId: req.user?.id,
+        action: 'UPDATE',
+        entityId: `${trackerId}-${recipientId}`,
+        description: `Failed to update tracker-recipient: tracker or recipient not found`,
+        ipAddress: req.clientIp,
+        userAgent: req.clientUserAgent,
+        status: 'failure'
+      });
       return res.status(404).json({
         success: false,
         message: 'Tracker or recipient not found'
@@ -285,6 +295,24 @@ exports.upsertTrackerRecipient = async (req, res) => {
     }
 
     await transaction.commit();
+
+    // Log the activity
+    await logRecipientTrackerActivity({
+      userId: req.user?.id,
+      action: created ? 'CREATE' : 'UPDATE',
+      entityId: `${trackerId}-${recipientId}`,
+      description: `${created ? 'Created' : 'Updated'} tracker-recipient: tracker ${tracker.serialNumber || trackerId}`,
+      details: { 
+        trackerId, 
+        recipientId, 
+        status, 
+        action, 
+        remarks 
+      },
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
 
     const updatedRecord = await TrackerRecipient.findByPk(trackerRecipient.id, {
       include: [
