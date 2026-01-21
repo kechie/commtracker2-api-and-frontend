@@ -57,7 +57,14 @@ const Header = () => {
                       </Nav.Link>
                     </LinkContainer>
                   )}
-
+                  {/*Monitor Link (only for monitor role) */}
+                  {(role === 'monitor' || role === 'admin' || role === 'superadmin') && (
+                    <LinkContainer to="/activity-logs-dashboard">
+                      <Nav.Link>
+                        <FontAwesomeIcon icon={faChartBar} className="me-1" /> Activity Logs
+                      </Nav.Link>
+                    </LinkContainer>
+                  )}
                   {/* User Management Link (only for admin/superadmin) 
                   {(role === 'admin' || role === 'superadmin') && (
                     <LinkContainer to="/users-management">

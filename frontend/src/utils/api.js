@@ -213,10 +213,10 @@ export const updateRecipientTrackerStatus = async (recipientId, trackerId, statu
   //console.log('trackerId:', trackerId);
   //console.log('status:', status);
   //console.log('extra payload:', extraPayload);
-  const body = {
-    status,
-    ...extraPayload
-  };
+  // const body = {
+  //   status,
+  //   ...extraPayload
+  // };
   //const endpoint = `/recipients/${recipientId}/trackers/${trackerId}`;
   //console.log('Sending PUT to:', endpoint);
   //console.log('Body:', body);
@@ -248,6 +248,23 @@ export const getTrackerDetails = async (recipientId, trackerId) => {
     return response.data;
   } catch (error) {
     console.error('API Get Tracker Details Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const getActivityLogs = async (page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'DESC') => {
+  try {
+    const response = await api.get('/activity-logs', {
+      params: {
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
+        sortBy: sortBy || 'createdAt',
+        sortOrder: sortOrder || 'DESC'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('API Get Activity Logs Error:', error.response?.data || error.message);
     throw error.response?.data || error;
   }
 };
