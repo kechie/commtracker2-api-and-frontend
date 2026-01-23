@@ -21,6 +21,18 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       field: 'status'
     },
+    isSeen: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+      field: 'is_seen'
+    },
+    isRead: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+      field: 'is_read'
+    },
     seenAt: {
       type: DataTypes.DATE,
       allowNull: true,
