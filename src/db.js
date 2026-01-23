@@ -8,11 +8,17 @@ require('dotenv').config();
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
   protocol: 'postgres',
+  // PostgreSQL SSL configuration
+  // SSL is disabled for local development and testing environments
+  // disable for production as well to match server settings
   dialectOptions: {
     ssl: process.env.NODE_ENV === 'production' ? {
-      require: true,
+      require: false,
       rejectUnauthorized: false
-    } : false
+    } :
+      {
+        require: false
+      },
   },
   logging: process.env.NODE_ENV === 'development' ? console.log : false
 });

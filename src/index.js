@@ -111,6 +111,12 @@ async function startServer() {
 
 // Only start the server if this file is run directly
 if (require.main === module) {
+  console.log('Starting server...');
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log(`API Port: ${PORT}`);
+  console.log(`Database URL: ${process.env.DATABASE_URL}`);
+  console.log(`Sequelize Sync Force: ${SEQUELIZE_SYNC_FORCE}`);
+  console.log(`Sequelize Sync Alter: ${SEQUELIZE_SYNC_ALTER}`);
   startServer();
 }
 
