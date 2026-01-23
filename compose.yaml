@@ -14,7 +14,7 @@ services:
     build:
       context: .
     volumes:
-      - ./uploads:/var/www/html/dts2/uploads
+      - ./uploads:/usr/src/app/uploads
     environment:
       NODE_ENV: production
     ports:
