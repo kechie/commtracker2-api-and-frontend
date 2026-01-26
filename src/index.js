@@ -66,7 +66,7 @@ app.use('/v2/trackers', addDeprecationHeaders('v2', false), trackerRoutesV2);
 app.use('/v2/recipients', addDeprecationHeaders('v2', false), recipientRoutesV2); // Use recipient routes
 app.use('/v2/tracker-recipients', addDeprecationHeaders('v2', false), trackerRecipientRoutesV2); // Use tracker-recipient routes
 app.use('/v2/activity-logs', addDeprecationHeaders('v2', false), activityLogRoutesV2);
-app.use('/v2', addDeprecationHeaders('v2', false));
+//app.use('/v2', addDeprecationHeaders('v2', false));
 // Activity logging middleware
 app.use(createActivityLoggerMiddleware());
 // Serve uploaded files
