@@ -201,7 +201,7 @@ export const getTrackerRecipients = async (trackerId) => {
 export const getRecipientTrackers = async (recipientId) => {
   try {
     console.log('Fetching trackers for recipientId:', recipientId);
-    const response = await api.get(`/recipients/${recipientId}/trackers`);
+    const response = await api.get(`/recipient-trackers/recipients/${recipientId}/trackers`);
     return response.data;
   } catch (error) {
     console.error('API Get Recipient Trackers Error:', error.response?.data || error.message);

@@ -478,7 +478,7 @@ const TrackersScreen = () => {
                     <Col md={6}>
                       <FloatingLabel controlId='lceAction' label='LCE Action' className='mb-3'>
                         <Form.Select name="lceAction" value={formData.lceAction} onChange={handleChange} placeholder="Enter LCE Action">
-                          <option value="">Select action</option>
+                          <option value="action">Select action</option>
                           <option value="pending">Pending</option>
                           <option value="approved">Approved</option>
                           <option value="disapproved">Disapproved</option>
