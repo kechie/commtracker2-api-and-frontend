@@ -4,7 +4,7 @@ import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipie
 import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEdit, faTrash, faArrowLeft, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft, faEye, faInfoCircle, faFileText } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/useAuth';
 
 const TrackersScreen = () => {
@@ -208,7 +208,7 @@ const TrackersScreen = () => {
           <p>Loading trackers...</p>
         ) : (
           <Table striped bordered hover responsive="lg">
-            <thead>
+            <thead className='align-bottom' variant='light'>
               <tr>
                 <th>Serial Number</th>
                 <th>From</th>
@@ -279,7 +279,7 @@ const TrackersScreen = () => {
                           <FontAwesomeIcon icon={faEdit} />
                         </Button>
                         <OverlayTrigger
-                          placement="top"
+                          placement="left"
                           delay={{ show: 250, hide: 400 }}
                           overlay={
                             <Tooltip id={`tooltip-view-${tracker.id}`}>
@@ -302,7 +302,7 @@ const TrackersScreen = () => {
                           }
                         >
                           <Button variant="light" size="sm" title="View Details">
-                            <FontAwesomeIcon icon={faEye} />
+                            <FontAwesomeIcon icon={faFileText} />
                           </Button>
                         </OverlayTrigger>
                         {(role === 'admin' || role === 'superadmin') && <Button variant="danger" size="sm" onClick={() => handleDelete(tracker.id)} title="Delete"><FontAwesomeIcon icon={faTrash} /></Button>}

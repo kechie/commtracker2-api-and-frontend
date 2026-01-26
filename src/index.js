@@ -55,6 +55,7 @@ const recipientRoutesV2 = require('./routes/v2/recipients'); // Import recipient
 const trackerRecipientRoutesV2 = require('./routes/v2/trackerRecipients'); // Import tracker-recipient routes
 const recipientTrackerRoutesV2 = require('./routes/v2/recipientTrackers');
 const activityLogRoutesV2 = require('./routes/v2/activityLogs');
+const v2RootRoutes = require('./routes/v2/v2RootRoutes');
 const path = require('path');
 const { createActivityLoggerMiddleware } = require('./utils/activityLogger');
 
@@ -66,6 +67,8 @@ app.use('/v2/trackers', addDeprecationHeaders('v2', false), trackerRoutesV2);
 app.use('/v2/recipients', addDeprecationHeaders('v2', false), recipientRoutesV2); // Use recipient routes
 app.use('/v2/tracker-recipients', addDeprecationHeaders('v2', false), trackerRecipientRoutesV2); // Use tracker-recipient routes
 app.use('/v2/activity-logs', addDeprecationHeaders('v2', false), activityLogRoutesV2);
+app.use('/v2/recipient-trackers', addDeprecationHeaders('v2', false), recipientTrackerRoutesV2);
+app.use('/v2/', addDeprecationHeaders('v2', false), v2RootRoutes);
 //app.use('/v2', addDeprecationHeaders('v2', false));
 // Activity logging middleware
 app.use(createActivityLoggerMiddleware());
