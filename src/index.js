@@ -13,6 +13,7 @@ const app = express();
 
 // CORS configuration
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',').map(origin => origin.trim());
+//console.log('Allowed Origins:', allowedOrigins);
 const corsOptions = {
   origin: allowedOrigins,
   credentials: true,

@@ -47,7 +47,7 @@ USER node
 
 
 # Expose the port that the application listens on.
-EXPOSE 3023
+# EXPOSE 3007
 
 # Run the application.
 CMD ["yarn", "start"]
