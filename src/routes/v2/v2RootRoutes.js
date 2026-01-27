@@ -9,12 +9,14 @@ router.get('/', v2RootController.getRoot);
  * @route   GET /v2/health
  * @access  Public
  */
-router.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    status: 'OK',
-    timestamp: new Date(),
-  });
-});
+router.get('/health', v2RootController.getHealth);
+
+// router.get('/health', (req, res) => {
+//   res.json({
+//     success: true,
+//     status: 'OK',
+//     timestamp: new Date(),
+//   });
+// });
 
 module.exports = router;
