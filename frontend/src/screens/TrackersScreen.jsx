@@ -118,6 +118,9 @@ const TrackersScreen = () => {
     setError(null);
     try {
       const blob = await getTrackerAttachment(trackerId);
+      if (!blob) {
+        throw new Error('No attachment found');
+      }
       setSelectedPdfUrl(blob);
       setShowPdfModal(true);
     } catch (err) {
@@ -275,7 +278,7 @@ const TrackersScreen = () => {
                       </div>
                       <div className="d-flex gap-1 flex-wrap">
                         {statusCounts.pending > 0 && (
-                          <Badge bg="secondary">Unseen: {statusCounts.pending}</Badge>
+                          <Badge bg="secondary">Pending: {statusCounts.pending}</Badge>
                         )}
                         {statusCounts.seen > 0 && (
                           <Badge bg="info">Seen: {statusCounts.seen}</Badge>
@@ -310,7 +313,7 @@ const TrackersScreen = () => {
                             onClick={() => handleShowPdfPreview(tracker.id)}
                             title="View Attachment"
                           >
-                            <FontAwesomeIcon icon={faEye} />
+                            <FontAwesomeIcon icon={faFileText} />
                           </Button>
                         )}
                         <OverlayTrigger
@@ -337,7 +340,7 @@ const TrackersScreen = () => {
                           }
                         >
                           <Button variant="light" size="sm" title="View Details">
-                            <FontAwesomeIcon icon={faFileText} />
+                            <FontAwesomeIcon icon={faEye} />
                           </Button>
                         </OverlayTrigger>
                         {(role === 'admin' || role === 'superadmin') && <Button variant="danger" size="sm" onClick={() => handleDelete(tracker.id)} title="Delete"><FontAwesomeIcon icon={faTrash} /></Button>}
