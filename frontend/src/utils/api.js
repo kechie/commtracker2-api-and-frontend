@@ -237,7 +237,7 @@ export const getAttachment = async (recipientId, trackerId) => {
     const response = await api.get(`/recipient-trackers/recipients/${recipientId}/trackers/${trackerId}/attachment`, {
       responseType: 'blob', // Important for file downloads
     });
-    console.log('Attachment response:', response);
+    //console.log('Attachment response:', response);
     return response.data;
   } catch (error) {
     console.error('API Download Attachment Error:', error.response?.data || error.message);

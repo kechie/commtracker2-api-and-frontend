@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 //import { faPlus, faEdit, faTrash, faArrowLeft, faEye, faInfoCircle, faFileText } from '@fortawesome/free-solid-svg-icons';
 import { faPlus, faEdit, faTrash, faArrowLeft, faFileText } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/useAuth';
+import PdfPreviewModal from '../components/PdfPreviewModal';
 
 const TrackersScreen = () => {
   //const { user, role } = useAuth();
@@ -18,6 +19,8 @@ const TrackersScreen = () => {
   const [success, setSuccess] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingTracker, setEditingTracker] = useState(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -106,6 +109,16 @@ const TrackersScreen = () => {
       lceActionDate: '',
       recipientIds: [],
     });
+  };
+
+  const handleShowPdfPreview = (url) => {
+    setPdfUrl(url);
+    setShowPdfModal(true);
+  };
+
+  const handleClosePdfPreview = () => {
+    setShowPdfModal(false);
+    setPdfUrl('');
   };
 
   const handleShow = (tracker = null) => {
@@ -279,6 +292,16 @@ const TrackersScreen = () => {
                         <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
                           <FontAwesomeIcon icon={faEdit} />
                         </Button>
+                        {tracker.attachment && (
+                          <Button
+                            variant="light"
+                            size="sm"
+                            onClick={() => handleShowPdfPreview(tracker.attachment)}
+                            title="View Attachment"
+                          >
+                            <FontAwesomeIcon icon={faFileText} />
+                          </Button>
+                        )}
                         <OverlayTrigger
                           placement="left"
                           delay={{ show: 250, hide: 400 }}
@@ -596,8 +619,15 @@ const TrackersScreen = () => {
           </Col>
         </Modal.Body >
       </Modal >
+
+      <PdfPreviewModal
+        show={showPdfModal}
+        handleClose={handleClosePdfPreview}
+        pdfUrl={pdfUrl}
+      />
     </Container >
   );
 };
 
 export default TrackersScreen;
+
