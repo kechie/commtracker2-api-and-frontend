@@ -8,6 +8,7 @@ const {
   getTrackerById,
   updateTracker,
   deleteTracker,
+  serveAttachment,
 } = require('../../controllers/v2/trackerController');
 const { verifyToken, requireRole } = require('../../middleware/authMiddleware');
 const multer = require('multer');
@@ -30,6 +31,8 @@ router.use(verifyToken, requireRole(['receiving', 'admin', 'superadmin']));
 
 // Get all trackers without pagination (use with caution)
 router.get('/all', getAllTrackers);
+// Serve attachment files
+router.get('/attachment/:id', serveAttachment);
 
 // Get paginated trackers and create new tracker
 router.route('/').post(upload.single('attachment'), createTracker).get(getTrackers);

@@ -499,3 +499,23 @@ exports.deleteTracker = async (req, res) => {
     });
   }
 };
+
+exports.serveAttachment = async (req, res) => {
+  try {
+    const tracker = await Tracker.findByPk(req.params.id);
+    if (!tracker || !tracker.attachment) {
+      return res.status(404).json({ error: 'Attachment not found' });
+    }
+
+    const filePath = path.join(UPLOADS_DIR, tracker.attachment);
+    res.download(filePath, tracker.attachment, (err) => {
+      if (err) {
+        console.error('File download error:', err);
+        res.status(500).json({ error: 'Error downloading file' });
+      }
+    });
+  } catch (error) {
+    console.error('Serve attachment error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
