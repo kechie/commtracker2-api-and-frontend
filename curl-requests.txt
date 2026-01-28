@@ -1,0 +1,176 @@
+# ========== HEALTH CHECK ==========
+curl http://localhost:3000/v2/health
+
+# ========== AUTHENTICATION ==========
+# Login
+curl -X POST http://localhost:3000/v2/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "password123"
+  }'
+
+# Register (non-production only)
+curl -X POST http://localhost:3000/v2/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "newuser",
+    "email": "newuser@example.com",
+    "password": "password123"
+  }'
+
+# ========== USERS ==========
+# Get profile (requires token)
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:3000/v2/users/profile
+
+# Update profile
+curl -X PUT http://localhost:3000/v2/users/profile \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{ "username": "newname" }'
+
+# Get all users
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:3000/v2/users
+
+# Get user by ID
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:3000/v2/users/:id
+
+# Update user
+curl -X PUT http://localhost:3000/v2/users/:id \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{ "username": "updated" }'
+
+# Reset user password
+curl -X PUT http://localhost:3000/v2/users/:id/reset-password \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{ "newPassword": "newpass123" }'
+
+# Delete user
+curl -X DELETE http://localhost:3000/v2/users/:id \
+  -H "Authorization: Bearer <TOKEN>"
+
+# ========== TRACKERS ==========
+# Create tracker (with optional file upload)
+curl -X POST http://localhost:3000/v2/trackers \
+  -H "Authorization: Bearer <TOKEN>" \
+  -F "name=Tracker Name" \
+  -F "attachment=@/path/to/file"
+
+# Get all trackers (paginated)
+curl -H "Authorization: Bearer <TOKEN>" \
+  "http://localhost:3000/v2/trackers?page=1&limit=20"
+
+# Get all trackers (no pagination)
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:3000/v2/trackers/all
+
+# Get tracker by ID
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:3000/v2/trackers/:id
+
+# Update tracker
+curl -X PUT http://localhost:3000/v2/trackers/:id \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Updated Name" }'
+
+# Delete tracker
+curl -X DELETE http://localhost:3000/v2/trackers/:id \
+  -H "Authorization: Bearer <TOKEN>"
+
+# ========== RECIPIENTS ==========
+# Get recipients (paginated)
+curl -H "Authorization: Bearer <TOKEN>" \
+  "http://localhost:3000/v2/recipients?page=1&limit=20"
+
+# Get all recipients
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:3000/v2/recipients/all
+
+# Create recipient
+curl -X POST http://localhost:3000/v2/recipients \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Recipient Name", "email": "recipient@example.com" }'
+
+# Update recipient
+curl -X PUT http://localhost:3000/v2/recipients/:id \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "Updated Name" }'
+
+# Delete recipient
+curl -X DELETE http://localhost:3000/v2/recipients/:id \
+  -H "Authorization: Bearer <TOKEN>"
+
+# ========== TRACKER RECIPIENTS ==========
+# Get recipients for a tracker
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:3000/v2/tracker-recipients/trackers/:trackerId/recipients
+
+# Get trackers for a recipient
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:3000/v2/tracker-recipients/trackers/:trackerId/trackers
+
+# Bulk update tracker-recipients
+curl -X POST http://localhost:3000/v2/tracker-recipients/trackers/:trackerId/recipients/bulk-update \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{ "updates": [...] }'
+
+# Create/update tracker-recipient action
+curl -X POST http://localhost:3000/v2/tracker-recipients/trackers/:trackerId/recipients/:recipientId/action \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{ "action": "submitted" }'
+
+# Get tracker-recipient by ID
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:3000/v2/tracker-recipients/:id
+
+# Update tracker-recipient status
+curl -X PATCH http://localhost:3000/v2/tracker-recipients/:id/status \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{ "status": "completed" }'
+
+# Delete tracker-recipient
+curl -X DELETE http://localhost:3000/v2/tracker-recipients/:id \
+  -H "Authorization: Bearer <TOKEN>"
+
+# ========== RECIPIENT TRACKERS ==========
+# Get received trackers for recipient (paginated)
+curl -H "Authorization: Bearer <TOKEN>" \
+  "http://localhost:3000/v2/recipient-trackers/recipients/:recipientId/trackers?page=1&limit=20"
+
+# Get all received trackers for recipient
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:3000/v2/recipient-trackers/recipients/:recipientId/trackers/all
+
+# Get specific received tracker
+curl -H "Authorization: Bearer <TOKEN>" \
+  http://localhost:3000/v2/recipient-trackers/recipients/:recipientId/trackers/:trackerId
+
+# Update received tracker
+curl -X PUT http://localhost:3000/v2/recipient-trackers/recipients/:recipientId/trackers/:trackerId \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{ "status": "updated" }'
+
+# ========== ACTIVITY LOGS ==========
+# Get all activity logs
+curl -H "Authorization: Bearer <TOKEN>" \
+  "http://localhost:3000/v2/activity-logs?page=1&limit=20"
+
+# Get activity logs for specific user
+curl -H "Authorization: Bearer <TOKEN>" \
+  "http://localhost:3000/v2/activity-logs/user/:userId?page=1&limit=20"
+
+# Get activity logs for specific entity
+curl -H "Authorization: Bearer <TOKEN>" \
+  "http://localhost:3000/v2/activity-logs/entity/:entityType/:entityId?page=1&limit=20"

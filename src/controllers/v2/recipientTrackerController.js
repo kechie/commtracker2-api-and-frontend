@@ -147,21 +147,30 @@ exports.updateReceivedTracker = async (req, res) => {
       });
     }
 
-    const updateData = { status };
-
-    // Set timestamp based on status
+    const updateData = {};
     const now = new Date();
+
+    // If only updating timestamps, retain status
     if (status === 'seen') {
       updateData.seenAt = now;
+      updateData.isSeen = true;
     } else if (status === 'read') {
       updateData.readAt = now;
+      updateData.isRead = true;
       if (!trackerRecipient.seenAt) {
         updateData.seenAt = now;
       }
-    } else if (status === 'acknowledged') {
-      updateData.acknowledgedAt = now;
-    } else if (status === 'completed') {
-      updateData.completedAt = now;
+      if (!trackerRecipient.isSeen) {
+        updateData.isSeen = true;
+      }
+    } else {
+      // For all other statuses, update the status and set corresponding timestamp
+      updateData.status = status;
+      if (status === 'acknowledged') {
+        updateData.acknowledgedAt = now;
+      } else if (status === 'completed') {
+        updateData.completedAt = now;
+      }
     }
 
     if (remarks !== undefined) updateData.remarks = remarks;
@@ -170,17 +179,17 @@ exports.updateReceivedTracker = async (req, res) => {
     await transaction.commit();
 
     const updatedRecord = await TrackerRecipient.findOne({
-        where: { recipientId, trackerId },
-        include: [
-            {
-              model: Tracker,
-              as: 'tracker',
-            },
-            {
-              model: Recipient,
-              as: 'recipient',
-            },
-          ],
+      where: { recipientId, trackerId },
+      include: [
+        {
+          model: Tracker,
+          as: 'tracker',
+        },
+        {
+          model: Recipient,
+          as: 'recipient',
+        },
+      ],
     });
 
     res.json({
