@@ -1,8 +1,60 @@
 // src/controllers/v2/trackerController.js
+const fs = require('fs').promises;
+const path = require('path');
 const { Tracker, Recipient, TrackerRecipient, sequelize } = require('../../db'); // Import sequelize for transactions
 const { Op, fn, col, literal } = require('sequelize'); // Import Op for operators
 const { body, validationResult } = require('express-validator'); // ← add this dependency
 const { logTrackerActivity } = require('../../utils/activityLogger');
+
+// File configuration
+const UPLOADS_DIR = path.join(__dirname, '../../..', 'uploads');
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'text/plain'
+];
+
+// Helper function to delete file from disk
+const deleteFile = async (filename) => {
+  if (!filename) return;
+  try {
+    const filePath = path.join(UPLOADS_DIR, filename);
+    await fs.unlink(filePath);
+    console.log(`Deleted file: ${filename}`);
+  } catch (error) {
+    // Log error but don't throw - file may already be deleted
+    console.error(`Failed to delete file ${filename}:`, error.message);
+  }
+};
+
+// Helper function to validate file
+const validateFile = (file) => {
+  if (!file) return { valid: true };
+
+  if (file.size > MAX_FILE_SIZE) {
+    return {
+      valid: false,
+      error: `File size exceeds maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)}MB`
+    };
+  }
+
+  if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    return {
+      valid: false,
+      error: `File type not allowed. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`
+    };
+  }
+
+  return { valid: true };
+};
 
 // Helper function to generate serial number
 const generateSerialNumberx = async (transaction) => {
@@ -93,6 +145,20 @@ exports.createTracker = async (req, res) => {
   try {
     const { recipientIds, serialNumber: incomingSerialNumber, ...trackerData } = req.body;
 
+    // Validate file if provided
+    if (req.file) {
+      const fileValidation = validateFile(req.file);
+      if (!fileValidation.valid) {
+        await transaction.rollback();
+        // Clean up uploaded file
+        await deleteFile(req.file.filename);
+        return res.status(400).json({
+          success: false,
+          message: fileValidation.error
+        });
+      }
+    }
+
     let finalSerialNumber = incomingSerialNumber;
     if (!finalSerialNumber) {
       finalSerialNumber = await generateSerialNumber(transaction);
@@ -138,7 +204,7 @@ exports.createTracker = async (req, res) => {
       action: 'CREATE',
       entityId: tracker.id,
       description: `Created tracker: ${trackerData.documentTitle || 'Untitled'}`,
-      details: { 
+      details: {
         serialNumber: finalSerialNumber,
         recipients: recipientIds,
         documentTitle: trackerData.documentTitle
@@ -152,7 +218,12 @@ exports.createTracker = async (req, res) => {
   } catch (error) {
     await transaction.rollback(); // Rollback on error
     console.error('Create tracker error:', error);
-    
+
+    // Clean up file on error
+    if (req.file) {
+      await deleteFile(req.file.filename);
+    }
+
     // Log failed tracker creation
     await logTrackerActivity({
       userId: req.user?.id,
@@ -162,8 +233,12 @@ exports.createTracker = async (req, res) => {
       userAgent: req.clientUserAgent,
       status: 'failure'
     });
-    
-    res.status(500).json({ error: 'Internal server error' });
+
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message
+    });
   }
 };
 
@@ -294,7 +369,27 @@ exports.updateTracker = async (req, res) => {
   try {
     const tracker = await Tracker.findByPk(req.params.id);
     if (!tracker) {
-      return res.status(404).json({ error: 'Tracker not found' });
+      // Clean up uploaded file if tracker not found
+      if (req.file) {
+        await deleteFile(req.file.filename);
+      }
+      return res.status(404).json({
+        success: false,
+        error: 'Tracker not found'
+      });
+    }
+
+    // Validate file if provided
+    if (req.file) {
+      const fileValidation = validateFile(req.file);
+      if (!fileValidation.valid) {
+        // Clean up uploaded file
+        await deleteFile(req.file.filename);
+        return res.status(400).json({
+          success: false,
+          message: fileValidation.error
+        });
+      }
     }
 
     const { recipientIds, ...trackerData } = req.body;
@@ -302,6 +397,17 @@ exports.updateTracker = async (req, res) => {
     // serialNumber should not be updated after creation, unless specifically allowed by logic
     if (trackerData.serialNumber) {
       delete trackerData.serialNumber;
+    }
+
+    // Handle file update - delete old file if new one is being uploaded
+    if (req.file) {
+      const oldFileName = tracker.attachment;
+      trackerData.attachment = req.file.filename;
+      trackerData.attachmentMimeType = req.file.mimetype;
+      // Delete old file asynchronously (don't wait for it)
+      if (oldFileName) {
+        deleteFile(oldFileName);
+      }
     }
 
     // Update tracker's own fields
@@ -327,10 +433,21 @@ exports.updateTracker = async (req, res) => {
       ],
     });
 
-    res.json(result);
+    res.json({
+      success: true,
+      data: result
+    });
   } catch (error) {
     console.error('Update tracker error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    // Clean up file on error
+    if (req.file) {
+      await deleteFile(req.file.filename);
+    }
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message
+    });
   }
 };
 
@@ -341,13 +458,44 @@ exports.deleteTracker = async (req, res) => {
   try {
     const tracker = await Tracker.findByPk(req.params.id);
     if (!tracker) {
-      return res.status(404).json({ error: 'Tracker not found' });
+      return res.status(404).json({
+        success: false,
+        error: 'Tracker not found'
+      });
     }
 
+    // Delete associated file before deleting tracker
+    const fileName = tracker.attachment;
+
     await tracker.destroy();
-    res.status(204).send(); // No content
+
+    // Delete file asynchronously (don't wait for it)
+    if (fileName) {
+      deleteFile(fileName);
+    }
+
+    // Log tracker deletion
+    await logTrackerActivity({
+      userId: req.user?.id,
+      action: 'DELETE',
+      entityId: tracker.id,
+      description: `Deleted tracker: ${tracker.documentTitle || tracker.serialNumber}`,
+      details: { serialNumber: tracker.serialNumber },
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Tracker deleted successfully'
+    });
   } catch (error) {
     console.error('Delete tracker error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message
+    });
   }
 };
