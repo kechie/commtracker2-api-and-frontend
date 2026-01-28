@@ -12,17 +12,13 @@ import {
   Alert
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faPaperclip, faDownload } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '../context/useAuth';
-import { getTrackerDetails } from '../utils/api';
+import { faArrowLeft, faDownload, faEye } from '@fortawesome/free-solid-svg-icons';
+import { getTrackerDetails, updateRecipientTrackerStatus } from '../utils/api';
+import PdfPreviewModal from '../components/PdfPreviewModal';
 
 const RecipientTrackerDetailsScreen = () => {
   const { recipientId, trackerId } = useParams();
-  console.log('Recipient ID from params:', recipientId);
-  console.log('Tracker ID from params:', trackerId);
   const navigate = useNavigate();
-  const { user } = useAuth();
-  //const recipientId = user?.recipientId;
 
   const [tracker, setTracker] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,11 +26,10 @@ const RecipientTrackerDetailsScreen = () => {
   const [success, setSuccess] = useState(null);
   const [remarks, setRemarks] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
 
   useEffect(() => {
     const fetchTrackerDetails = async (recipientId, trackerId) => {
-      console.log('Recipient ID from params:', recipientId);
-      console.log('Tracker ID from params:', trackerId);
       if (!recipientId) {
         setError('No recipient ID found. Please log in again.');
         setLoading(false);
@@ -45,10 +40,8 @@ const RecipientTrackerDetailsScreen = () => {
         setLoading(true);
         setError(null);
         const response = await getTrackerDetails(recipientId, trackerId);
-        console.log('Tracker details response:', response);
-
         const trackerData = response.data;
-
+        console.log('Fetched tracker details:', trackerData);
         if (!trackerData) {
           setError('Tracker not found.');
           setLoading(false);
@@ -74,9 +67,8 @@ const RecipientTrackerDetailsScreen = () => {
       setSubmitting(true);
       setError(null);
 
-      await updateRecipientTrackerStatus(tracker.id, {
-        status: newStatus,
-        remarks: remarks || undefined
+      await updateRecipientTrackerStatus(recipientId, trackerId, newStatus, {
+        remarks: remarks || undefined,
       });
 
       setSuccess(`Status updated to ${newStatus} successfully!`);
@@ -86,7 +78,6 @@ const RecipientTrackerDetailsScreen = () => {
       }));
       setRemarks('');
 
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error updating status:', err);
@@ -100,6 +91,14 @@ const RecipientTrackerDetailsScreen = () => {
     if (tracker?.tracker?.attachmentUrl) {
       window.open(tracker.tracker.attachmentUrl, '_blank');
     }
+  };
+
+  const handleViewAttachment = () => {
+    setShowPdfModal(true);
+  };
+
+  const handleClosePdfModal = () => {
+    setShowPdfModal(false);
   };
 
   const handleBack = () => {
@@ -156,6 +155,7 @@ const RecipientTrackerDetailsScreen = () => {
           <h2 className="mb-0">{trackerData.documentTitle || 'Document Details'}</h2>
         </Card.Header>
         <Card.Body>
+          {/* ... existing card body content ... */}
           <Row className="mb-3">
             <Col md={6}>
               <h5>Serial/Reference Number</h5>
@@ -198,62 +198,42 @@ const RecipientTrackerDetailsScreen = () => {
           </Row>
 
           <Row className="mb-3">
-            <Col md={6}>
-              <h5>Created At</h5>
-              <p className="text-muted">
-                {tracker.createdAt
-                  ? new Date(tracker.createdAt).toLocaleDateString()
-                  : '—'}
-              </p>
-            </Col>
-            <Col md={6}>
-              <h5>Last Updated</h5>
-              <p className="text-muted">
-                {tracker.updatedAt
-                  ? new Date(tracker.updatedAt).toLocaleDateString()
-                  : '—'}
-              </p>
-            </Col>
-          </Row>
-
-          {tracker.completedAt && (
-            <Row className="mb-3">
-              <Col md={6}>
-                <h5>Completed At</h5>
-                <p className="text-muted">
-                  {new Date(tracker.completedAt).toLocaleDateString()}
-                </p>
-              </Col>
-            </Row>
-          )}
-
-          <Row className="mb-3">
             <Col>
               <h5>Description / Remarks</h5>
               <p className="text-muted">{trackerData.remarks || '—'}</p>
-            </Col>
+            </Col>.
           </Row>
 
           {trackerData.attachmentUrl && (
             <Row className="mb-3">
               <Col>
                 <h5>Attachment</h5>
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  onClick={handleDownloadAttachment}
-                  className="d-flex align-items-center gap-2"
-                >
-                  <FontAwesomeIcon icon={faPaperclip} />
-                  Download Attachment
-                </Button>
+                <div className="d-flex gap-2">
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    onClick={handleViewAttachment}
+                    className="d-flex align-items-center gap-2"
+                  >
+                    <FontAwesomeIcon icon={faEye} />
+                    View Attachment
+                  </Button>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={handleDownloadAttachment}
+                    className="d-flex align-items-center gap-2"
+                  >
+                    <FontAwesomeIcon icon={faDownload} />
+                    Download Attachment
+                  </Button>
+                </div>
               </Col>
             </Row>
           )}
         </Card.Body>
       </Card>
 
-      {/* Action Section */}
       <Card className="mb-4">
         <Card.Header className="bg-light">
           <h5 className="mb-0">Actions</h5>
@@ -306,6 +286,7 @@ const RecipientTrackerDetailsScreen = () => {
             </Button>
             <Button
               variant="secondary"
+
               onClick={() => handleStatusUpdate('forwarded')}
               disabled={tracker.status === 'forwarded' || submitting}
             >
@@ -325,6 +306,14 @@ const RecipientTrackerDetailsScreen = () => {
           </div>
         </Card.Body>
       </Card>
+
+      {trackerData.attachmentUrl && (
+        <PdfPreviewModal
+          show={showPdfModal}
+          handleClose={handleClosePdfModal}
+          pdfUrl={trackerData.attachmentUrl}
+        />
+      )}
     </Container>
   );
 };
