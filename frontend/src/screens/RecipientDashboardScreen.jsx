@@ -27,8 +27,13 @@ import {
   Modal,
 } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
-import { getRecipientTrackers, updateRecipientTrackerStatus } from '../utils/api';
+import {
+  getRecipientTrackers,
+  updateRecipientTrackerStatus,
+  getAttachment,
+} from '../utils/api';
 import { useAuth } from '../context/useAuth';
+import PdfPreviewModal from '../components/PdfPreviewModal';
 
 const RecipientDashboardScreen = () => {
   const { user } = useAuth();
@@ -45,6 +50,9 @@ const RecipientDashboardScreen = () => {
   const [selectedTracker, setSelectedTracker] = useState(null); // { id, currentStatus, newStatus }
   const [remark, setRemark] = useState('');
   const [actionLoading, setActionLoading] = useState({});
+  const [attachmentLoading, setAttachmentLoading] = useState(null); // Use tracker ID to indicate loading
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
 
   // Pagination & filters
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,8 +64,7 @@ const RecipientDashboardScreen = () => {
   const [sortOrder, setSortOrder] = useState('DESC');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  // TODO: send {	"status":"seen" } payload to mark as seen when downloading/viewing attachment
-  // TODO: send { "status":"read" } payload when opening details page
+  //const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3007/v2';
   useEffect(() => {
     const fetchTrackers = async () => {
       if (!recipientId) {
@@ -144,15 +151,47 @@ const RecipientDashboardScreen = () => {
     console.log('View details →', trackerId);
     console.log('Recipient ID:', recipientId);
     //http://localhost:3007/v2/recipients/721587c5-7e32-4d83-a71c-2f2105039ff9/trackers/{trackerId}
-    updateRecipientTrackerStatus(recipientId, trackerId, 'read').catch(err => { console.warn('Failed to mark as read:', err); });
+    //updateRecipientTrackerStatus(recipientId, trackerId, 'read').catch(err => { console.warn('Failed to mark as read:', err); });
     navigate(`/recipients/${recipientId}/trackers/${trackerId}`);
   };
 
-  const handleViewAttachment = (recipientId, trackerId) => {
-    console.log('View attachment →', trackerId);
-    updateRecipientTrackerStatus(recipientId, trackerId, 'seen').catch(err => { console.warn('Failed to mark as read:', err); });
-    //navigate(`/recipients/${recipientId}/trackers/${trackerId}`);
-    alert('Attachment preview not implemented yet.');
+  const handleViewAttachment = async (trackerId) => {
+    if (!recipientId || !trackerId) return;
+
+    setAttachmentLoading(trackerId);
+    setError(null);
+
+    try {
+      const blob = await getAttachment(recipientId, trackerId);
+      const url = URL.createObjectURL(blob);
+      setSelectedPdfUrl(url);
+      setShowPdfModal(true);
+
+      // Mark as seen and read after viewing/downloading
+      updateRecipientTrackerStatus(recipientId, trackerId, 'seen').catch(err => {
+        console.warn('Failed to mark as seen:', err);
+      });
+      updateRecipientTrackerStatus(recipientId, trackerId, 'read').catch(err => {
+        console.warn('Failed to mark as read:', err);
+      });
+    } catch (err) {
+      console.error('View attachment failed:', err);
+      setError(err?.response?.data?.message || 'Could not load attachment.');
+    } finally {
+      setAttachmentLoading(null);
+    }
+  };
+
+  const handleClosePdfModal = () => {
+    if (selectedPdfUrl) {
+      URL.revokeObjectURL(selectedPdfUrl);
+    }
+    // Mark as read after closing the PDF modal
+    // updateRecipientTrackerStatus(recipientId, trackerId, 'seen').catch(err => {
+    //   console.warn('Failed to mark as seen:', err);
+    // });
+    setShowPdfModal(false);
+    setSelectedPdfUrl(null);
   };
 
   const handleBack = () => navigate('/');
@@ -285,7 +324,9 @@ const RecipientDashboardScreen = () => {
             {recipientTrackers.map((item, index) => {
               const isLoading = actionLoading[item.id];
               return (
-                <tr key={item.id} index={index}>
+
+                < tr key={item.id} index={index} >
+                  {/*console.log('Rendering tracker item:', `${API_BASE_URL}recipient-trackers/recipients/${item.recipientId}/trackers/${item.tracker.id}/attachment`, item)*/}
                   <td>{item.tracker?.serialNumber || '—'}</td>
                   <td>{item.tracker?.documentTitle || '—'}</td>
                   <td>{item.tracker?.fromName || '—'}</td>
@@ -295,9 +336,20 @@ const RecipientDashboardScreen = () => {
                       : '—'}
                   </td>
                   <td className="text-center">
-                    <Button size="sm" variant="info" onClick={() => handleViewAttachment(item.tracker?.id)}>
-                      <FontAwesomeIcon icon={faPaperclip} />
-                    </Button>
+                    {item.tracker?.attachment && (
+                      <Button
+                        size="sm"
+                        variant="info"
+                        onClick={() => handleViewAttachment(item.tracker.id)}
+                        disabled={attachmentLoading === item.tracker.id}
+                      >
+                        {attachmentLoading === item.tracker.id ? (
+                          <FontAwesomeIcon icon={faSpinner} spin />
+                        ) : (
+                          <FontAwesomeIcon icon={faPaperclip} />
+                        )}
+                      </Button>
+                    )}
                   </td>
                   <td>
                     <Badge
@@ -377,7 +429,8 @@ const RecipientDashboardScreen = () => {
             })}
           </tbody>
         </Table>
-      )}
+      )
+      }
 
       {/* Confirmation Modal */}
       <Modal show={showActionModal} onHide={() => setShowActionModal(false)}>
@@ -428,61 +481,69 @@ const RecipientDashboardScreen = () => {
         </Modal.Footer>
       </Modal>
 
+      <PdfPreviewModal
+        show={showPdfModal}
+        handleClose={handleClosePdfModal}
+        pdfUrl={selectedPdfUrl}
+      />
+
       {/* Pagination */}
-      {totalPages > 1 && (
-        <Row className="mt-4 align-items-center">
-          <Col md={4}>
-            <Form.Group className="d-flex align-items-center gap-2">
-              <Form.Label className="mb-0 small">Per page:</Form.Label>
-              <Form.Select
-                size="sm"
-                style={{ width: '80px' }}
-                value={pageSize}
-                onChange={e => {
-                  setPageSize(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-              >
-                <option>5</option>
-                <option>10</option>
-                <option>15</option>
-                <option>20</option>
-                <option>50</option>
-              </Form.Select>
-            </Form.Group>
-          </Col>
+      {
+        totalPages > 1 && (
+          <Row className="mt-4 align-items-center">
+            <Col md={4}>
+              <Form.Group className="d-flex align-items-center gap-2">
+                <Form.Label className="mb-0 small">Per page:</Form.Label>
+                <Form.Select
+                  size="sm"
+                  style={{ width: '80px' }}
+                  value={pageSize}
+                  onChange={e => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option>5</option>
+                  <option>10</option>
+                  <option>15</option>
+                  <option>20</option>
+                  <option>50</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
 
-          <Col md={4} className="text-center">
-            <small className="text-muted">
-              Showing {(currentPage - 1) * pageSize + 1}–
-              {Math.min(currentPage * pageSize, totalItems)} of {totalItems}
-            </small>
-          </Col>
+            <Col md={4} className="text-center">
+              <small className="text-muted">
+                Showing {(currentPage - 1) * pageSize + 1}–
+                {Math.min(currentPage * pageSize, totalItems)} of {totalItems}
+              </small>
+            </Col>
 
-          <Col md={4}>
-            <Pagination size="sm" className="mb-0 justify-content-end">
-              <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
-              <Pagination.Prev onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} />
-              {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-                const page = Math.max(1, currentPage - 3) + i;
-                if (page > totalPages) return null;
-                return (
-                  <Pagination.Item
-                    key={page}
-                    active={page === currentPage}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </Pagination.Item>
-                );
-              })}
-              <Pagination.Next onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} />
-              <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
-            </Pagination>
-          </Col>
-        </Row>
-      )}
-    </Container>
+            <Col md={4}>
+              <Pagination size="sm" className="mb-0 justify-content-end">
+                <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
+                <Pagination.Prev onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} />
+                {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
+                  const page = Math.max(1, currentPage - 3) + i;
+                  if (page > totalPages) return null;
+                  return (
+                    <Pagination.Item
+                      key={page}
+                      active={page === currentPage}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </Pagination.Item>
+                  );
+                })}
+                <Pagination.Next onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} />
+                <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
+              </Pagination>
+            </Col>
+          </Row>
+        )
+      }
+    </Container >
   );
 };
 

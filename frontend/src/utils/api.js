@@ -200,9 +200,9 @@ export const getTrackerRecipients = async (trackerId) => {
 
 export const getRecipientTrackers = async (recipientId) => {
   try {
-    console.log('Fetching trackers for recipientId:', recipientId);
+    //console.log('Fetching trackers for recipientId:', recipientId);
     const response = await api.get(`/recipient-trackers/recipients/${recipientId}/trackers`);
-    console.log('Received response:', response.data);
+    //console.log('Received response:', response.data);
     return response.data;
   } catch (error) {
     console.error('API Get Recipient Trackers Error:', error.response?.data || error.message);
@@ -224,7 +224,7 @@ export const updateRecipientTrackerStatus = async (recipientId, trackerId, statu
   //console.log('Body:', body);
 
   try {
-    const response = await api.put(`/recipients/${recipientId}/trackers/${trackerId}`, { status, ...extraPayload });
+    const response = await api.put(`/recipient-trackers/recipients/${recipientId}/trackers/${trackerId}`, { status, ...extraPayload });
     return response.data;
   } catch (error) {
     console.error('API Update Recipient Tracker Status Error:', error.response?.data || error.message);
@@ -237,6 +237,7 @@ export const getAttachment = async (recipientId, trackerId) => {
     const response = await api.get(`/recipient-trackers/recipients/${recipientId}/trackers/${trackerId}/attachment`, {
       responseType: 'blob', // Important for file downloads
     });
+    console.log('Attachment response:', response);
     return response.data;
   } catch (error) {
     console.error('API Download Attachment Error:', error.response?.data || error.message);

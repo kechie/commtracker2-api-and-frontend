@@ -4,7 +4,8 @@ import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipie
 import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faEdit, faTrash, faArrowLeft, faEye, faInfoCircle, faFileText } from '@fortawesome/free-solid-svg-icons';
+//import { faPlus, faEdit, faTrash, faArrowLeft, faEye, faInfoCircle, faFileText } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft, faFileText } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/useAuth';
 
 const TrackersScreen = () => {
@@ -233,8 +234,8 @@ const TrackersScreen = () => {
                 // Count recipients by status
                 const statusCounts = {
                   pending: trackerRecipients.filter(tr => tr.status === 'pending').length,
-                  seen: trackerRecipients.filter(tr => tr.status === 'seen').length,
-                  read: trackerRecipients.filter(tr => tr.status === 'read').length,
+                  seen: trackerRecipients.filter(tr => tr.isSeen).length,
+                  read: trackerRecipients.filter(tr => tr.isRead).length,
                   acknowledged: trackerRecipients.filter(tr => tr.status === 'acknowledged').length,
                   completed: trackerRecipients.filter(tr => tr.status === 'completed').length,
                 };

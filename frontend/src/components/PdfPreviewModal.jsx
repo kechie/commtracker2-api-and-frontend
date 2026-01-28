@@ -3,8 +3,13 @@ import { Modal, Button, Spinner, Alert } from 'react-bootstrap';
 import { Document, Page, pdfjs } from 'react-pdf';
 
 // Required for react-pdf to work
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+//pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+//   'pdfjs-dist/build/pdf.worker.min.js',
+//   import.meta.url
+// ).toString();
 
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -39,7 +44,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
           </div>
         )}
         {error && <Alert variant="danger">{error}</Alert>}
-        
+
         <Document
           file={pdfUrl}
           onLoadSuccess={onDocumentLoadSuccess}
@@ -49,7 +54,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
             cMapPacked: true,
           }}
         >
-          <Page pageNumber={pageNumber} />
+          <Page pageNumber={pageNumber} renderAnnotationLayer={false} renderTextLayer={false} />
         </Document>
       </Modal.Body>
       <Modal.Footer>
