@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, FloatingLabel, Alert, Container, Card, Row, Col, Badge, Pagination, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipients } from '../utils/api';
+import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipients, getTrackerAttachment } from '../utils/api';
 import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 //import { faPlus, faEdit, faTrash, faArrowLeft, faEye, faInfoCircle, faFileText } from '@fortawesome/free-solid-svg-icons';
-import { faPlus, faEdit, faTrash, faArrowLeft, faFileText } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faPaperclip } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
 
@@ -20,8 +20,9 @@ const TrackersScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingTracker, setEditingTracker] = useState(null);
   const [showPdfModal, setShowPdfModal] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState('');
-
+  //const [pdfUrl, setPdfUrl] = useState(null);
+  const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
+  const [attachmentLoading, setAttachmentLoading] = useState(null); // Use tracker ID to indicate loading
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -111,14 +112,24 @@ const TrackersScreen = () => {
     });
   };
 
-  const handleShowPdfPreview = (url) => {
-    setPdfUrl(url);
-    setShowPdfModal(true);
-  };
-
+  const handleShowPdfPreview = async (trackerId) => {
+    if (!trackerId) return;
+    setAttachmentLoading(trackerId);
+    setError(null);
+    try {
+      const blob = await getTrackerAttachment(trackerId);
+      setSelectedPdfUrl(blob);
+      setShowPdfModal(true);
+    } catch (err) {
+      console.error('View attachment failed:', err);
+      setError(err?.response?.data?.message || 'Could not load attachment.');
+    } finally {
+      setAttachmentLoading(null);
+    };
+  }
   const handleClosePdfPreview = () => {
     setShowPdfModal(false);
-    setPdfUrl('');
+    setAttachmentLoading(null);
   };
 
   const handleShow = (tracker = null) => {
@@ -296,10 +307,10 @@ const TrackersScreen = () => {
                           <Button
                             variant="light"
                             size="sm"
-                            onClick={() => handleShowPdfPreview(tracker.attachment)}
+                            onClick={() => handleShowPdfPreview(tracker.id)}
                             title="View Attachment"
                           >
-                            <FontAwesomeIcon icon={faFileText} />
+                            <FontAwesomeIcon icon={faEye} />
                           </Button>
                         )}
                         <OverlayTrigger
@@ -623,7 +634,7 @@ const TrackersScreen = () => {
       <PdfPreviewModal
         show={showPdfModal}
         handleClose={handleClosePdfPreview}
-        pdfUrl={pdfUrl}
+        pdfUrl={selectedPdfUrl}
       />
     </Container >
   );
