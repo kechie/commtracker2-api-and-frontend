@@ -8,7 +8,8 @@ const {
   updateTrackerRecipientStatus,
   bulkUpdateTrackerRecipients,
   deleteTrackerRecipient,
-  getRecipientTrackers
+  getRecipientTrackers,
+  serveAttachment,
 } = require('../../controllers/v2/trackerRecipientController');
 const { verifyToken, requireRole } = require('../../middleware/authMiddleware');
 

@@ -1,5 +1,22 @@
 // src/controllers/v2/recipientTrackerController.js
 const { TrackerRecipient, Tracker, Recipient, sequelize } = require('../../db');
+const fs = require('fs').promises;
+const path = require('path');
+// File configuration
+const UPLOADS_DIR = path.join(__dirname, '../../..', 'uploads');
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/csv',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'text/plain'
+];
 
 /**
  * @desc    Get paginated list of trackers received by a specific recipient
@@ -240,3 +257,22 @@ exports.downloadAttachment = async (req, res) => {
   }
 };
 
+exports.serveAttachment = async (req, res) => {
+  try {
+    const tracker = await Tracker.findByPk(req.params.trackerId);
+    if (!tracker || !tracker.attachment) {
+      return res.status(404).json({ error: 'Attachment not found' });
+    }
+
+    const filePath = path.join(UPLOADS_DIR, tracker.attachment);
+    res.download(filePath, tracker.attachment, (err) => {
+      if (err) {
+        console.error('File download error:', err);
+        res.status(500).json({ error: 'Error downloading file' });
+      }
+    });
+  } catch (error) {
+    console.error('Serve attachment error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

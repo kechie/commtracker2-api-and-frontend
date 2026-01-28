@@ -6,6 +6,7 @@ const {
   getAllReceivedTrackers,
   getReceivedTracker,
   updateReceivedTracker,
+  serveAttachment,
 } = require('../../controllers/v2/recipientTrackerController');
 const { verifyToken } = require('../../middleware/authMiddleware');
 
@@ -14,6 +15,9 @@ router.use(verifyToken);
 
 router.route('/recipients/:recipientId/trackers/all').get(getAllReceivedTrackers);
 router.route('/recipients/:recipientId/trackers').get(getReceivedTrackers);
+
+// Get attachment file
+router.route('/recipients/:recipientId/trackers/:trackerId/attachment').get(serveAttachment);
 
 router
   .route('/recipients/:recipientId/trackers/:trackerId')
