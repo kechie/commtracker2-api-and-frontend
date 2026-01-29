@@ -31,6 +31,24 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
   const goToPrevPage = () => setPageNumber(prevPage => Math.max(prevPage - 1, 1));
   const goToNextPage = () => setPageNumber(prevPage => Math.min(prevPage + 1, numPages));
 
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = 'document.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handlePrint = () => {
+    const printWindow = window.open(pdfUrl);
+    if (printWindow) {
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+    }
+  };
+
   return (
     <Modal show={show} onHide={handleClose} size="lg" centered>
       <Modal.Header closeButton>
@@ -65,6 +83,14 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
             </Button>
             <Button variant="secondary" onClick={goToNextPage} disabled={pageNumber >= numPages} className="ms-2">
               Next
+            </Button>
+          </div>
+          <div>
+            <Button variant="success" onClick={handleDownload} className="ms-2">
+              Download
+            </Button>
+            <Button variant="info" onClick={handlePrint} className="ms-2">
+              Print
             </Button>
           </div>
           <span>
