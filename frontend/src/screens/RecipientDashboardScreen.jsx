@@ -104,7 +104,6 @@ const RecipientDashboardScreen = () => {
   }, [recipientId, currentPage, pageSize, sortBy, sortOrder, searchTerm, dateFrom, dateTo]);
 
   const openConfirmModal = (trackerId, newStatus) => {
-    console.log('Open confirm modal for tracker:', trackerId, 'to status:', newStatus);
     const tracker = recipientTrackers.find(t => t.tracker.id === trackerId);
     if (!tracker) return;
 
@@ -149,8 +148,6 @@ const RecipientDashboardScreen = () => {
   };
 
   const handleViewDetails = (recipientId, trackerId) => {
-    console.log('View details →', trackerId);
-    console.log('Recipient ID:', recipientId);
     //http://localhost:3007/v2/recipients/721587c5-7e32-4d83-a71c-2f2105039ff9/trackers/{trackerId}
     //updateRecipientTrackerStatus(recipientId, trackerId, 'read').catch(err => { console.warn('Failed to mark as read:', err); });
     navigate(`/recipients/${recipientId}/trackers/${trackerId}`);

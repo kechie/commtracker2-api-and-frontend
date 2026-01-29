@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, Button, Spinner, Alert } from 'react-bootstrap';
 import { Document, Page, pdfjs } from 'react-pdf';
 
@@ -16,6 +16,15 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  useEffect(() => {
+    if (!show) {
+      setNumPages(null);
+      setPageNumber(1);
+      setLoading(true);
+      setError(null);
+    }
+  }, [show]);
+
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
     setLoading(false);
@@ -32,21 +41,44 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
   const goToNextPage = () => setPageNumber(prevPage => Math.min(prevPage + 1, numPages));
 
   const handleDownload = () => {
+    if (!pdfUrl) return;
+    const url = pdfUrl instanceof Blob ? URL.createObjectURL(pdfUrl) : pdfUrl;
     const link = document.createElement('a');
-    link.href = pdfUrl;
+    link.href = url;
     link.download = 'document.pdf';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    if (pdfUrl instanceof Blob) {
+      URL.revokeObjectURL(url);
+    }
   };
 
   const handlePrint = () => {
-    const printWindow = window.open(pdfUrl);
-    if (printWindow) {
-      printWindow.onload = () => {
-        printWindow.print();
-      };
-    }
+    if (!pdfUrl) return;
+    const url = pdfUrl instanceof Blob ? URL.createObjectURL(pdfUrl) : pdfUrl;
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = url;
+
+    iframe.onload = () => {
+      try {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+      } catch (e) {
+        console.error('Print failed:', e);
+        alert('Could not open print dialog. Please try downloading the file and printing it.');
+      }
+    };
+    
+    document.body.appendChild(iframe);
+
+    setTimeout(() => {
+        document.body.removeChild(iframe);
+        if (pdfUrl instanceof Blob) {
+            URL.revokeObjectURL(url);
+        }
+    }, 1000);
   };
 
   return (
@@ -55,7 +87,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
         <Modal.Title>PDF Preview</Modal.Title>
       </Modal.Header>
       <Modal.Body style={{ textAlign: 'center', maxHeight: '70vh', overflowY: 'auto' }}>
-        {loading && (
+        {loading && !error &&(
           <div className="text-center">
             <Spinner animation="border" role="status" />
             <p className="mt-2">Loading PDF...</p>
@@ -67,12 +99,13 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
           file={pdfUrl}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={onDocumentLoadError}
+          onLoadStart={() => setLoading(true)}
           options={{
             cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
             cMapPacked: true,
           }}
         >
-          <Page pageNumber={pageNumber} renderAnnotationLayer={false} renderTextLayer={false} />
+          {!loading && !error && <Page pageNumber={pageNumber} renderAnnotationLayer={false} renderTextLayer={false} />}
         </Document>
       </Modal.Body>
       <Modal.Footer>

@@ -20,11 +20,9 @@ const ActivityLogsDashboardScreen = () => {
     const fetchLogs = async () => {
       try {
         const data = await getActivityLogs(currentPage, pageSize);
-        console.log('Fetched activity logs:', data);
         setLogs(data.data);
         setTotalPages(data.totalPages);
         setTotalItems(data.totalItems);
-        console.log('Activity logs set in state:', data.logs);
       } catch (error) {
         console.error('Error fetching activity logs:', error);
       }
