@@ -285,4 +285,19 @@ export const getActivityLogs = async (page = 1, limit = 20, sortBy = 'createdAt'
   }
 };
 
+export const getActivitySummary = async (startDate, endDate, entityType) => {
+  try {
+    const params = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    if (entityType) params.entityType = entityType;
+
+    const response = await api.get('/activity-logs/summary/statistics', { params });
+    return response.data;
+  } catch (error) {
+    console.error('API Get Activity Summary Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
 export default api;

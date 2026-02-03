@@ -14,6 +14,7 @@ import RecipientTrackerDetailsScreen from './screens/RecipientTrackerDetailsScre
 import UserManagementScreen from './screens/UserManagementScreen'; // Import UserManagementScreen
 import RecipientManagementScreen from './screens/RecipientManagementScreen';
 import ActivityLogsDashboardScreen from './screens/ActivityLogsDashboardScreen';
+import AnalyticsScreen from './screens/AnalyticsScreen';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -40,6 +41,14 @@ const App = () => {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
                   <AdminScreen />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/analytics"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+                  <AnalyticsScreen />
                 </ProtectedRoute>
               }
             />

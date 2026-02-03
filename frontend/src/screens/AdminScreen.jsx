@@ -16,6 +16,9 @@ const AdminScreen = () => {
       <p>{user.userId}, {role}</p>*/}
       <Link to="/users-management">User Accounts Management</Link>
       <Link to="/recipients-management" className="ms-3">Department/Office/Agency Management</Link>
+      <br /><br />
+      <Link to="/analytics">System Analytics</Link>
+      <Link to="/activity-logs-dashboard" className="ms-3">Activity Logs</Link>
     </div>
   );
 };

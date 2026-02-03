@@ -1,5 +1,6 @@
 // controllers/v2/activityLogController.js
-const { ActivityLog, User } = require('../../db');
+const { ActivityLog, User, sequelize, Sequelize } = require('../../db');
+const Op = Sequelize.Op;
 
 // Get all activity logs (with optional filters)
 exports.getAllActivityLogs = async (req, res) => {
@@ -157,8 +158,8 @@ exports.getActivitySummary = async (req, res) => {
     const where = {};
     if (startDate || endDate) {
       where.createdAt = {};
-      if (startDate) where.createdAt[sequelize.Op.gte] = new Date(startDate);
-      if (endDate) where.createdAt[sequelize.Op.lte] = new Date(endDate);
+      if (startDate) where.createdAt[Op.gte] = new Date(startDate);
+      if (endDate) where.createdAt[Op.lte] = new Date(endDate);
     }
     if (entityType) where.entityType = entityType;
 

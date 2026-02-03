@@ -101,7 +101,7 @@ async function startServer() {
       console.log('Database synchronized successfully.', { alter: SEQUELIZE_SYNC_ALTER, force: SEQUELIZE_SYNC_FORCE });
     } else {
       //await db.sequelize.sync({ alter: true});
-      console.log('Skipping database sync in production.');
+      console.log('Skipping database sync/alter in production.');
     }
 
     app.listen(PORT, () => {
