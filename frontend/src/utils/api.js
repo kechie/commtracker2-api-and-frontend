@@ -300,4 +300,14 @@ export const getActivitySummary = async (startDate, endDate, entityType) => {
   }
 };
 
+export const getSystemAnalytics = async () => {
+  try {
+    const response = await api.get('/analytics/system-stats');
+    return response.data;
+  } catch (error) {
+    console.error('API Get System Analytics Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
 export default api;
