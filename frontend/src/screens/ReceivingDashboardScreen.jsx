@@ -36,7 +36,7 @@ const ReceivingDashboardScreen = () => {
           </Button>
         </Col>
       </Row>
-      <Link to="/trackers">Manage Document Trackers</Link>
+      <Link to="/trackers">Manage Documents</Link>
       <br />
       <p>This will contain receiving-specific analytics</p>
     </Container>
