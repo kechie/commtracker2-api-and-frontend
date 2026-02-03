@@ -41,7 +41,7 @@ const RecipientTrackerDetailsScreen = () => {
         setError(null);
         const response = await getTrackerDetails(recipientId, trackerId);
         const trackerData = response.data;
-        console.log('Fetched tracker details:', trackerData);
+        //console.log('Fetched tracker details:', trackerData);
         if (!trackerData) {
           setError('Tracker not found.');
           setLoading(false);
