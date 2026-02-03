@@ -16,4 +16,11 @@ router.use(verifyToken);
  */
 router.get('/system-stats', analyticsController.getSystemStats);
 
+/**
+ * @route GET /v2/analytics/recipient/:recipientId
+ * @desc Get analytics for a specific recipient
+ * @access Private (Admin or Owner)
+ */
+router.get('/recipient/:recipientId', analyticsController.getRecipientStats);
+
 module.exports = router;

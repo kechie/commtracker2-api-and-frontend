@@ -310,4 +310,14 @@ export const getSystemAnalytics = async () => {
   }
 };
 
+export const getRecipientAnalytics = async (recipientId) => {
+  try {
+    const response = await api.get(`/analytics/recipient/${recipientId}`);
+    return response.data;
+  } catch (error) {
+    console.error('API Get Recipient Analytics Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
 export default api;

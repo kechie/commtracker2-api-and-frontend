@@ -31,6 +31,7 @@ import {
   getRecipientTrackers,
   updateRecipientTrackerStatus,
   getAttachment,
+  getRecipientAnalytics,
 } from '../utils/api';
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
@@ -44,6 +45,7 @@ const RecipientDashboardScreen = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [recipientTrackers, setRecipientTrackers] = useState([]);
+  const [stats, setStats] = useState(null);
 
   // Modal + action state
   const [showActionModal, setShowActionModal] = useState(false);
@@ -67,7 +69,7 @@ const RecipientDashboardScreen = () => {
 
   //const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3007/v2';
   useEffect(() => {
-    const fetchTrackers = async () => {
+    const fetchData = async () => {
       if (!recipientId) {
         setError("No recipient ID found. Please log in again.");
         setLoading(false);
@@ -88,19 +90,24 @@ const RecipientDashboardScreen = () => {
       };
 
       try {
-        const res = await getRecipientTrackers(recipientId, params);
-        setRecipientTrackers(res.data || []);
-        setTotalItems(res.pagination?.total || res.data?.length || 0);
-        setTotalPages(res.pagination?.totalPages || 1);
+        const [trackersRes, statsRes] = await Promise.all([
+          getRecipientTrackers(recipientId, params),
+          getRecipientAnalytics(recipientId)
+        ]);
+        
+        setRecipientTrackers(trackersRes.data || []);
+        setTotalItems(trackersRes.pagination?.total || trackersRes.data?.length || 0);
+        setTotalPages(trackersRes.pagination?.totalPages || 1);
+        setStats(statsRes);
       } catch (err) {
-        console.error('Fetch trackers failed:', err);
-        setError('Failed to load documents. Please try again.');
+        console.error('Fetch data failed:', err);
+        setError('Failed to load dashboard data. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTrackers();
+    fetchData();
   }, [recipientId, currentPage, pageSize, sortBy, sortOrder, searchTerm, dateFrom, dateTo]);
 
   const openConfirmModal = (trackerId, newStatus) => {
@@ -235,6 +242,54 @@ const RecipientDashboardScreen = () => {
 
       {error && <div className="alert alert-danger mb-3">{error}</div>}
       {success && <div className="alert alert-success mb-3">{success}</div>}
+
+      {/* Metrics Section */}
+      {stats && (
+        <Row className="mb-4 g-3">
+          <Col md={3}>
+            <div className="card text-center border-primary h-100 shadow-sm">
+              <div className="card-body">
+                <h6 className="card-subtitle mb-2 text-muted">Pending Documents</h6>
+                <h2 className="card-title text-primary">
+                  {stats.trackersByStatus?.find(s => s.status === 'pending')?.count || 0}
+                </h2>
+              </div>
+            </div>
+          </Col>
+          <Col md={3}>
+            <div className="card text-center border-info h-100 shadow-sm">
+              <div className="card-body">
+                <h6 className="card-subtitle mb-2 text-muted">In Progress</h6>
+                <h2 className="card-title text-info">
+                  {stats.trackersByStatus?.find(s => s.status === 'in-progress')?.count || 0}
+                </h2>
+              </div>
+            </div>
+          </Col>
+          <Col md={3}>
+            <div className="card text-center border-success h-100 shadow-sm">
+              <div className="card-body">
+                <h6 className="card-subtitle mb-2 text-muted">Completed</h6>
+                <h2 className="card-title text-success">
+                  {stats.trackersByStatus?.find(s => s.status === 'completed')?.count || 0}
+                </h2>
+              </div>
+            </div>
+          </Col>
+          <Col md={3}>
+            <div className="card text-center border-secondary h-100 shadow-sm">
+              <div className="card-body">
+                <h6 className="card-subtitle mb-2 text-muted">Avg Completion Time</h6>
+                <h2 className="card-title text-secondary">
+                  {stats.avgDurations?.avgTimeToComplete 
+                    ? `${stats.avgDurations.avgTimeToComplete} hrs` 
+                    : 'N/A'}
+                </h2>
+              </div>
+            </div>
+          </Col>
+        </Row>
+      )}
 
       {/* Filters */}
       <Row className="mb-4 g-3">
