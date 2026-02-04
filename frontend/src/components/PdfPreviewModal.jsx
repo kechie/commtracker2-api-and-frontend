@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Spinner, Alert } from 'react-bootstrap';
 import { Document, Page, pdfjs } from 'react-pdf';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faRedo, faUndo } from '@fortawesome/free-solid-svg-icons';
 
 // Required for react-pdf to work
 //pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -15,6 +17,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [rotation, setRotation] = useState(0);
 
   useEffect(() => {
     if (!show) {
@@ -22,6 +25,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
       setPageNumber(1);
       setLoading(true);
       setError(null);
+      setRotation(0);
     }
   }, [show]);
 
@@ -39,6 +43,9 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
 
   const goToPrevPage = () => setPageNumber(prevPage => Math.max(prevPage - 1, 1));
   const goToNextPage = () => setPageNumber(prevPage => Math.min(prevPage + 1, numPages));
+
+  const rotateLeft = () => setRotation(prev => (prev - 90 + 360) % 360);
+  const rotateRight = () => setRotation(prev => (prev + 90) % 360);
 
   const handleDownload = () => {
     if (!pdfUrl) return;
@@ -97,6 +104,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
 
         <Document
           file={pdfUrl}
+          className="d-flex justify-content-center"
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={onDocumentLoadError}
           onLoadStart={() => setLoading(true)}
@@ -105,7 +113,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
             cMapPacked: true,
           }}
         >
-          {!loading && !error && <Page pageNumber={pageNumber} renderAnnotationLayer={false} renderTextLayer={false} />}
+          {!loading && !error && <Page pageNumber={pageNumber} rotate={rotation} renderAnnotationLayer={false} renderTextLayer={false} />}
         </Document>
       </Modal.Body>
       <Modal.Footer>
@@ -116,6 +124,14 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
             </Button>
             <Button variant="secondary" onClick={goToNextPage} disabled={pageNumber >= numPages} className="ms-2">
               Next
+            </Button>
+          </div>
+          <div>
+            <Button variant="outline-secondary" onClick={rotateLeft} title="Rotate Left">
+              <FontAwesomeIcon icon={faUndo} />
+            </Button>
+            <Button variant="outline-secondary" onClick={rotateRight} className="ms-2" title="Rotate Right">
+              <FontAwesomeIcon icon={faRedo} />
             </Button>
           </div>
           <div>
