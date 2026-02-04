@@ -23,4 +23,6 @@ router.get('/system-stats', analyticsController.getSystemStats);
  */
 router.get('/recipient/:recipientId', analyticsController.getRecipientStats);
 
+router.get('/recipient', analyticsController.getRecipientStatsTest)
+//router.get('/recipient', analyticsController.getRecipientStatsTest)
 module.exports = router;

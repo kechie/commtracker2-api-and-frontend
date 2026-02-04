@@ -79,6 +79,9 @@ const UserManagementScreen = () => {
     const loadUsers = async () => {
       fetchUsers(page, limit);
     };
+    // console.log('Loading users...', page, limit)
+    // console.log(role);
+    // console.log(users)
     loadUsers();
   }, [page, limit]);
 
@@ -251,26 +254,17 @@ const UserManagementScreen = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              {user.recipient.recipientCode >= 1000 ? (
-                <>
-                {console.log(user.recipient.recipientCode, "special code")}
-                              <td>{user.username}</td>
-              <td>{user.recipient?.recipientName || 'N/A'}</td>
-              <td>{user.email}</td>
-              <td>{user.fullname}</td>
-              <td>{user.role}</td>
-              <td>Special Account (System) </td>
-                </>
-              ):(
+          {users.map((userdata) => (
+            <tr key={userdata.id}>
+
+              {userdata.recipient && userdata.recipient.recipientCode <= 1000 ? (
                 <>
               {/* <td>{user.id}</td> */}
-              <td>{user.username}</td>
-              <td>{user.recipient?.recipientName || 'N/A'}</td>
-              <td>{user.email}</td>
-              <td>{user.fullname}</td>
-              <td>{user.role}</td>
+              <td>{userdata.username}</td>
+              <td>{userdata.recipient?.recipientName || 'N/A'}</td>
+              <td>{userdata.email}</td>
+              <td>{userdata.fullname}</td>
+              <td>{userdata.role}</td>
               <td>
                 <Button variant="light" className="btn-sm mx-1" onClick={() => handleEditClick(user)}>
                   <i className="fas fa-edit"></i>
@@ -296,6 +290,16 @@ const UserManagementScreen = () => {
                   </Button>}
               </td>
                 </>
+              ):(
+              <>
+              {/*console.log(userdata.recipient.recipientCode, "special code")*/}
+              <td>{userdata.username}</td>
+              <td>{userdata.recipient?.recipientName || 'N/A'}</td>
+              <td>{userdata.email}</td>
+              <td>{userdata.fullname}</td>
+              <td>{userdata.role}</td>
+              <td>Special Account (System) </td>
+              </>
               )}
 
             </tr>

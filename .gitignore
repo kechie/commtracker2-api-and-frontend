@@ -38,3 +38,5 @@ dts2-users.csv
 dts2-recipients.csv
 frontend/src/screens/temp.txt
 frontend/src/screens/xRecipientDashboardScreen.jsx
+users.csv
+recipients.csv

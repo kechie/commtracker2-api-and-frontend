@@ -158,16 +158,16 @@ exports.getRecipientStats = async (req, res) => {
 
     // Check if the user is authorized to view these stats
     // Assuming req.user is populated by middleware
-    // if (
-    //   req.user.role !== "recipient" &&
     //   req.user.role !== "admin" &&
     //   req.user.role !== "superadmin" &&
-    //   req.user.recipientId !== recipientId
-    // ) {
-    //  return res
-    //    .status(403)
-    //    .json({ error: "Unauthorized to view these statistics" });
-    //}
+
+    if (req.user.role !== "recipient" && req.user.recipientId !== recipientId)
+      {
+        console.error("Reached access control error");
+      return res
+        .status(403)
+        .json({ error: "Unauthorized to view these statistics" });
+      }
 
     // 1. Counts by Status
     const trackersByStatus = await TrackerRecipient.findAll({
@@ -231,3 +231,29 @@ exports.getRecipientStats = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch recipient analytics" });
   }
 };
+
+
+//Test export for /analytics/recipient endpoint
+exports.getRecipientStatsTest = async (req, res) => {
+  try {
+    const { recipientId } = req.params;
+    console.log("Recipient ID:", recipientId)
+    console.log(req.params)
+    console.log(req.user.role)
+    console.log(req.user.recipientId)
+    if (req.user.role !== "superadmin" && req.user.recipientId !== recipientId)
+      {
+        console.error("Reached access control error");
+      return res
+        .status(403)
+        .json({ error: "Unauthorized to view these statistics" });
+      }
+
+    return res.json({
+      "result": "Test OK"
+    })
+  } catch (error){
+    console.log(req.user.recipientId, error)
+    }
+};
+
