@@ -202,14 +202,14 @@ const RecipientManagementScreen = () => {
                 >
                   <FontAwesomeIcon icon={faEdit} />
                 </Button>
-                <Button
+{/*                <Button
                   variant="danger"
                   className="btn-sm mx-1"
                   onClick={() => deleteHandler(recipient.id)}
                   title="Delete recipient"
                 >
                   <FontAwesomeIcon icon={faTrash} />
-                </Button>
+                </Button> */}
               </td>
             </tr>
           ))}

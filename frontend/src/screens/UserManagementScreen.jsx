@@ -253,6 +253,18 @@ const UserManagementScreen = () => {
         <tbody>
           {users.map((user) => (
             <tr key={user.id}>
+              {user.recipient.recipientCode >= 1000 ? (
+                <>
+                {console.log(user.recipient.recipientCode, "special code")}
+                              <td>{user.username}</td>
+              <td>{user.recipient?.recipientName || 'N/A'}</td>
+              <td>{user.email}</td>
+              <td>{user.fullname}</td>
+              <td>{user.role}</td>
+              <td>Special Account (System) </td>
+                </>
+              ):(
+                <>
               {/* <td>{user.id}</td> */}
               <td>{user.username}</td>
               <td>{user.recipient?.recipientName || 'N/A'}</td>
@@ -283,6 +295,9 @@ const UserManagementScreen = () => {
                     <FontAwesomeIcon icon={faTrash} />
                   </Button>}
               </td>
+                </>
+              )}
+
             </tr>
           ))}
         </tbody>

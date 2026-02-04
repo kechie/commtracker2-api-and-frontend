@@ -25,6 +25,7 @@ import {
   Dropdown,
   DropdownButton,
   Modal,
+  Alert,
 } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import {
@@ -66,6 +67,21 @@ const RecipientDashboardScreen = () => {
   const [sortOrder, setSortOrder] = useState('DESC');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   //const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3007/v2';
   useEffect(() => {
@@ -94,7 +110,7 @@ const RecipientDashboardScreen = () => {
           getRecipientTrackers(recipientId, params),
           getRecipientAnalytics(recipientId)
         ]);
-
+        console.log(statsRes);
         setRecipientTrackers(trackersRes.data || []);
         setTotalItems(trackersRes.pagination?.total || trackersRes.data?.length || 0);
         setTotalPages(trackersRes.pagination?.totalPages || 1);
@@ -108,7 +124,7 @@ const RecipientDashboardScreen = () => {
     };
 
     fetchData();
-  }, [recipientId, currentPage, pageSize, sortBy, sortOrder, searchTerm, dateFrom, dateTo]);
+  }, [recipientId, currentPage, pageSize, sortBy, sortOrder, searchTerm, dateFrom, dateTo, refreshTrigger]);
 
   const openConfirmModal = (trackerId, newStatus) => {
     const tracker = recipientTrackers.find(t => t.tracker.id === trackerId);
@@ -144,6 +160,7 @@ const RecipientDashboardScreen = () => {
       );
 
       setSuccess(`Status changed to ${newStatus}`);
+      setRefreshTrigger(prev => prev + 1);
     } catch (err) {
       console.error('Update failed:', err);
       setError(err?.response?.data?.message || 'Could not update status');
@@ -197,6 +214,7 @@ const RecipientDashboardScreen = () => {
     // });
     setShowPdfModal(false);
     setSelectedPdfUrl(null);
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleBack = () => navigate('/');
@@ -240,8 +258,8 @@ const RecipientDashboardScreen = () => {
         </Col>
       </Row>
 
-      {error && <div className="alert alert-danger mb-3">{error}</div>}
-      {success && <div className="alert alert-success mb-3">{success}</div>}
+      {error && <Alert variant="danger" dismissible onClose={() => setError(null)} className="mb-3">{error}</Alert>}
+      {success && <Alert variant="success" dismissible onClose={() => setSuccess(null)} className="mb-3">{success}</Alert>}
       {/*<Row><p>{recipientId}</p></Row>*/}
       {/* Metrics Section */}
       {stats && (
