@@ -250,13 +250,13 @@ const RecipientDashboardScreen = () => {
     <Container>
       <h1>Recipient Dashboard</h1>
 
-      <Row className="align-items-center mb-4">
+{/*       <Row className="align-items-center mb-4">
         <Col xs="auto">
           <Button variant="light" onClick={handleBack} className="d-flex align-items-center gap-2">
             <FontAwesomeIcon icon={faArrowLeft} /> Back
           </Button>
         </Col>
-      </Row>
+      </Row> */}
 
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)} className="mb-3">{error}</Alert>}
       {success && <Alert variant="success" dismissible onClose={() => setSuccess(null)} className="mb-3">{success}</Alert>}
