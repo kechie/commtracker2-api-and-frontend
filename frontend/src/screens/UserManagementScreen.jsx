@@ -15,6 +15,7 @@ const UserManagementScreen = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
+  const [recipients, setRecipients] = useState([]);
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -30,6 +31,7 @@ const UserManagementScreen = () => {
     fullname: '',
     email: '',
     role: '',
+    recipientId: '',
   });
   // Password reset state
   const [showResetModal, setShowResetModal] = useState(false);
@@ -43,6 +45,7 @@ const UserManagementScreen = () => {
     email: '',
     fullname: '',
     userrole: 'user',
+    recipientId: '',
   });
 
   // Auto-close alert after 5 seconds
@@ -85,6 +88,18 @@ const UserManagementScreen = () => {
     loadUsers();
   }, [page, limit]);
 
+  useEffect(() => {
+    const fetchRecipientsList = async () => {
+      try {
+        const { data } = await api.get('/recipients/all');
+        setRecipients(data.recipients || data);
+      } catch (err) {
+        console.error('Failed to fetch recipients:', err);
+      }
+    };
+    fetchRecipientsList();
+  }, []);
+
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
@@ -117,6 +132,7 @@ const UserManagementScreen = () => {
       fullname: user.fullname,
       email: user.email,
       role: user.role,
+      recipientId: user.recipientId || (user.recipient ? user.recipient.id : ''),
     });
     setShowEditModal(true);
   };
@@ -131,6 +147,7 @@ const UserManagementScreen = () => {
       email: '',
       fullname: '',
       userrole: 'user',
+      recipientId: '',
     });
   };
 
@@ -148,7 +165,8 @@ const UserManagementScreen = () => {
       const updateData = {
         fullname: formData.fullname,
         email: formData.email,
-        role: formData.role
+        role: formData.role,
+        recipientId: formData.recipientId || null,
       };
       await api.put(`/users/${currentUser.id}`, updateData);
       fetchUsers(page, limit);
@@ -161,7 +179,11 @@ const UserManagementScreen = () => {
 
   const handleCreateUser = async () => {
     try {
-      await api.post('/auth/register', createFormData);
+      const payload = {
+        ...createFormData,
+        recipientId: createFormData.recipientId || null,
+      };
+      await api.post('/auth/register', payload);
       fetchUsers(1, limit);
       handleModalClose();
     } catch (err) {
@@ -266,7 +288,7 @@ const UserManagementScreen = () => {
               <td>{userdata.fullname}</td>
               <td>{userdata.role}</td>
               <td>
-                <Button variant="light" className="btn-sm mx-1" onClick={() => handleEditClick(user)}>
+                <Button variant="light" className="btn-sm mx-1" onClick={() => handleEditClick(userdata)}>
                   <i className="fas fa-edit"></i>
                   <FontAwesomeIcon icon={faEdit} />
                 </Button>
@@ -274,7 +296,7 @@ const UserManagementScreen = () => {
                   variant="outline-warning"
                   size="sm"
                   className="btn-sm mx-1"
-                  onClick={() => handleResetPasswordClick(user)}
+                  onClick={() => handleResetPasswordClick(userdata)}
                   title="Reset password"
                 >
                   <FontAwesomeIcon icon={faKey} />
@@ -283,7 +305,7 @@ const UserManagementScreen = () => {
                   <Button
                     variant="danger"
                     className="btn-sm mx-1"
-                    onClick={() => deleteHandler(user.id)}
+                    onClick={() => deleteHandler(userdata.id)}
                   >
                     <i className="fas fa-trash"></i>
                     <FontAwesomeIcon icon={faTrash} />
@@ -398,6 +420,19 @@ const UserManagementScreen = () => {
                 {/*superadmin', 'admin', 'receiving', 'recipient', 'viewer', 'monitor', 'staff' */}
               </Form.Control>
             </Form.Group>
+            <Form.Group className="mb-3" controlId="formRecipientId">
+              <Form.Label>Recipient (Office/Agency)</Form.Label>
+              <Form.Select
+                name="recipientId"
+                value={formData.recipientId}
+                onChange={handleFormChange}
+              >
+                <option value="">None</option>
+                {recipients.map((r) => (
+                  <option key={r.id} value={r.id}>{r.recipientName}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
@@ -470,6 +505,19 @@ const UserManagementScreen = () => {
                 <option value="monitor">Monitor</option>
                 <option value="staff">Staff</option>
               </Form.Control>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formCreateRecipientId">
+              <Form.Label>Recipient (Office/Agency)</Form.Label>
+              <Form.Select
+                name="recipientId"
+                value={createFormData.recipientId}
+                onChange={handleCreateFormChange}
+              >
+                <option value="">None</option>
+                {recipients.map((r) => (
+                  <option key={r.id} value={r.id}>{r.recipientName}</option>
+                ))}
+              </Form.Select>
             </Form.Group>
           </Form>
         </Modal.Body>
