@@ -151,18 +151,23 @@ exports.getSystemStats = async (req, res) => {
 exports.getRecipientStats = async (req, res) => {
   try {
     const { recipientId } = req.params;
+    console.log("Recipient ID:", recipientId)
+    console.log(req.params)
+    console.log(req.user.role)
+    //console.log(req.user.recipientId)
 
     // Check if the user is authorized to view these stats
     // Assuming req.user is populated by middleware
-    if (
-      req.user.role !== "recipient" &&
-      req.user.role !== "superadmin" &&
-      req.user.recipientId !== recipientId
-    ) {
-      return res
-        .status(403)
-        .json({ error: "Unauthorized to view these statistics" });
-    }
+    // if (
+    //   req.user.role !== "recipient" &&
+    //   req.user.role !== "admin" &&
+    //   req.user.role !== "superadmin" &&
+    //   req.user.recipientId !== recipientId
+    // ) {
+    //  return res
+    //    .status(403)
+    //    .json({ error: "Unauthorized to view these statistics" });
+    //}
 
     // 1. Counts by Status
     const trackersByStatus = await TrackerRecipient.findAll({

@@ -94,7 +94,7 @@ const RecipientDashboardScreen = () => {
           getRecipientTrackers(recipientId, params),
           getRecipientAnalytics(recipientId)
         ]);
-        
+
         setRecipientTrackers(trackersRes.data || []);
         setTotalItems(trackersRes.pagination?.total || trackersRes.data?.length || 0);
         setTotalPages(trackersRes.pagination?.totalPages || 1);
@@ -242,7 +242,7 @@ const RecipientDashboardScreen = () => {
 
       {error && <div className="alert alert-danger mb-3">{error}</div>}
       {success && <div className="alert alert-success mb-3">{success}</div>}
-
+      {/*<Row><p>{recipientId}</p></Row>*/}
       {/* Metrics Section */}
       {stats && (
         <Row className="mb-4 g-3">
@@ -279,10 +279,13 @@ const RecipientDashboardScreen = () => {
           <Col md={3}>
             <div className="card text-center border-secondary h-100 shadow-sm">
               <div className="card-body">
-                <h6 className="card-subtitle mb-2 text-muted">Avg Completion Time</h6>
+                <h6 className="card-subtitle mb-2 text-muted">Avg Completion / Seen</h6>
                 <h2 className="card-title text-secondary">
-                  {stats.avgDurations?.avgTimeToComplete 
-                    ? `${stats.avgDurations.avgTimeToComplete} hrs` 
+                  {stats.avgDurations?.avgTimeToComplete
+                    ? `${stats.avgDurations.avgTimeToComplete} hrs`
+                    : 'N/A'} &nbsp;/&nbsp;
+                  {stats.avgDurations?.avgTimeToSeen
+                    ? `${stats.avgDurations.avgTimeToSeen} hrs`
                     : 'N/A'}
                 </h2>
               </div>
