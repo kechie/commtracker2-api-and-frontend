@@ -6,7 +6,9 @@ import startOfWeek from 'date-fns/startOfWeek';
 import getDay from 'date-fns/getDay';
 import enUS from 'date-fns/locale/en-US';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { Container, Card, Spinner, Alert, Button, Modal } from 'react-bootstrap';
+import { Container, Card, Spinner, Alert, Button, Modal, Row, Col } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import api from '../utils/api';
@@ -40,7 +42,7 @@ const CalendarScreen = () => {
         setLoading(true);
         // Fetch all trackers with due dates (we can optimize this later to fetch by range)
         const response = await api.get(`/recipients/${user.recipientId}/trackers/all`);
-        
+
         if (response.data && response.data.data) {
           const calendarEvents = response.data.data
             .filter(item => item.dueDate) // Only items with due dates
@@ -76,10 +78,25 @@ const CalendarScreen = () => {
     }
   };
 
+  const handleBack = () => {
+    //navigate(-1);
+    navigate('/recipient-dashboard');
+  }
   return (
     <Container fluid className="p-4">
-      <h2 className="mb-4">My Calendar</h2>
-
+      <h2 className="mb-4">My Calendar (work in progress)</h2>
+      <Row className="align-items-left mb-3">
+        <Col>
+          <Button
+            variant="light"
+            onClick={handleBack}
+            className="d-flex align-items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+            Back
+          </Button>
+        </Col>
+      </Row>
       {error && <Alert variant="danger">{error}</Alert>}
 
       <Card className="shadow-sm">
@@ -104,7 +121,7 @@ const CalendarScreen = () => {
                  if (status === 'completed') backgroundColor = '#28a745';
                  if (status === 'pending') backgroundColor = '#ffc107';
                  if (status === 'rejected') backgroundColor = '#dc3545';
-                 
+
                  return { style: { backgroundColor } };
               }}
             />
