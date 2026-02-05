@@ -203,14 +203,14 @@ exports.updateUser = async (req, res) => {
     // ──────────────────────────────────────────────
     if (req.user.role !== 'superadmin') {
       // Normal admin cannot change role or upgrade privileges
-      if (role && role !== targetUser.role) {
+      if (role && role !== user.role) {
         return res.status(403).json({
           error: 'Only superadmin can change user roles'
         });
       }
 
       // Optional: prevent admin from modifying superadmin
-      if (targetUser.role === 'superadmin') {
+      if (user.role === 'superadmin') {
         return res.status(403).json({
           error: 'Superadmin accounts can only be modified by another superadmin'
         });

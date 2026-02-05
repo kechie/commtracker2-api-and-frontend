@@ -213,7 +213,8 @@ const UserManagementScreen = () => {
 
     try {
       await api.put(`/users/${resetUserId}/reset-password`, { newPassword });
-      alert('Password has been reset successfully');
+      setSuccess('Password has been reset successfully');
+      setShowAlert(true);
       setShowResetModal(false);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to reset password');
@@ -433,6 +434,19 @@ const UserManagementScreen = () => {
                 ))}
               </Form.Select>
             </Form.Group>
+            <hr />
+            <div className="d-grid">
+              <Button 
+                variant="outline-warning" 
+                onClick={() => {
+                  setShowEditModal(false);
+                  handleResetPasswordClick(currentUser);
+                }}
+              >
+                <FontAwesomeIcon icon={faKey} className="me-2" />
+                Reset User Password
+              </Button>
+            </div>
           </Form>
         </Modal.Body>
         <Modal.Footer>

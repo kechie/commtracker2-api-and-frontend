@@ -7,9 +7,10 @@ export default defineConfig({
     chunkSizeWarningLimit: 1600,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom']
-        }
+      manualChunks: undefined, // Remove manualChunks
+      advancedChunks: {
+        groups: [{ name: 'vendor', test:  /[\\/]node_modules[\\/](react|react-dom)[\\/]/ }]
+          }
       }
     }
   },
