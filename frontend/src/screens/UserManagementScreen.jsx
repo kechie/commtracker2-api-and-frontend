@@ -249,6 +249,7 @@ const UserManagementScreen = () => {
 
   return (
     <Container>
+    <h1>User Accounts Management</h1>
       <Row className="align-items-left mb-3">
         <Col>
           <Button
@@ -295,6 +296,7 @@ const UserManagementScreen = () => {
           {success}
         </Alert>
       )}
+      <Row className="align-items-center my-3">
       <Table striped bordered hover responsive className="table-sm">
         <thead>
           <tr>
@@ -360,7 +362,7 @@ const UserManagementScreen = () => {
           ))}
         </tbody>
       </Table>
-
+</Row>
       {/* Pagination Controls */}
       <Row className="align-items-center my-3">
         <Col md={4}>
@@ -467,8 +469,8 @@ const UserManagementScreen = () => {
             </Form.Group>
             <hr />
             <div className="d-grid">
-              <Button 
-                variant="outline-warning" 
+              <Button
+                variant="outline-warning"
                 onClick={() => {
                   setShowEditModal(false);
                   handleResetPasswordClick(currentUser);

@@ -8,9 +8,10 @@ const { logRecipientActivity } = require('../../utils/activityLogger');
 // @access  Private
 exports.getRecipients = async (req, res) => {
   try {
-    // Get pagination parameters from query string
+    // Get pagination and search parameters from query string
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
     const offset = (page - 1) * limit;
 
     // Validate pagination parameters
@@ -18,13 +19,27 @@ exports.getRecipients = async (req, res) => {
       return res.status(400).json({ error: 'Page and limit must be positive integers' });
     }
 
-    // Fetch recipients with pagination, excluding codes greater than 1000
+    const whereClause = {
+      recipientCode: {
+        [Op.lte]: 1000
+      }
+    };
+
+    if (search) {
+      whereClause[Op.or] = [
+        { recipientName: { [Op.iLike]: `%${search}%` } },
+        { initial: { [Op.iLike]: `%${search}%` } }
+      ];
+      
+      // If search is a number, also search by recipientCode
+      if (!isNaN(search)) {
+        whereClause[Op.or].push({ recipientCode: parseInt(search) });
+      }
+    }
+
+    // Fetch recipients with pagination
     const { count, rows } = await Recipient.findAndCountAll({
-      where: {
-        recipientCode: {
-          [Op.lte]: 1000
-        }
-      },
+      where: whereClause,
       limit,
       offset,
       order: [['recipientCode', 'ASC']],
@@ -74,13 +89,11 @@ exports.getAllRecipients = async (req, res) => {
 // @access  Private
 exports.createRecipient = async (req, res) => {
   try {
-    const { recipient_name, address, contactPerson, contactEmail, contactPhone } = req.body;
+    const { recipientCode, recipientName, initial } = req.body;
     const recipient = await Recipient.create({
-      recipient_name,
-      address,
-      contactPerson,
-      contactEmail,
-      contactPhone,
+      recipientCode,
+      recipientName,
+      initial,
     });
 
     // Log recipient creation
@@ -88,8 +101,8 @@ exports.createRecipient = async (req, res) => {
       userId: req.user?.id,
       action: 'CREATE',
       entityId: recipient.id,
-      description: `Created recipient: ${recipient_name}`,
-      details: { contactPerson, contactEmail, contactPhone },
+      description: `Created recipient: ${recipientName}`,
+      details: { recipientCode, initial },
       ipAddress: req.clientIp,
       userAgent: req.clientUserAgent,
       status: 'success'
@@ -118,14 +131,12 @@ exports.createRecipient = async (req, res) => {
 exports.updateRecipient = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, address, contactPerson, contactEmail, contactPhone } = req.body;
+    const { recipientCode, recipientName, initial } = req.body;
     const recipient = await Recipient.findByPk(id);
     if (recipient) {
-      recipient.name = name;
-      recipient.address = address;
-      recipient.contactPerson = contactPerson;
-      recipient.contactEmail = contactEmail;
-      recipient.contactPhone = contactPhone;
+      recipient.recipientCode = recipientCode;
+      recipient.recipientName = recipientName;
+      recipient.initial = initial;
       await recipient.save();
       res.json(recipient);
     } else {
@@ -136,6 +147,7 @@ exports.updateRecipient = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 // @desc    Delete a recipient
 // @route   DELETE /api/v2/recipients/:id

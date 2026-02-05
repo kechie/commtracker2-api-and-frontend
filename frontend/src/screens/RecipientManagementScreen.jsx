@@ -13,11 +13,13 @@ const RecipientManagementScreen = () => {
   const [error, setError] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
 
-  // Pagination state
+  // Pagination and Search state
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchInput, setSearchInput] = useState('');
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -44,9 +46,9 @@ const RecipientManagementScreen = () => {
     }
   }, [showAlert]);
 
-  const fetchRecipients = async (pageNum = 1, pageLimit = 10) => {
+  const fetchRecipients = async (pageNum = 1, pageLimit = 10, search = '') => {
     try {
-      const { data } = await api.get(`/recipients?page=${pageNum}&limit=${pageLimit}`);
+      const { data } = await api.get(`/recipients?page=${pageNum}&limit=${pageLimit}&search=${search}`);
       setRecipients(Array.isArray(data.recipients) ? data.recipients : []);
       setTotal(data.pagination.total);
       setTotalPages(data.pagination.totalPages);
@@ -63,28 +65,44 @@ const RecipientManagementScreen = () => {
 
   useEffect(() => {
     const loadRecipients = async () => {
-      fetchRecipients(page, limit);
+      fetchRecipients(page, limit, searchTerm);
     }
     loadRecipients();
-  }, [page, limit]);
+  }, [page, limit, searchTerm]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
-      fetchRecipients(newPage, limit);
+      fetchRecipients(newPage, limit, searchTerm);
     }
   };
 
   const handleLimitChange = (e) => {
     const newLimit = parseInt(e.target.value);
     setLimit(newLimit);
-    fetchRecipients(1, newLimit);
+    fetchRecipients(1, newLimit, searchTerm);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchInput(e.target.value);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setSearchTerm(searchInput);
+    setPage(1); // Reset to first page on new search
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearchTerm('');
+    setPage(1);
   };
 
   const deleteHandler = async (id) => {
     if (window.confirm('Are you sure you want to delete this recipient?')) {
       try {
         await api.delete(`/recipients/${id}`);
-        fetchRecipients(page, limit);
+        fetchRecipients(page, limit, searchTerm);
       } catch (err) {
         setError(err.response?.data?.error || 'Failed to delete recipient');
         setShowAlert(true);
@@ -122,7 +140,7 @@ const RecipientManagementScreen = () => {
   const handleSaveChanges = async () => {
     try {
       await api.put(`/recipients/${currentRecipient.id}`, formData);
-      fetchRecipients(page, limit);
+      fetchRecipients(page, limit, searchTerm);
       handleModalClose();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update recipient');
@@ -133,7 +151,7 @@ const RecipientManagementScreen = () => {
   const handleCreateRecipient = async () => {
     try {
       await api.post('/recipients', createFormData);
-      fetchRecipients(1, limit);
+      fetchRecipients(1, limit, searchTerm);
       handleModalClose();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create recipient');
@@ -162,10 +180,25 @@ const RecipientManagementScreen = () => {
         </Col>
       </Row>
       <Row className="align-items-center">
-        <Col>
+        <Col md={6}>
           <h5>Department/Office/Agency (Doc/Comm Recipients)</h5>
         </Col>
-        <Col className="text-end">
+        <Col md={3}>
+           <Form onSubmit={handleSearchSubmit} className="d-flex">
+            <Form.Control
+              type="text"
+              placeholder="Search recipients..."
+              className="me-2"
+              value={searchInput}
+              onChange={handleSearchChange}
+            />
+            <Button type="submit" variant="outline-primary">Search</Button>
+            {searchTerm && (
+              <Button variant="outline-secondary" className="ms-2" onClick={handleClearSearch}>Clear</Button>
+            )}
+          </Form>
+        </Col>
+        <Col md={3} className="text-end">
           <Button className="my-3" onClick={() => setShowCreateModal(true)}>
             <FontAwesomeIcon icon={faPlus} /> New Recipient
           </Button>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Dropdown, ButtonGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarPlus } from '@fortawesome/free-solid-svg-icons';
