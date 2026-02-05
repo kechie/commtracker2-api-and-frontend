@@ -58,6 +58,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       field: 'remarks'
     },
+    dueDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'due_date'
+    },
     completedAt: {
       type: DataTypes.DATE,
       allowNull: true,

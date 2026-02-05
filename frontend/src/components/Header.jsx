@@ -1,7 +1,7 @@
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap'; // Import NavDropdown
 import { LinkContainer } from 'react-router-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperPlane, faSignInAlt, faSignOutAlt, faUser, faUserCog, faFileAlt, faChartBar } from '@fortawesome/free-solid-svg-icons'; // Import more icons
+import { faPaperPlane, faSignInAlt, faSignOutAlt, faUser, faUserCog, faFileAlt, faChartBar, faCalendarAlt } from '@fortawesome/free-solid-svg-icons'; // Import more icons
 import { useAuth } from '../context/useAuth'; // Import useAuth
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
@@ -16,6 +16,7 @@ const Header = () => {
 
   const canAccessTrackers = ['receiving', 'admin', 'superadmin'].includes(role);
   const canAccessReceivingDashboard = ['receiving', 'admin', 'superadmin'].includes(role);
+  const canAccessCalendar = ['recipient', 'admin', 'superadmin'].includes(role);
 
   return (
     <header>
@@ -45,6 +46,15 @@ const Header = () => {
                     <LinkContainer to="/trackers">
                       <Nav.Link>
                         <FontAwesomeIcon icon={faFileAlt} className="me-1" /> DocTrkr2s
+                      </Nav.Link>
+                    </LinkContainer>
+                  )}
+
+                  {/* Calendar Link */}
+                  {canAccessCalendar && (
+                    <LinkContainer to="/calendar">
+                      <Nav.Link>
+                        <FontAwesomeIcon icon={faCalendarAlt} className="me-1" /> Calendar
                       </Nav.Link>
                     </LinkContainer>
                   )}

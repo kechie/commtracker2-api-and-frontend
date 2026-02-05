@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faDownload, faEye } from '@fortawesome/free-solid-svg-icons';
 import { getTrackerDetails, updateRecipientTrackerStatus } from '../utils/api';
 import PdfPreviewModal from '../components/PdfPreviewModal';
+import AddToCalendarButton from '../components/AddToCalendarButton';
 
 const RecipientTrackerDetailsScreen = () => {
   const { recipientId, trackerId } = useParams();
@@ -162,23 +163,35 @@ const RecipientTrackerDetailsScreen = () => {
               <p className="text-muted">{trackerData.serialNumber || '—'}</p>
             </Col>
             <Col md={6}>
-              <h5>Status</h5>
-              <p>
-                <Badge
-                  bg={
-                    tracker.status === 'approved' ? 'success' :
-                      tracker.status === 'noted' ? 'info' :
-                        tracker.status === 'in-progress' ? 'primary' :
-                          tracker.status === 'rejected' ? 'danger' :
-                            tracker.status === 'forwarded' ? 'secondary' :
-                              tracker.status === 'completed' ? 'success' :
-                                'secondary'
-                  }
-                  className="text-uppercase fs-6"
-                >
-                  {tracker.status || 'unknown'}
-                </Badge>
-              </p>
+              <div className="d-flex justify-content-between align-items-start">
+                <div>
+                  <h5>Status</h5>
+                  <p>
+                    <Badge
+                      bg={
+                        tracker.status === 'approved' ? 'success' :
+                          tracker.status === 'noted' ? 'info' :
+                            tracker.status === 'in-progress' ? 'primary' :
+                              tracker.status === 'rejected' ? 'danger' :
+                                tracker.status === 'forwarded' ? 'secondary' :
+                                  tracker.status === 'completed' ? 'success' :
+                                    'secondary'
+                      }
+                      className="text-uppercase fs-6"
+                    >
+                      {tracker.status || 'unknown'}
+                    </Badge>
+                  </p>
+                </div>
+                {tracker.dueDate && (
+                  <AddToCalendarButton
+                    title={trackerData.documentTitle || 'Tracker Item'}
+                    description={`Ref: ${trackerData.serialNumber}\nFrom: ${trackerData.fromName}\nRemarks: ${trackerData.remarks || ''}`}
+                    startDate={tracker.dueDate}
+                    location="Office"
+                  />
+                )}
+              </div>
             </Col>
           </Row>
 
@@ -196,6 +209,17 @@ const RecipientTrackerDetailsScreen = () => {
               </p>
             </Col>
           </Row>
+
+          {tracker.dueDate && (
+            <Row className="mb-3">
+              <Col md={6}>
+                <h5>Due Date</h5>
+                <p className="text-danger fw-bold">
+                  {new Date(tracker.dueDate).toLocaleDateString()} {new Date(tracker.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </Col>
+            </Row>
+          )}
 
           <Row className="mb-3">
             <Col>

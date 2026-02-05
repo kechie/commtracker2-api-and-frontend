@@ -18,6 +18,9 @@ const ALLOWED_MIME_TYPES = [
   'text/plain'
 ];
 
+const { Op } = require('sequelize');
+// ... (imports)
+
 /**
  * @desc    Get paginated list of trackers received by a specific recipient
  * @route   GET /api/v2/recipients/:recipientId/trackers
@@ -26,18 +29,30 @@ const ALLOWED_MIME_TYPES = [
 exports.getReceivedTrackers = async (req, res) => {
   try {
     const { recipientId } = req.params;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, startDate, endDate } = req.query;
     const offset = (page - 1) * limit;
 
+    const where = { recipientId };
+
+    if (startDate || endDate) {
+      where.dueDate = {};
+      if (startDate) {
+        where.dueDate[Op.gte] = new Date(startDate);
+      }
+      if (endDate) {
+        where.dueDate[Op.lte] = new Date(endDate);
+      }
+    }
+
     const { count, rows: receivedTrackers } = await TrackerRecipient.findAndCountAll({
-      where: { recipientId },
+      where,
       include: [
         {
           model: Tracker,
           as: 'tracker',
         },
       ],
-      order: [['createdAt', 'DESC']],
+      order: [['dueDate', 'ASC'], ['createdAt', 'DESC']],
       offset,
       limit,
     });
@@ -70,16 +85,29 @@ exports.getReceivedTrackers = async (req, res) => {
 exports.getAllReceivedTrackers = async (req, res) => {
   try {
     const { recipientId } = req.params;
+    const { startDate, endDate } = req.query;
+
+    const where = { recipientId };
+
+    if (startDate || endDate) {
+      where.dueDate = {};
+      if (startDate) {
+        where.dueDate[Op.gte] = new Date(startDate);
+      }
+      if (endDate) {
+        where.dueDate[Op.lte] = new Date(endDate);
+      }
+    }
 
     const receivedTrackers = await TrackerRecipient.findAll({
-      where: { recipientId },
+      where,
       include: [
         {
           model: Tracker,
           as: 'tracker',
         },
       ],
-      order: [['createdAt', 'DESC']],
+      order: [['dueDate', 'ASC'], ['createdAt', 'DESC']],
     });
 
     res.json({

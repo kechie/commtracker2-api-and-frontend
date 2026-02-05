@@ -113,6 +113,7 @@ exports.getRecipientTrackers = async (req, res) => {
         'seenAt',
         'readAt',
         'acknowledgedAt',
+        'dueDate',
         'completedAt',
         'createdAt',
         'updatedAt',
@@ -229,7 +230,7 @@ exports.upsertTrackerRecipient = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { trackerId, recipientId } = req.params;
-    const { status, action, remarks } = req.body;
+    const { status, action, remarks, dueDate } = req.body;
 
     // Verify tracker and recipient exist
     const tracker = await Tracker.findByPk(trackerId, { transaction });
@@ -272,6 +273,7 @@ exports.upsertTrackerRecipient = async (req, res) => {
     }
     if (action !== undefined) updateData.action = action;
     if (remarks !== undefined) updateData.remarks = remarks;
+    if (dueDate !== undefined) updateData.dueDate = dueDate;
 
     // Find or create tracker-recipient
     const [trackerRecipient, created] = await TrackerRecipient.findOrCreate({
@@ -284,7 +286,8 @@ exports.upsertTrackerRecipient = async (req, res) => {
         recipientId,
         status: status || 'pending',
         action: action || null,
-        remarks: remarks || null
+        remarks: remarks || null,
+        dueDate: dueDate || null
       },
       transaction
     });
@@ -347,7 +350,7 @@ exports.updateTrackerRecipientStatus = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
-    const { status, remarks } = req.body;
+    const { status, remarks, dueDate } = req.body;
 
     const trackerRecipient = await TrackerRecipient.findByPk(id, { transaction });
 
@@ -377,6 +380,7 @@ exports.updateTrackerRecipientStatus = async (req, res) => {
     }
 
     if (remarks !== undefined) updateData.remarks = remarks;
+    if (dueDate !== undefined) updateData.dueDate = dueDate;
 
     await trackerRecipient.update(updateData, { transaction });
     await transaction.commit();
