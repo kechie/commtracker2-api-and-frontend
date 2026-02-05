@@ -22,6 +22,7 @@ const UserManagementScreen = () => {
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -58,11 +59,15 @@ const UserManagementScreen = () => {
     }
   }, [showAlert]);
 
-  const fetchUsers = async (targetPage, targetLimit) => {
+  const fetchUsers = async (targetPage, targetLimit, search = '') => {
     setLoading(true);
 
     try {
-      const { data } = await api.get(`/users?page=${targetPage}&limit=${targetLimit}`);
+      let url = `/users?page=${targetPage}&limit=${targetLimit}`;
+      if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+      }
+      const { data } = await api.get(url);
 
       // Batch updates - React 18+ will batch them anyway, but it's clearer
       setUsers(data.users);
@@ -80,13 +85,19 @@ const UserManagementScreen = () => {
 
   useEffect(() => {
     const loadUsers = async () => {
-      fetchUsers(page, limit);
+      fetchUsers(page, limit, searchTerm);
     };
     // console.log('Loading users...', page, limit)
     // console.log(role);
     // console.log(users)
     loadUsers();
   }, [page, limit]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setPage(1);
+    fetchUsers(1, limit, searchTerm);
+  };
 
   useEffect(() => {
     const fetchRecipientsList = async () => {
@@ -116,7 +127,7 @@ const UserManagementScreen = () => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
         await api.delete(`/users/${id}`);
-        fetchUsers(page, limit);
+        fetchUsers(page, limit, searchTerm);
         setSuccess('User deleted successfully!');
       } catch (err) {
         setError(err.response?.data?.error || 'Failed to delete user');
@@ -169,7 +180,7 @@ const UserManagementScreen = () => {
         recipientId: formData.recipientId || null,
       };
       await api.put(`/users/${currentUser.id}`, updateData);
-      fetchUsers(page, limit);
+      fetchUsers(page, limit, searchTerm);
       handleModalClose();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update user');
@@ -180,12 +191,18 @@ const UserManagementScreen = () => {
   const handleCreateUser = async () => {
     try {
       const payload = {
-        ...createFormData,
+        username: createFormData.username,
+        password: createFormData.password,
+        email: createFormData.email,
+        fullname: createFormData.fullname,
+        role: createFormData.userrole, // map userrole from form to role for API
         recipientId: createFormData.recipientId || null,
       };
-      await api.post('/auth/register', payload);
-      fetchUsers(1, limit);
+      await api.post('/users', payload);
+      fetchUsers(1, limit, searchTerm);
       handleModalClose();
+      setSuccess('User created successfully!');
+      setShowAlert(true);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create user');
       setShowAlert(true);
@@ -245,12 +262,26 @@ const UserManagementScreen = () => {
         </Col>
       </Row>
       <Row className="align-items-center">
-        <Col>
+        <Col md={4}>
           <h5>Doc Tracker User Accounts</h5>
         </Col>
-        <Col className="text-end">
-          <Button className="my-3" onClick={() => setShowCreateModal(true)}>
-            <i className="fas fa-plus"></i> <FontAwesomeIcon icon={faPlus} /> Create User Account
+        <Col md={5}>
+          <Form onSubmit={handleSearch} className="d-flex">
+            <Form.Control
+              type="text"
+              placeholder="Search by username, name or email..."
+              className="me-2"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Button variant="outline-primary" type="submit">
+              Search
+            </Button>
+          </Form>
+        </Col>
+        <Col md={3} className="text-end">
+          <Button onClick={() => setShowCreateModal(true)}>
+            <FontAwesomeIcon icon={faPlus} /> Create User Account
           </Button>
         </Col>
       </Row>

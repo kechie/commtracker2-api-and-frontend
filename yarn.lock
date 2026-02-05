@@ -2758,6 +2758,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commtracker-v2@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "commtracker-v2@workspace:."
+  dependencies:
+    bcryptjs: "npm:^3.0.3"
+    body-parser: "npm:^2.2.2"
+    cors: "npm:^2.8.6"
+    dotenv: "npm:^17.2.3"
+    express: "npm:^5.2.1"
+    express-validator: "npm:^7.3.1"
+    global: "npm:^4.4.0"
+    jest: "npm:^30.2.0"
+    jsonwebtoken: "npm:^9.0.3"
+    multer: "npm:^2.0.2"
+    nodemon: "npm:^3.1.11"
+    pg: "npm:^8.18.0"
+    sequelize: "npm:^6.37.7"
+    supertest: "npm:^7.2.2"
+  languageName: unknown
+  linkType: soft
+
 "component-emitter@npm:^1.3.1":
   version: 1.3.1
   resolution: "component-emitter@npm:1.3.1"
@@ -6477,27 +6498,6 @@ __metadata:
   checksum: 10c0/b21cb7f1fb746de8107b9febab60095187781137fd803e6a59a76d421444b1531b641bba5857f5dc011974d8a5c635d61cec49e6bd3b7fc20e01f0fafc4efbf2
   languageName: node
   linkType: hard
-
-"rest-api-server-scaffold-v2@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "rest-api-server-scaffold-v2@workspace:."
-  dependencies:
-    bcryptjs: "npm:^3.0.3"
-    body-parser: "npm:^2.2.2"
-    cors: "npm:^2.8.6"
-    dotenv: "npm:^17.2.3"
-    express: "npm:^5.2.1"
-    express-validator: "npm:^7.3.1"
-    global: "npm:^4.4.0"
-    jest: "npm:^30.2.0"
-    jsonwebtoken: "npm:^9.0.3"
-    multer: "npm:^2.0.2"
-    nodemon: "npm:^3.1.11"
-    pg: "npm:^8.18.0"
-    sequelize: "npm:^6.37.7"
-    supertest: "npm:^7.2.2"
-  languageName: unknown
-  linkType: soft
 
 "retry-as-promised@npm:^7.0.4":
   version: 7.1.1

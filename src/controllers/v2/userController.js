@@ -1,5 +1,6 @@
 // file: src/controllers/v2/userController.js
-const { User } = require('../../db');
+const { User, sequelize } = require('../../db');
+const { Op } = require('sequelize');
 const { logUserActivity } = require('../../utils/activityLogger');
 
 // Get the authenticated user's profile
@@ -120,6 +121,7 @@ exports.getAllUsers = async (req, res) => {
     // Get pagination parameters from query string
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
     const offset = (page - 1) * limit;
 
     // Validate pagination parameters
@@ -127,8 +129,20 @@ exports.getAllUsers = async (req, res) => {
       return res.status(400).json({ error: 'Page and limit must be positive integers' });
     }
 
+    // WHERE conditions
+    const where = {};
+    if (search) {
+      const searchTerm = `%${search.trim()}%`;
+      where[Op.or] = [
+        { username: { [Op.iLike]: searchTerm } },
+        { fullname: { [Op.iLike]: searchTerm } },
+        { email: { [Op.iLike]: searchTerm } }
+      ];
+    }
+
     // Fetch users with pagination and include related recipient data
     const { count, rows } = await User.findAndCountAll({
+      where,
       attributes: ['id', 'username', 'email', 'fullname', 'role', 'recipientId', 'created_at'],
       include: [
         {
@@ -262,6 +276,67 @@ exports.resetUserPassword = async (req, res) => {
     res.json({ message: 'v2 Password reset successfully', userId: id, version: 'v2' });
   } catch (error) {
     console.error('v2 Reset password error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.createUser = async (req, res) => {
+  try {
+    // Only superadmin and admin can create users
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
+    }
+
+    const { username, password, email, fullname, role, recipientId } = req.body;
+
+    if (!username || !password || !email) {
+      return res.status(400).json({ error: 'Username, password, and email are required' });
+    }
+
+    // Role-based security check (similar to updateUser)
+    if (req.user.role !== 'superadmin') {
+      if (role && role === 'superadmin') {
+        return res.status(403).json({ error: 'Only superadmin can create superadmin accounts' });
+      }
+    }
+
+    const user = await User.create({
+      username,
+      password,
+      email,
+      fullname,
+      role: role || 'recipient',
+      recipientId: recipientId || null
+    });
+
+    // Log user creation
+    await logUserActivity({
+      userId: req.user.id,
+      action: 'CREATE',
+      entityId: user.id,
+      description: `Created user: ${user.username}`,
+      details: { role: user.role, recipientId: user.recipientId },
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
+
+    res.status(201).json({
+      message: 'User created successfully',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullname: user.fullname,
+        role: user.role,
+        recipientId: user.recipientId
+      }
+    });
+  } catch (error) {
+    console.error('v2 Create user error:', error);
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(409).json({ error: 'Username or email already exists' });
+    }
     res.status(500).json({ error: 'Internal server error' });
   }
 };

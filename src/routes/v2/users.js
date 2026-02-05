@@ -10,6 +10,7 @@ router.put('/profile', verifyToken, userController.updateProfile);
 
 // Admin/general user routes
 router.get('/', verifyToken, userController.getAllUsers); // New route to get all users
+router.post('/', verifyToken, userController.createUser); // New route to create a user
 router.get('/:id', verifyToken, userController.getUser);
 router.put('/:id', verifyToken, userController.updateUser);
 router.delete('/:id', verifyToken, userController.deleteUser); // New route to delete a user
