@@ -19,15 +19,19 @@ exports.getAllActivityLogs = async (req, res) => {
 
     if (search) {
       where[Op.or] = [
-        { description: { [Op.like]: `%${search}%` } },
-        { entityId: { [Op.like]: `%${search}%` } },
-        { entityType: { [Op.like]: `%${search}%` } },
-        { action: { [Op.like]: `%${search}%` } }
+        { description: { [Op.iLike]: `%${search}%` } },
+        { entityId: { [Op.iLike]: `%${search}%` } },
+        { entityType: { [Op.iLike]: `%${search}%` } },
+        { action: { [Op.iLike]: `%${search}%` } },
+        { '$user.username$': { [Op.iLike]: `%${search}%` } },
+        { '$user.fullname$': { [Op.iLike]: `%${search}%` } }
       ];
     }
 
     const { count, rows } = await ActivityLog.findAndCountAll({
       where,
+      distinct: true,
+      col: 'id',
       include: [
         {
           model: User,

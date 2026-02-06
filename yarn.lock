@@ -2764,6 +2764,7 @@ __metadata:
   dependencies:
     bcryptjs: "npm:^3.0.3"
     body-parser: "npm:^2.2.2"
+    concat-map: "npm:^0.0.2"
     cors: "npm:^2.8.6"
     dotenv: "npm:^17.2.4"
     express: "npm:^5.2.1"
@@ -2783,6 +2784,13 @@ __metadata:
   version: 1.3.1
   resolution: "component-emitter@npm:1.3.1"
   checksum: 10c0/e4900b1b790b5e76b8d71b328da41482118c0f3523a516a41be598dc2785a07fd721098d9bf6e22d89b19f4fa4e1025160dc00317ea111633a3e4f75c2b86032
+  languageName: node
+  linkType: hard
+
+"concat-map@npm:^0.0.2":
+  version: 0.0.2
+  resolution: "concat-map@npm:0.0.2"
+  checksum: 10c0/478d3dd398dfde98debe9640adb635e54495836a86bba1fa1772b969ffa6e7626d8dba93ed2240066f22984264c7e8cc4a315f027eff7ce46772f32b63eb1373
   languageName: node
   linkType: hard
 

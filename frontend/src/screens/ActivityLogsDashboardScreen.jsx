@@ -1,4 +1,4 @@
-// frontend/src/screens/AdminScreen.jsx
+// frontend/src/screens/ActivityLogsDashboardScreen.jsx
 //import React from 'react';
 import { useAuth } from '../context/useAuth';
 import { Link } from 'react-router-dom';
@@ -70,7 +70,7 @@ const ActivityLogsDashboardScreen = () => {
               </span>
               <Form.Control
                 type="text"
-                placeholder="Search description, entity ID, type or action..."
+                placeholder="Search description, entity ID, type, action or user..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
