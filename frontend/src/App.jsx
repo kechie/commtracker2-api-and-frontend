@@ -81,7 +81,7 @@ const App = () => {
             <Route
               path="/trackers"
               element={
-                <ProtectedRoute allowedRoles={['receiving', 'admin', 'superadmin']}>
+                <ProtectedRoute allowedRoles={['receiving', 'admin', 'superadmin','monitor']}>
                   <TrackersScreen />
                 </ProtectedRoute>
               }

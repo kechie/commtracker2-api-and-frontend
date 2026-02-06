@@ -193,7 +193,7 @@ const TrackersScreen = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.recipientIds || formData.recipientIds.length === 0) {
       setError('Please select at least one recipient.');
       return;
@@ -368,10 +368,11 @@ const TrackersScreen = () => {
                     {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
                     <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply == 'pending' ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
                     <td>
-                      <div className="d-flex gap-1">
+                      <div className="d-flex gap-1">{console.log("User role:", role)}
+                        {role !='monitor' && (
                         <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
                           <FontAwesomeIcon icon={faEdit} />
-                        </Button>
+                        </Button>)}
                         <Button
                           variant="light"
                           size="sm"
