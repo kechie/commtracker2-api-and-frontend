@@ -4,7 +4,7 @@ import { useAuth } from '../context/useAuth';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Table, Button, Modal, Pagination, Form, Row, Col } from 'react-bootstrap';
 import { getActivityLogs } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
@@ -16,28 +16,43 @@ const ActivityLogsDashboardScreen = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Debounce search effect
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1); // Reset to first page when search changes
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const data = await getActivityLogs(currentPage, pageSize);
+        const data = await getActivityLogs(currentPage, pageSize, 'createdAt', 'DESC', debouncedSearch);
         setLogs(data.data);
-        setTotalPages(data.totalPages);
-        setTotalItems(data.totalItems);
+        setTotalPages(data.pagination?.totalPages || 1);
+        setTotalItems(data.pagination?.total || 0);
       } catch (error) {
         console.error('Error fetching activity logs:', error);
       }
     };
 
     fetchLogs();
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, debouncedSearch]);
 
   const handleBack = () => navigate('/');
 
   return (
     <div>
       <h1>Activity Logs Dashboard</h1>
-      <Row className="align-items-left mb-3">
-        <Col>
+      <Row className="align-items-center mb-3">
+        <Col md={4}>
           <Button
             variant="light"
             onClick={handleBack}
@@ -46,6 +61,33 @@ const ActivityLogsDashboardScreen = () => {
             <FontAwesomeIcon icon={faArrowLeft} />
             Back
           </Button>
+        </Col>
+        <Col md={8}>
+          <Form.Group className="d-flex gap-2">
+            <div className="input-group">
+              <span className="input-group-text bg-light">
+                <FontAwesomeIcon icon={faSearch} />
+              </span>
+              <Form.Control
+                type="text"
+                placeholder="Search description, entity ID, type or action..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {search && (
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => {
+                    setSearch('');
+                    setDebouncedSearch('');
+                    setCurrentPage(1);
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </Button>
+              )}
+            </div>
+          </Form.Group>
         </Col>
       </Row>
 

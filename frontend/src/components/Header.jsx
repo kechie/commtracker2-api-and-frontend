@@ -75,7 +75,7 @@ const Header = () => {
                       </Nav.Link>
                     </LinkContainer>
                   )}
-                  {/* User Management Link (only for admin/superadmin) 
+                  {/* User Management Link (only for admin/superadmin)
                   {(role === 'admin' || role === 'superadmin') && (
                     <LinkContainer to="/users-management">
                       <Nav.Link>
@@ -84,7 +84,7 @@ const Header = () => {
                     </LinkContainer>
                   )}*/}
 
-                  {/* Recipient Management Link (only for admin/superadmin) 
+                  {/* Recipient Management Link (only for admin/superadmin)
                   {(role === 'admin' || role === 'superadmin') && (
                     <LinkContainer to="/recipients-management">
                       <Nav.Link>
@@ -111,11 +111,11 @@ const Header = () => {
                       <FontAwesomeIcon icon={faSignInAlt} className="me-1" /> Sign In
                     </Nav.Link>
                   </LinkContainer>
-                  <LinkContainer to="/register">
+{/*                  <LinkContainer to="/register">
                     <Nav.Link>
                       <FontAwesomeIcon icon={faUser} className="me-1" /> Sign Up
                     </Nav.Link>
-                  </LinkContainer>
+                  </LinkContainer> */}
                 </>
               )}
             </Nav>
