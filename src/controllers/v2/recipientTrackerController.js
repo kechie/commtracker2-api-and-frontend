@@ -59,6 +59,8 @@ exports.getReceivedTrackers = async (req, res) => {
       }
     }
 
+    const hasTrackerFilter = !!(search || dateFrom || dateTo);
+
     // Determine sort column and order
     let orderBy = [];
     if (['dateReceived', 'serialNumber', 'fromName', 'documentTitle'].includes(sort)) {
@@ -74,8 +76,8 @@ exports.getReceivedTrackers = async (req, res) => {
         {
           model: Tracker,
           as: 'tracker',
-          where: Object.keys(trackerWhere).length > 0 ? trackerWhere : undefined,
-          required: Object.keys(trackerWhere).length > 0, // Use INNER JOIN if searching/filtering by tracker
+          where: hasTrackerFilter ? trackerWhere : undefined,
+          required: hasTrackerFilter, // Use INNER JOIN if searching/filtering by tracker
         },
       ],
       order: orderBy,
