@@ -44,12 +44,8 @@ const DashboardScreen = () => {
               Add recipient-specific content here
               brief analytics, recent activities, quick actions, etc.
             </Container>*/}
-          {/*role === 'monitor' &&
-            <Container className="mt-4">
-              Add monitor-specific content here
-              brief analytics, recent activities, quick actions, etc.
-            </Container>*/}
-          <p>This will contain analytics for the monitor and recipient role in the future.</p>
+          {(role === 'monitor' || role === 'admin' || role === 'superadmin') && <Link to="/monitor-dashboard">Monitor Dashboard</Link>}<br />
+          {(role === 'monitor' || role === 'admin' || role === 'superadmin') && <Link to="/activity-logs-dashboard">Activity Logs Dashboard</Link>}<br />
         </Col>
       </Row>
     </Container>

@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const analyticsController = require('../../controllers/v2/analyticsController');
-const { verifyToken, isAdmin } = require('../../middleware/authMiddleware');
+const { verifyToken, requireRole } = require('../../middleware/authMiddleware');
 
 // Protect analytics routes - likely only for admins
 router.use(verifyToken);
@@ -12,9 +12,9 @@ router.use(verifyToken);
 /**
  * @route GET /v2/analytics/system-stats
  * @desc Get comprehensive system statistics
- * @access Private (Admin only)
+ * @access Private (Admin, Superadmin, Monitor)
  */
-router.get('/system-stats', analyticsController.getSystemStats);
+router.get('/system-stats', requireRole(['admin', 'superadmin', 'monitor']), analyticsController.getSystemStats);
 
 /**
  * @route GET /v2/analytics/recipient/:recipientId
