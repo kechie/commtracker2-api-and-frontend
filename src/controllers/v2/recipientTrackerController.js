@@ -23,25 +23,49 @@ const { Op } = require('sequelize');
 
 /**
  * @desc    Get paginated list of trackers received by a specific recipient
- * @route   GET /api/v2/recipients/:recipientId/trackers
+ * @route   GET /api/v2/recipient-trackers/recipients/:recipientId/trackers
  * @access  Private
  */
 exports.getReceivedTrackers = async (req, res) => {
   try {
     const { recipientId } = req.params;
-    const { page = 1, limit = 10, startDate, endDate } = req.query;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limitParam = parseInt(req.query.limit, 10);
+    const limit = Math.max(1, Math.min(100, isNaN(limitParam) ? 10 : limitParam));
     const offset = (page - 1) * limit;
 
-    const where = { recipientId };
+    const { search, sort = 'dateReceived', order = 'DESC', dateFrom, dateTo } = req.query;
 
-    if (startDate || endDate) {
-      where.dueDate = {};
-      if (startDate) {
-        where.dueDate[Op.gte] = new Date(startDate);
+    const where = { recipientId };
+    const trackerWhere = {};
+
+    // Search functionality
+    if (search) {
+      trackerWhere[Op.or] = [
+        { serialNumber: { [Op.iLike]: `%${search}%` } },
+        { fromName: { [Op.iLike]: `%${search}%` } },
+        { documentTitle: { [Op.iLike]: `%${search}%` } },
+      ];
+    }
+
+    // Date range filtering
+    if (dateFrom || dateTo) {
+      trackerWhere.dateReceived = {};
+      if (dateFrom) {
+        trackerWhere.dateReceived[Op.gte] = new Date(dateFrom);
       }
-      if (endDate) {
-        where.dueDate[Op.lte] = new Date(endDate);
+      if (dateTo) {
+        trackerWhere.dateReceived[Op.lte] = new Date(dateTo);
       }
+    }
+
+    // Determine sort column and order
+    let orderBy = [];
+    if (['dateReceived', 'serialNumber', 'fromName', 'documentTitle'].includes(sort)) {
+      orderBy = [[{ model: Tracker, as: 'tracker' }, sort, order.toUpperCase()]];
+    } else {
+      // Sort by TrackerRecipient fields (status, createdAt, updatedAt)
+      orderBy = [[sort, order.toUpperCase()]];
     }
 
     const { count, rows: receivedTrackers } = await TrackerRecipient.findAndCountAll({
@@ -50,11 +74,16 @@ exports.getReceivedTrackers = async (req, res) => {
         {
           model: Tracker,
           as: 'tracker',
+          where: Object.keys(trackerWhere).length > 0 ? trackerWhere : undefined,
+          required: Object.keys(trackerWhere).length > 0, // Use INNER JOIN if searching/filtering by tracker
         },
       ],
-      order: [['dueDate', 'ASC'], ['createdAt', 'DESC']],
+      order: orderBy,
       offset,
       limit,
+      distinct: true,
+      col: 'id',
+      subQuery: false, // Prevent issues with joined where clauses
     });
 
     res.json({
@@ -62,8 +91,8 @@ exports.getReceivedTrackers = async (req, res) => {
       data: receivedTrackers,
       pagination: {
         total: count,
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
+        page,
+        limit,
         totalPages: Math.ceil(count / limit),
       },
     });

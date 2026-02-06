@@ -243,7 +243,7 @@ exports.createTracker = async (req, res) => {
 };
 
 // @desc    Get trackers with pagination
-// @route   GET /api/v2/trackers?page=1&limit=10&sortBy=dateReceived&sortOrder=DESC
+// @route   GET /api/v2/trackers?page=1&limit=10&sortBy=dateReceived&sortOrder=DESC&search=query
 // @access  Private (receiving role)
 exports.getTrackers = async (req, res) => {
   try {
@@ -253,6 +253,7 @@ exports.getTrackers = async (req, res) => {
     const limit = Math.max(1, Math.min(100, isNaN(limitParam) ? 10 : limitParam)); // Max 100 per page, default 10
     const sortBy = req.query.sortBy || 'dateReceived';
     const sortOrder = (req.query.sortOrder || 'DESC').toUpperCase();
+    const search = req.query.search || '';
 
     // Validate sortOrder
     if (!['ASC', 'DESC'].includes(sortOrder)) {
@@ -262,11 +263,25 @@ exports.getTrackers = async (req, res) => {
     // Calculate offset
     const offset = (page - 1) * limit;
 
+    // Build where clause for search
+    const where = {};
+    if (search) {
+      where[Op.or] = [
+        { serialNumber: { [Op.iLike]: `%${search}%` } },
+        { fromName: { [Op.iLike]: `%${search}%` } },
+        { documentTitle: { [Op.iLike]: `%${search}%` } },
+        { '$trackerRecipients.recipient.recipient_name$': { [Op.iLike]: `%${search}%` } },
+        { '$trackerRecipients.recipient.initial$': { [Op.iLike]: `%${search}%` } },
+      ];
+    }
+
     // Get total count and paginated results
     // Use distinct: true to count unique trackers, not joined rows
     const { count, rows } = await Tracker.findAndCountAll({
+      where,
       distinct: true,
       col: 'id',
+      subQuery: false,
       include: [
         {
           association: 'trackerRecipients',

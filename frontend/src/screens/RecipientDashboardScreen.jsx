@@ -1,7 +1,6 @@
 // frontend/src/screens/RecipientDashboardScreen.jsx
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faArrowLeft,
   faSearch,
   faSpinner,
   faCheck,
@@ -63,6 +62,7 @@ const RecipientDashboardScreen = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('dateReceived');
   const [sortOrder, setSortOrder] = useState('DESC');
   const [dateFrom, setDateFrom] = useState('');
@@ -78,10 +78,22 @@ const RecipientDashboardScreen = () => {
 
   useEffect(() => {
     if (success) {
-      const timer = setTimeout(() => setSuccess(null), 3000);
+      const timer = setTimeout(() => setSuccess(null), 2000);
       return () => clearTimeout(timer);
     }
   }, [success]);
+
+  // Debounce search effect
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset to first page when search changes
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
 
   //const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3007/v2';
   useEffect(() => {
@@ -100,7 +112,7 @@ const RecipientDashboardScreen = () => {
         limit: pageSize,
         sort: sortBy,
         order: sortOrder,
-        search: searchTerm.trim() || undefined,
+        search: debouncedSearchTerm.trim() || undefined,
         dateFrom: dateFrom || undefined,
         dateTo: dateTo || undefined,
       };
@@ -124,7 +136,7 @@ const RecipientDashboardScreen = () => {
     };
 
     fetchData();
-  }, [recipientId, currentPage, pageSize, sortBy, sortOrder, searchTerm, dateFrom, dateTo, refreshTrigger]);
+  }, [recipientId, currentPage, pageSize, sortBy, sortOrder, debouncedSearchTerm, dateFrom, dateTo, refreshTrigger]);
 
   const openConfirmModal = (trackerId, newStatus) => {
     const tracker = recipientTrackers.find(t => t.tracker.id === trackerId);
@@ -217,10 +229,9 @@ const RecipientDashboardScreen = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
-  const handleBack = () => navigate('/');
-
   const resetFilters = () => {
     setSearchTerm('');
+    setDebouncedSearchTerm('');
     setSortBy('dateReceived');
     setSortOrder('DESC');
     setDateFrom('');
@@ -319,9 +330,9 @@ const RecipientDashboardScreen = () => {
           <InputGroup>
             <InputGroup.Text><FontAwesomeIcon icon={faSearch} size="sm" /></InputGroup.Text>
             <Form.Control
-              placeholder="Title, sender, remarks..."
+              placeholder="Title, sender, serial..."
               value={searchTerm}
-              onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+              onChange={e => setSearchTerm(e.target.value)}
             />
           </InputGroup>
         </Col>

@@ -5,7 +5,7 @@ import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 //import { faPlus, faEdit, faTrash, faArrowLeft, faEye, faInfoCircle, faFileText } from '@fortawesome/free-solid-svg-icons';
-import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faPaperclip } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
 
@@ -22,13 +22,14 @@ const TrackersScreen = () => {
   const [showPdfModal, setShowPdfModal] = useState(false);
   //const [pdfUrl, setPdfUrl] = useState(null);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
-  const [attachmentLoading, setAttachmentLoading] = useState(null); // Use tracker ID to indicate loading
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalTrackers, setTotalTrackers] = useState(0);
-  const [sortBy, setSortBy] = useState('dateReceived');
-  const [sortOrder, setSortOrder] = useState('DESC');
+  const [sortBy] = useState('dateReceived');
+  const [sortOrder] = useState('DESC');
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [formData, setFormData] = useState({
     serialNumber: '',
     fromName: '',
@@ -44,14 +45,24 @@ const TrackersScreen = () => {
     recipientIds: [], // Array of recipient IDs to assign
   });
 
+  // Debounce search effect
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1); // Reset to first page when search changes
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
   useEffect(() => {
     const loadData = async () => {
-      setSortBy('dateReceived');
-      setSortOrder('DESC');
       try {
         setLoading(true);
         const [trackersData, recipientsData] = await Promise.all([
-          getTrackers(currentPage, pageSize, sortBy, sortOrder),
+          getTrackers(currentPage, pageSize, sortBy, sortOrder, debouncedSearch),
           getAllRecipients()
         ]);
 
@@ -80,10 +91,10 @@ const TrackersScreen = () => {
       }
     };
     loadData();
-  }, [currentPage, pageSize, sortBy, sortOrder]);
+  }, [currentPage, pageSize, sortBy, sortOrder, debouncedSearch]);
 
   const fetchTrackers = async () => {
-    const data = await getTrackers(currentPage, pageSize, sortBy, sortOrder);
+    const data = await getTrackers(currentPage, pageSize, sortBy, sortOrder, debouncedSearch);
     const trackersList = data.data || data;
     setTrackers(Array.isArray(trackersList) ? trackersList : []);
     if (data.pagination) {
@@ -114,7 +125,6 @@ const TrackersScreen = () => {
 
   const handleShowPdfPreview = async (trackerId) => {
     if (!trackerId) return;
-    setAttachmentLoading(trackerId);
     setError(null);
     try {
       const blob = await getTrackerAttachment(trackerId);
@@ -126,13 +136,10 @@ const TrackersScreen = () => {
     } catch (err) {
       console.error('View attachment failed:', err);
       setError(err?.response?.data?.message || 'Could not load attachment.');
-    } finally {
-      setAttachmentLoading(null);
-    };
+    }
   }
   const handleClosePdfPreview = () => {
     setShowPdfModal(false);
-    setAttachmentLoading(null);
   };
 
   const handleShow = (tracker = null) => {
@@ -219,10 +226,37 @@ const TrackersScreen = () => {
         </Col>
       </Row>
       <Row className="align-items-left mb-3">
-        <Col>
+        <Col md={4}>
           <p>Manage DocTrkr2s. Create, Update them here.</p>
         </Col>
-        <Col className="text-end">
+        <Col md={4}>
+          <Form.Group className="d-flex gap-2">
+            <div className="input-group">
+              <span className="input-group-text bg-light">
+                <FontAwesomeIcon icon={faSearch} />
+              </span>
+              <Form.Control
+                type="text"
+                placeholder="Find serial, from, title, or recipient..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {search && (
+                <Button 
+                  variant="outline-secondary" 
+                  onClick={() => {
+                    setSearch('');
+                    setDebouncedSearch('');
+                    setCurrentPage(1);
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </Button>
+              )}
+            </div>
+          </Form.Group>
+        </Col>
+        <Col md={4} className="text-end">
           <Button variant="primary" className="mb-3" onClick={() => handleShow()}>
             <i className="fas fa-plus"></i>
             <FontAwesomeIcon icon={faPlus} className="me-2" />New DocTrkr2
