@@ -115,11 +115,11 @@ const LoginScreen = () => {
             </Button>
           </Form>
 
-          <Row className="py-3">
+          {/*<Row className="py-3">
             <Col>
               New Customer? <Link to="/register">Register</Link>
             </Col>
-          </Row>
+          </Row>*/}
         </Col>
       </Row>
     </Container>
