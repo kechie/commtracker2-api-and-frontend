@@ -5,9 +5,10 @@ import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 //import { faPlus, faEdit, faTrash, faArrowLeft, faEye, faInfoCircle, faFileText } from '@fortawesome/free-solid-svg-icons';
-import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faSearch, faTimes, faPrint } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
+import TrackerPrintModal from '../components/TrackerPrintModal';
 
 const TrackersScreen = () => {
   //const { user, role } = useAuth();
@@ -22,6 +23,8 @@ const TrackersScreen = () => {
   const [showPdfModal, setShowPdfModal] = useState(false);
   //const [pdfUrl, setPdfUrl] = useState(null);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
+  const [showPrintModal, setShowPrintModal] = useState(false);
+  const [selectedTrackerForPrint, setSelectedTrackerForPrint] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -140,6 +143,16 @@ const TrackersScreen = () => {
   }
   const handleClosePdfPreview = () => {
     setShowPdfModal(false);
+  };
+
+  const handleShowPrint = (tracker) => {
+    setSelectedTrackerForPrint(tracker);
+    setShowPrintModal(true);
+  };
+
+  const handleClosePrint = () => {
+    setShowPrintModal(false);
+    setSelectedTrackerForPrint(null);
   };
 
   const handleShow = (tracker = null) => {
@@ -358,6 +371,14 @@ const TrackersScreen = () => {
                       <div className="d-flex gap-1">
                         <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
                           <FontAwesomeIcon icon={faEdit} />
+                        </Button>
+                        <Button
+                          variant="light"
+                          size="sm"
+                          onClick={() => handleShowPrint(tracker)}
+                          title="Print Tracking Sheet"
+                        >
+                          <FontAwesomeIcon icon={faPrint} />
                         </Button>
                         {tracker.attachment && (
                           <Button
@@ -691,6 +712,12 @@ const TrackersScreen = () => {
         show={showPdfModal}
         handleClose={handleClosePdfPreview}
         pdfUrl={selectedPdfUrl}
+      />
+
+      <TrackerPrintModal
+        show={showPrintModal}
+        onHide={handleClosePrint}
+        tracker={selectedTrackerForPrint}
       />
     </Container >
   );
