@@ -134,7 +134,8 @@ const TrackersScreen = () => {
       if (!blob) {
         throw new Error('No attachment found');
       }
-      setSelectedPdfUrl(blob);
+      const url = URL.createObjectURL(blob);
+      setSelectedPdfUrl(url);
       setShowPdfModal(true);
     } catch (err) {
       console.error('View attachment failed:', err);
@@ -143,6 +144,10 @@ const TrackersScreen = () => {
   }
   const handleClosePdfPreview = () => {
     setShowPdfModal(false);
+    if (selectedPdfUrl) {
+      URL.revokeObjectURL(selectedPdfUrl);
+      setSelectedPdfUrl(null);
+    }
   };
 
   const handleShowPrint = (tracker) => {
@@ -368,7 +373,7 @@ const TrackersScreen = () => {
                     {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
                     <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply == 'pending' ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
                     <td>
-                      <div className="d-flex gap-1">{console.log("User role:", role)}
+                      <div className="d-flex gap-1">{/*console.log("User role:", role)*/}
                         {role !='monitor' && (
                         <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
                           <FontAwesomeIcon icon={faEdit} />
