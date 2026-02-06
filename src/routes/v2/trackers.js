@@ -9,6 +9,7 @@ const {
   updateTracker,
   deleteTracker,
   serveAttachment,
+  trackerValidation,
 } = require('../../controllers/v2/trackerController');
 const { verifyToken, requireRole } = require('../../middleware/authMiddleware');
 const multer = require('multer');
@@ -35,13 +36,13 @@ router.get('/all', getAllTrackers);
 router.get('/attachment/:id', serveAttachment);
 
 // Get paginated trackers and create new tracker
-router.route('/').post(upload.single('attachment'), createTracker).get(getTrackers);
+router.route('/').post(upload.single('attachment'), trackerValidation, createTracker).get(getTrackers);
 
 // Get, update, delete specific tracker
 router
   .route('/:id')
   .get(getTrackerById)
-  .put(updateTracker)
+  .put(trackerValidation, updateTracker)
   .delete(deleteTracker);
 
 module.exports = router;

@@ -130,17 +130,22 @@ const generateSerialNumber = async (transaction) => {
 };
 
 // Validation chain (you can export and reuse)
-const trackerValidation = [
-  body('title').trim().notEmpty().withMessage('Title is required'),
+exports.trackerValidation = [
+  body('documentTitle').trim().notEmpty().withMessage('Document Title is required'),
+  body('fromName').trim().notEmpty().withMessage('From Name is required'),
   body('dateReceived').optional().isISO8601().toDate(),
-  body('recipientIds').optional().isArray().withMessage('recipientIds must be an array'),
+  body('recipientIds').isArray({ min: 1 }).withMessage('At least one recipient is required'),
   body('recipientIds.*').isUUID(4).withMessage('Invalid recipient ID'),
-  // add more fields as needed: description, priority, etc.
 ];
 // @desc    Create a tracker
 // @route   POST /api/v2/trackers
 // @access  Private (receiving role)
 exports.createTracker = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+
   const transaction = await sequelize.transaction(); // Start a transaction
   try {
     const { recipientIds, serialNumber: incomingSerialNumber, ...trackerData } = req.body;
@@ -381,6 +386,11 @@ exports.getTrackerById = async (req, res) => {
 // @route   PUT /api/v2/trackers/:id
 // @access  Private (receiving role)
 exports.updateTracker = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+
   try {
     const tracker = await Tracker.findByPk(req.params.id);
     if (!tracker) {

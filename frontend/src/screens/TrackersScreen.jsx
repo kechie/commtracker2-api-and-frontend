@@ -143,6 +143,7 @@ const TrackersScreen = () => {
   };
 
   const handleShow = (tracker = null) => {
+    setError(null);
     if (tracker) {
       setEditingTracker(tracker);
       // Extract recipient IDs from trackerRecipients array
@@ -179,6 +180,12 @@ const TrackersScreen = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.recipientIds || formData.recipientIds.length === 0) {
+      setError('Please select at least one recipient.');
+      return;
+    }
+
     try {
       if (editingTracker) {
         await updateTracker(editingTracker.id, formData);
@@ -212,8 +219,7 @@ const TrackersScreen = () => {
     <Container>
       {/*console.log('Rendering TrackersScreen with trackers:', trackers)*/}
       {/*console.log('Recipients available:', recipients.recipients)*/}
-      <h1>Document Trackers</h1>
-      <Row className="align-items-left mb-3">
+      <Row className='align-items-center mb-3'>
         <Col>
           <Button
             variant="light"
@@ -224,12 +230,25 @@ const TrackersScreen = () => {
             Back
           </Button>
         </Col>
-      </Row>
-      <Row className="align-items-left mb-3">
-        <Col md={4}>
-          <p>Manage DocTrkr2s. Create, Update them here.</p>
+      <Col>
+        <h4 className="text-center">Document Management and Tracking System V2</h4>
         </Col>
-        <Col md={4}>
+      </Row>
+      {/*<Row className="align-items-left mb-3">
+
+        <Col>
+          <Button
+            variant="light"
+            onClick={handleBack}
+            className="d-flex align-items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+            Back
+          </Button>
+        </Col>
+      </Row>*/}
+      <Row className="align-items-left mb-3">
+        <Col md={8}>
           <Form.Group className="d-flex gap-2">
             <div className="input-group">
               <span className="input-group-text bg-light">
@@ -242,8 +261,8 @@ const TrackersScreen = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
               {search && (
-                <Button 
-                  variant="outline-secondary" 
+                <Button
+                  variant="outline-secondary"
                   onClick={() => {
                     setSearch('');
                     setDebouncedSearch('');
@@ -472,7 +491,7 @@ const TrackersScreen = () => {
         </Modal.Header>
         <Modal.Body>
           <Col>
-
+            {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}
             <Form onSubmit={handleSubmit}>
               <Card><Card.Header>Tracker Details</Card.Header>
                 <Card.Body>
@@ -507,7 +526,7 @@ const TrackersScreen = () => {
                   </Row>
                   {/* <Row>
                     <Form.Group className="mb-3" controlId="documentTitle">
-                      <Form.Label>Title</Form.Label> 
+                      <Form.Label>Title</Form.Label>
                       <Form.Control type="text" name="documentTitle" value={formData.documentTitle} onChange={handleChange} required />
                       <Form.Text className="text-muted">Document Tracker title.</Form.Text>
                     </Form.Group>
@@ -527,14 +546,14 @@ const TrackersScreen = () => {
                   {/* <Row>
                     <Col md={6}>
                       <Form.Group className="mb-3" controlId="fromName">
-                
+
                   <Form.Control type="text" name="fromName" value={formData.fromName} onChange={handleChange} required />
                   <Form.Text className="text-muted">Sender's name or organization.</Form.Text>
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3" controlId="dateReceived">
-                
+
                   <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required />
                   <Form.Text className="text-muted">Date the document was received.</Form.Text>
                 </Form.Group>
@@ -591,7 +610,7 @@ const TrackersScreen = () => {
                     </Col>
                     *<Col>
                       <Form.Group className="mb-3" controlId="lceAction">
-                        <Form.Label>Action</Form.Label> 
+                        <Form.Label>Action</Form.Label>
                         <Form.Select name="lceAction" value={formData.lceAction} onChange={handleChange} placeholder="Enter LCE Action">
                           <option value="">Select action</option>
                           <option value="pending">Pending</option>
@@ -650,7 +669,7 @@ const TrackersScreen = () => {
                       }));
                     }} />
                   </FloatingLabel>
-                  {/* 
+                  {/*
                   <Form.Group className="mb-3" controlId="attachment">
                     <Form.Control type="file" name="attachment" />
                     <Form.Text className="text-muted">DocTrkr2 Attachment (PDF)</Form.Text>
@@ -678,4 +697,3 @@ const TrackersScreen = () => {
 };
 
 export default TrackersScreen;
-
