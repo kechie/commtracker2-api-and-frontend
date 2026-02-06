@@ -14,11 +14,25 @@ export default defineConfig({
       }
     }
   },
+  optimizeDeps: {
+    rolldownOptions: {
+      jsx: 'automatic',
+    },
+  },
   plugins: [
     react({
       babel: {
         plugins: [['babel-plugin-react-compiler']],
       },
     }),
+    {
+      name: 'silence-rolldown-warning',
+      enforce: 'post',
+      config(config) {
+        if (config.optimizeDeps) {
+          config.optimizeDeps.esbuildOptions = {};
+        }
+      },
+    },
   ],
 })
