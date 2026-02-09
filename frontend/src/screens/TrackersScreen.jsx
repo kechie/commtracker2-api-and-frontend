@@ -27,7 +27,7 @@ const TrackersScreen = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalTrackers, setTotalTrackers] = useState(0);
-  const [sortBy] = useState('dateReceived');
+  const [sortBy] = useState('createdAt');
   const [sortOrder] = useState('DESC');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');

@@ -64,7 +64,7 @@ const RecipientDashboardScreen = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('dateReceived');
+  const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('DESC');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
