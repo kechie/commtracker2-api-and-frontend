@@ -11,11 +11,7 @@ import { faRedo, faUndo } from '@fortawesome/free-solid-svg-icons';
 //   import.meta.url
 // ).toString();
 
-import { pdfOptions } from '../utils/pdfOptions';
-
-// Use local worker from public folder to avoid MIME type issues with .mjs on some servers
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
-
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -51,27 +47,23 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
   const rotateLeft = () => setRotation(prev => (prev - 90 + 360) % 360);
   const rotateRight = () => setRotation(prev => (prev + 90) % 360);
 
-  const isBlobOrMediaSource = (obj) => {
-    return obj instanceof Blob || obj instanceof MediaSource;
-  };
-
   const handleDownload = () => {
     if (!pdfUrl) return;
-    const url = isBlobOrMediaSource(pdfUrl) ? URL.createObjectURL(pdfUrl) : pdfUrl;
+    const url = pdfUrl instanceof Blob ? URL.createObjectURL(pdfUrl) : pdfUrl;
     const link = document.createElement('a');
     link.href = url;
     link.download = 'document.pdf';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    if (isBlobOrMediaSource(pdfUrl)) {
+    if (pdfUrl instanceof Blob) {
       URL.revokeObjectURL(url);
     }
   };
 
   const handlePrint = () => {
     if (!pdfUrl) return;
-    const url = isBlobOrMediaSource(pdfUrl) ? URL.createObjectURL(pdfUrl) : pdfUrl;
+    const url = pdfUrl instanceof Blob ? URL.createObjectURL(pdfUrl) : pdfUrl;
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
     iframe.src = url;
@@ -90,7 +82,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
 
     setTimeout(() => {
         document.body.removeChild(iframe);
-        if (isBlobOrMediaSource(pdfUrl)) {
+        if (pdfUrl instanceof Blob) {
             URL.revokeObjectURL(url);
         }
     }, 1000);
@@ -116,7 +108,10 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={onDocumentLoadError}
           onLoadStart={() => setLoading(true)}
-          options={pdfOptions}
+          options={{
+            cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+            cMapPacked: true,
+          }}
         >
           {!loading && !error && <Page pageNumber={pageNumber} rotate={rotation} renderAnnotationLayer={false} renderTextLayer={false} />}
         </Document>

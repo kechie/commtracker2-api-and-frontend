@@ -134,8 +134,8 @@ const Analytics = () => {
         <Col lg={6} className="mb-4">
           <Card className="shadow-sm h-100">
             <Card.Header className="bg-white fw-bold">User Distribution by Role</Card.Header>
-            <Card.Body>
-              <ResponsiveContainer width="100%" height={300}>
+            <Card.Body style={{ height: '300px' }}>
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={userRoleData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
@@ -155,8 +155,8 @@ const Analytics = () => {
         <Col lg={6} className="mb-4">
           <Card className="shadow-sm h-100">
             <Card.Header className="bg-white fw-bold">Tracker Status Distribution</Card.Header>
-            <Card.Body>
-              <ResponsiveContainer width="100%" height={300}>
+            <Card.Body style={{ height: '300px' }}>
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={trackerStatusData}
@@ -185,8 +185,8 @@ const Analytics = () => {
         <Col lg={8} className="mb-4">
           <Card className="shadow-sm h-100">
             <Card.Header className="bg-white fw-bold">New Trackers (Last 6 Months)</Card.Header>
-            <Card.Body>
-              <ResponsiveContainer width="100%" height={300}>
+            <Card.Body style={{ height: '300px' }}>
+              <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={recentTrackersData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
@@ -238,8 +238,8 @@ const Analytics = () => {
         <Col lg={6} className="mb-4">
           <Card className="shadow-sm h-100">
             <Card.Header className="bg-white fw-bold">Recipient Actions on Documents</Card.Header>
-            <Card.Body>
-              <ResponsiveContainer width="100%" height={300}>
+            <Card.Body style={{ height: '300px' }}>
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={trackerActionData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
@@ -256,8 +256,8 @@ const Analytics = () => {
         <Col lg={6} className="mb-4">
           <Card className="shadow-sm h-100">
             <Card.Header className="bg-white fw-bold">System Activity Log Summary</Card.Header>
-            <Card.Body>
-              <ResponsiveContainer width="100%" height={300}>
+            <Card.Body style={{ height: '300px' }}>
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={actionData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
@@ -277,8 +277,8 @@ const Analytics = () => {
         <Col md={12}>
           <Card className="shadow-sm h-100">
             <Card.Header className="bg-white fw-bold">Average Tracker Duration by Stage (Hours)</Card.Header>
-            <Card.Body>
-              <ResponsiveContainer width="100%" height={300}>
+            <Card.Body style={{ height: '300px' }}>
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={durationData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />

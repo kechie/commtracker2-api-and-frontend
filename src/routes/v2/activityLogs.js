@@ -2,12 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const activityLogController = require('../../controllers/v2/activityLogController');
-const { verifyToken, requireRole } = require('../../middleware/authMiddleware');
+const { verifyToken } = require('../../middleware/authMiddleware');
 
 // All routes require authentication
 router.use(verifyToken);
-// Restrict to specific roles
-router.use(requireRole(['admin', 'superadmin', 'monitor']));
 
 /**
  * @route GET /v2/activity-logs

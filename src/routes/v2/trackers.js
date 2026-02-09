@@ -1,5 +1,5 @@
 // src/routes/v2/trackers.js
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 const {
   createTracker,
@@ -10,43 +10,37 @@ const {
   deleteTracker,
   serveAttachment,
   trackerValidation,
-} = require("../../controllers/v2/trackerController");
-const { verifyToken, requireRole } = require("../../middleware/authMiddleware");
-const multer = require("multer");
-const path = require("path");
+} = require('../../controllers/v2/trackerController');
+const { verifyToken, requireRole } = require('../../middleware/authMiddleware');
+const multer = require('multer');
+const path = require('path');
 
 // Multer storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+    cb(null, Date.now() + '-' + file.originalname);
   },
 });
 
 const upload = multer({ storage });
 
 // All routes in this file are protected and require a role of 'receiving', 'admin', or 'superadmin'
-router.use(
-  verifyToken,
-  requireRole(["receiving", "admin", "superadmin", "monitor"]),
-);
+router.use(verifyToken, requireRole(['receiving', 'admin', 'superadmin']));
 
 // Get all trackers without pagination (use with caution)
-router.get("/all", getAllTrackers);
+router.get('/all', getAllTrackers);
 // Serve attachment files
-router.get("/attachment/:id", serveAttachment);
+router.get('/attachment/:id', serveAttachment);
 
 // Get paginated trackers and create new tracker
-router
-  .route("/")
-  .post(upload.single("attachment"), trackerValidation, createTracker)
-  .get(getTrackers);
+router.route('/').post(upload.single('attachment'), trackerValidation, createTracker).get(getTrackers);
 
 // Get, update, delete specific tracker
 router
-  .route("/:id")
+  .route('/:id')
   .get(getTrackerById)
   .put(trackerValidation, updateTracker)
   .delete(deleteTracker);

@@ -5,7 +5,7 @@ const Op = Sequelize.Op;
 // Get all activity logs (with optional filters)
 exports.getAllActivityLogs = async (req, res) => {
   try {
-    const { page = 1, limit = 20, userId, action, entityType, status, search, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
+    const { page = 1, limit = 20, userId, action, entityType, status, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
 
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
     const pageLimit = Math.min(100, parseInt(limit, 10) || 20);
@@ -17,21 +17,8 @@ exports.getAllActivityLogs = async (req, res) => {
     if (entityType) where.entityType = entityType;
     if (status) where.status = status;
 
-    if (search) {
-      where[Op.or] = [
-        { description: { [Op.iLike]: `%${search}%` } },
-        { entityId: { [Op.iLike]: `%${search}%` } },
-        { entityType: { [Op.iLike]: `%${search}%` } },
-        { action: { [Op.iLike]: `%${search}%` } },
-        { '$user.username$': { [Op.iLike]: `%${search}%` } },
-        { '$user.fullname$': { [Op.iLike]: `%${search}%` } }
-      ];
-    }
-
     const { count, rows } = await ActivityLog.findAndCountAll({
       where,
-      distinct: true,
-      col: 'id',
       include: [
         {
           model: User,

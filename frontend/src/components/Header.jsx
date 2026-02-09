@@ -1,7 +1,7 @@
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap'; // Import NavDropdown
 import { LinkContainer } from 'react-router-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperPlane, faSignInAlt, faSignOutAlt, faUser, faUserCog, faFileAlt, faChartBar, faCalendarAlt, faHistory } from '@fortawesome/free-solid-svg-icons'; // Import more icons
+import { faPaperPlane, faSignInAlt, faSignOutAlt, faUser, faUserCog, faFileAlt, faChartBar, faCalendarAlt } from '@fortawesome/free-solid-svg-icons'; // Import more icons
 import { useAuth } from '../context/useAuth'; // Import useAuth
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
@@ -69,20 +69,13 @@ const Header = () => {
                   )}
                   {/*Monitor Link (only for monitor role) */}
                   {(role === 'monitor' || role === 'admin' || role === 'superadmin') && (
-                    <LinkContainer to="/monitor-dashboard">
-                      <Nav.Link>
-                        <FontAwesomeIcon icon={faChartBar} className="me-1" /> Monitor
-                      </Nav.Link>
-                    </LinkContainer>
-                  )}
-                  {(role === 'monitor' || role === 'admin' || role === 'superadmin') && (
                     <LinkContainer to="/activity-logs-dashboard">
                       <Nav.Link>
-                        <FontAwesomeIcon icon={faHistory} className="me-1" /> Activity Logs
+                        <FontAwesomeIcon icon={faChartBar} className="me-1" /> Activity Logs
                       </Nav.Link>
                     </LinkContainer>
                   )}
-                  {/* User Management Link (only for admin/superadmin)
+                  {/* User Management Link (only for admin/superadmin) 
                   {(role === 'admin' || role === 'superadmin') && (
                     <LinkContainer to="/users-management">
                       <Nav.Link>
@@ -91,7 +84,7 @@ const Header = () => {
                     </LinkContainer>
                   )}*/}
 
-                  {/* Recipient Management Link (only for admin/superadmin)
+                  {/* Recipient Management Link (only for admin/superadmin) 
                   {(role === 'admin' || role === 'superadmin') && (
                     <LinkContainer to="/recipients-management">
                       <Nav.Link>
@@ -118,11 +111,11 @@ const Header = () => {
                       <FontAwesomeIcon icon={faSignInAlt} className="me-1" /> Sign In
                     </Nav.Link>
                   </LinkContainer>
-{/*                  <LinkContainer to="/register">
+                  <LinkContainer to="/register">
                     <Nav.Link>
                       <FontAwesomeIcon icon={faUser} className="me-1" /> Sign Up
                     </Nav.Link>
-                  </LinkContainer> */}
+                  </LinkContainer>
                 </>
               )}
             </Nav>

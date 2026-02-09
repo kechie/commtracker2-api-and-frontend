@@ -269,15 +269,14 @@ export const getTrackerDetails = async (recipientId, trackerId) => {
   }
 };
 
-export const getActivityLogs = async (page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'DESC', search = '') => {
+export const getActivityLogs = async (page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'DESC') => {
   try {
     const response = await api.get('/activity-logs', {
       params: {
         page: parseInt(page, 10),
         limit: parseInt(limit, 10),
         sortBy: sortBy || 'createdAt',
-        sortOrder: sortOrder || 'DESC',
-        search: search || ''
+        sortOrder: sortOrder || 'DESC'
       }
     });
     return response.data;
