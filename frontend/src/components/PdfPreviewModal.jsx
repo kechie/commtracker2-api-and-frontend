@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Modal, Button, Spinner, Alert } from 'react-bootstrap';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRedo, faUndo } from '@fortawesome/free-solid-svg-icons';
+import { faRedo, faUndo, faRoute } from '@fortawesome/free-solid-svg-icons';
+import { QRCodeSVG } from 'qrcode.react';
+import Draggable from 'react-draggable';
 
 // Required for react-pdf to work
 //pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -12,22 +14,14 @@ import { faRedo, faUndo } from '@fortawesome/free-solid-svg-icons';
 // ).toString();
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
+
+const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber }) => {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rotation, setRotation] = useState(0);
-
-  useEffect(() => {
-    if (!show) {
-      setNumPages(null);
-      setPageNumber(1);
-      setLoading(true);
-      setError(null);
-      setRotation(0);
-    }
-  }, [show]);
+  const nodeRef = useRef(null);
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -47,12 +41,22 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
   const rotateLeft = () => setRotation(prev => (prev - 90 + 360) % 360);
   const rotateRight = () => setRotation(prev => (prev + 90) % 360);
 
+  const trackingUrl = serialNumber 
+    ? `${window.location.origin}/public/tracking/${encodeURIComponent(serialNumber)}`
+    : null;
+
+  const handleViewRoutingSlip = () => {
+    if (trackingUrl) {
+      window.open(trackingUrl, '_blank');
+    }
+  };
+
   const handleDownload = () => {
     if (!pdfUrl) return;
     const url = pdfUrl instanceof Blob ? URL.createObjectURL(pdfUrl) : pdfUrl;
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'document.pdf';
+    link.download = `document_${serialNumber || 'download'}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -62,38 +66,17 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
   };
 
   const handlePrint = () => {
-    if (!pdfUrl) return;
-    const url = pdfUrl instanceof Blob ? URL.createObjectURL(pdfUrl) : pdfUrl;
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = url;
-
-    iframe.onload = () => {
-      try {
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-      } catch (e) {
-        console.error('Print failed:', e);
-        alert('Could not open print dialog. Please try downloading the file and printing it.');
-      }
-    };
-    
-    document.body.appendChild(iframe);
-
-    setTimeout(() => {
-        document.body.removeChild(iframe);
-        if (pdfUrl instanceof Blob) {
-            URL.revokeObjectURL(url);
-        }
-    }, 1000);
+    window.print();
   };
 
   return (
     <Modal show={show} onHide={handleClose} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>PDF Preview</Modal.Title>
+        <Modal.Title className="d-flex justify-content-between align-items-center w-100 me-3">
+          <span>PDF Preview {serialNumber && `- ${serialNumber}`}</span>
+        </Modal.Title>
       </Modal.Header>
-      <Modal.Body style={{ textAlign: 'center', maxHeight: '70vh', overflowY: 'auto' }}>
+      <Modal.Body style={{ textAlign: 'center', maxHeight: '70vh', overflowY: 'auto', position: 'relative' }}>
         {loading && !error &&(
           <div className="text-center">
             <Spinner animation="border" role="status" />
@@ -102,19 +85,51 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
         )}
         {error && <Alert variant="danger">{error}</Alert>}
 
-        <Document
-          file={pdfUrl}
-          className="d-flex justify-content-center"
-          onLoadSuccess={onDocumentLoadSuccess}
-          onLoadError={onDocumentLoadError}
-          onLoadStart={() => setLoading(true)}
-          options={{
-            cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
-            cMapPacked: true,
-          }}
-        >
-          {!loading && !error && <Page pageNumber={pageNumber} rotate={rotation} renderAnnotationLayer={false} renderTextLayer={false} />}
-        </Document>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <Document
+            file={pdfUrl}
+            className="d-flex justify-content-center"
+            onLoadSuccess={onDocumentLoadSuccess}
+            onLoadError={onDocumentLoadError}
+            onLoadStart={() => setLoading(true)}
+            options={{
+              cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+              cMapPacked: true,
+            }}
+          >
+            {!loading && !error && <Page pageNumber={pageNumber} rotate={rotation} renderAnnotationLayer={false} renderTextLayer={false} />}
+          </Document>
+
+          {!loading && !error && serialNumber && (
+            <Draggable bounds="parent" nodeRef={nodeRef}>
+              <div 
+                ref={nodeRef}
+                style={{ 
+                  position: 'absolute', 
+                  top: '10px', 
+                  right: '10px', 
+                  zIndex: 10,
+                  background: 'white',
+                  padding: '5px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  cursor: 'move'
+                }}
+                title={`Serial Number: ${serialNumber} (Drag to move)`}
+              >
+                              <QRCodeSVG 
+                                value={trackingUrl || serialNumber} 
+                                size={80} 
+                                level="H"
+                                includeMargin={true}
+                              />
+                
+                <div style={{ fontSize: '10px', marginTop: '2px', fontWeight: 'bold', userSelect: 'none' }}>{serialNumber}</div>
+              </div>
+            </Draggable>
+          )}
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <div className="d-flex justify-content-between align-items-center w-100">
@@ -135,6 +150,10 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl }) => {
             </Button>
           </div>
           <div>
+            <Button variant="outline-info" onClick={handleViewRoutingSlip} disabled={!serialNumber} title="View Routing Slip">
+              <FontAwesomeIcon icon={faRoute} className="me-2" />
+              Routing Slip
+            </Button>
             <Button variant="success" onClick={handleDownload} className="ms-2">
               Download
             </Button>

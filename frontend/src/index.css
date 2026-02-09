@@ -1,0 +1,54 @@
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show only the printable area */
+  .modal-content,
+  .modal-content * {
+    visibility: visible;
+  }
+
+  .modal-content {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Hide UI elements that shouldn't be printed */
+  .modal-footer,
+  .modal-header,
+  .d-print-none,
+  .btn,
+  .spinner-border,
+  .alert {
+    display: none !important;
+  }
+
+  /* Ensure the QR code is visible and correctly positioned */
+  .react-draggable {
+    visibility: visible !important;
+  }
+
+  /* Adjust Modal Body for print */
+  .modal-body {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  /* Remove scrollbars and other artifacts */
+  canvas, svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}

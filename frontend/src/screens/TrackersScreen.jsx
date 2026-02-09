@@ -22,6 +22,7 @@ const TrackersScreen = () => {
   const [showPdfModal, setShowPdfModal] = useState(false);
   //const [pdfUrl, setPdfUrl] = useState(null);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
+  const [selectedSerialNumber, setSelectedSerialNumber] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -123,15 +124,16 @@ const TrackersScreen = () => {
     });
   };
 
-  const handleShowPdfPreview = async (trackerId) => {
-    if (!trackerId) return;
+  const handleShowPdfPreview = async (tracker) => {
+    if (!tracker || !tracker.id) return;
     setError(null);
     try {
-      const blob = await getTrackerAttachment(trackerId);
+      const blob = await getTrackerAttachment(tracker.id);
       if (!blob) {
         throw new Error('No attachment found');
       }
       setSelectedPdfUrl(blob);
+      setSelectedSerialNumber(tracker.serialNumber);
       setShowPdfModal(true);
     } catch (err) {
       console.error('View attachment failed:', err);
@@ -140,6 +142,7 @@ const TrackersScreen = () => {
   }
   const handleClosePdfPreview = () => {
     setShowPdfModal(false);
+    setSelectedSerialNumber(null);
   };
 
   const handleShow = (tracker = null) => {
@@ -363,7 +366,7 @@ const TrackersScreen = () => {
                           <Button
                             variant="light"
                             size="sm"
-                            onClick={() => handleShowPdfPreview(tracker.id)}
+                            onClick={() => handleShowPdfPreview(tracker)}
                             title="View Attachment"
                           >
                             <FontAwesomeIcon icon={faFileText} />
@@ -688,9 +691,11 @@ const TrackersScreen = () => {
       </Modal >
 
       <PdfPreviewModal
+        key={selectedSerialNumber || 'none'}
         show={showPdfModal}
         handleClose={handleClosePdfPreview}
         pdfUrl={selectedPdfUrl}
+        serialNumber={selectedSerialNumber}
       />
     </Container >
   );

@@ -55,6 +55,7 @@ const RecipientDashboardScreen = () => {
   const [attachmentLoading, setAttachmentLoading] = useState(null); // Use tracker ID to indicate loading
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
+  const [selectedSerialNumber, setSelectedSerialNumber] = useState(null);
 
   // Pagination & filters
   const [currentPage, setCurrentPage] = useState(1);
@@ -189,8 +190,9 @@ const RecipientDashboardScreen = () => {
     navigate(`/recipients/${recipientId}/trackers/${trackerId}`);
   };
 
-  const handleViewAttachment = async (trackerId) => {
-    if (!recipientId || !trackerId) return;
+  const handleViewAttachment = async (item) => {
+    if (!recipientId || !item || !item.tracker) return;
+    const trackerId = item.tracker.id;
 
     setAttachmentLoading(trackerId);
     setError(null);
@@ -199,6 +201,7 @@ const RecipientDashboardScreen = () => {
       const blob = await getAttachment(recipientId, trackerId);
       const url = URL.createObjectURL(blob);
       setSelectedPdfUrl(url);
+      setSelectedSerialNumber(item.tracker.serialNumber);
       setShowPdfModal(true);
 
       // Mark as seen and read after viewing/downloading
@@ -226,6 +229,7 @@ const RecipientDashboardScreen = () => {
     // });
     setShowPdfModal(false);
     setSelectedPdfUrl(null);
+    setSelectedSerialNumber(null);
     setRefreshTrigger(prev => prev + 1);
   };
 
@@ -425,7 +429,7 @@ const RecipientDashboardScreen = () => {
                       <Button
                         size="sm"
                         variant="info"
-                        onClick={() => handleViewAttachment(item.tracker.id)}
+                        onClick={() => handleViewAttachment(item)}
                         disabled={attachmentLoading === item.tracker.id}
                       >
                         {attachmentLoading === item.tracker.id ? (
@@ -567,9 +571,11 @@ const RecipientDashboardScreen = () => {
       </Modal>
 
       <PdfPreviewModal
+        key={selectedSerialNumber || 'none'}
         show={showPdfModal}
         handleClose={handleClosePdfModal}
         pdfUrl={selectedPdfUrl}
+        serialNumber={selectedSerialNumber}
       />
 
       {/* Pagination */}

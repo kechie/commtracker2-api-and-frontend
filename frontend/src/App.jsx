@@ -16,6 +16,7 @@ import RecipientManagementScreen from './screens/RecipientManagementScreen';
 import ActivityLogsDashboardScreen from './screens/ActivityLogsDashboardScreen';
 import AnalyticsScreen from './screens/AnalyticsScreen';
 import CalendarScreen from './screens/CalendarScreen';
+import PublicTrackingScreen from './screens/PublicTrackingScreen';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -120,6 +121,9 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            {/* Public Routes */}
+            <Route path="/public/tracking/:serialNumber" element={<PublicTrackingScreen />} />
+            
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
           </Routes>
         </Container>

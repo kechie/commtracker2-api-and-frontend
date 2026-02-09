@@ -333,9 +333,11 @@ const RecipientTrackerDetailsScreen = () => {
 
       {trackerData.attachmentUrl && (
         <PdfPreviewModal
+          key={trackerData.serialNumber || 'none'}
           show={showPdfModal}
           handleClose={handleClosePdfModal}
           pdfUrl={trackerData.attachmentUrl}
+          serialNumber={trackerData.serialNumber}
         />
       )}
     </Container>
