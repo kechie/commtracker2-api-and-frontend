@@ -32,6 +32,7 @@ import {
   updateRecipientTrackerStatus,
   getAttachment,
   getRecipientAnalytics,
+  getTrackerReplySlipAttachment,
 } from '../utils/api';
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
@@ -53,9 +54,11 @@ const RecipientDashboardScreen = () => {
   const [remark, setRemark] = useState('');
   const [actionLoading, setActionLoading] = useState({});
   const [attachmentLoading, setAttachmentLoading] = useState(null); // Use tracker ID to indicate loading
+  const [replySlipLoading, setReplySlipLoading] = useState(null); // Use tracker ID to indicate loading
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
   const [selectedSerialNumber, setSelectedSerialNumber] = useState(null);
+  const [showQrCodeInModal, setShowQrCodeInModal] = useState(true);
 
   // Pagination & filters
   const [currentPage, setCurrentPage] = useState(1);
@@ -202,6 +205,7 @@ const RecipientDashboardScreen = () => {
       const url = URL.createObjectURL(blob);
       setSelectedPdfUrl(url);
       setSelectedSerialNumber(item.tracker.serialNumber);
+      setShowQrCodeInModal(true);
       setShowPdfModal(true);
 
       // Mark as seen and read after viewing/downloading
@@ -216,6 +220,28 @@ const RecipientDashboardScreen = () => {
       setError(err?.response?.data?.message || 'Could not load attachment.');
     } finally {
       setAttachmentLoading(null);
+    }
+  };
+
+  const handleViewReplySlip = async (item) => {
+    if (!recipientId || !item || !item.tracker) return;
+    const trackerId = item.tracker.id;
+
+    setReplySlipLoading(trackerId);
+    setError(null);
+
+    try {
+      const blob = await getTrackerReplySlipAttachment(trackerId);
+      const url = URL.createObjectURL(blob);
+      setSelectedPdfUrl(url);
+      setSelectedSerialNumber(item.tracker.serialNumber);
+      setShowQrCodeInModal(false);
+      setShowPdfModal(true);
+    } catch (err) {
+      console.error('View reply slip failed:', err);
+      setError(err?.response?.data?.message || 'Could not load reply slip.');
+    } finally {
+      setReplySlipLoading(null);
     }
   };
 
@@ -403,6 +429,7 @@ const RecipientDashboardScreen = () => {
               <th>From</th>
               <th>Date Received</th>
               <th className="text-center"><FontAwesomeIcon icon={faPaperclip} /></th>
+              <th className="text-center">Reply Slip</th>
               <th className="text-center">Status</th>
               <th>LCE Action / Date</th>
               <th>Last Updated</th>
@@ -436,6 +463,23 @@ const RecipientDashboardScreen = () => {
                           <FontAwesomeIcon icon={faSpinner} spin />
                         ) : (
                           <FontAwesomeIcon icon={faPaperclip} />
+                        )}
+                      </Button>
+                    )}
+                  </td>
+                  <td className="text-center">
+                    {item.tracker?.replySlipAttachment && (
+                      <Button
+                        size="sm"
+                        variant="light"
+                        onClick={() => handleViewReplySlip(item)}
+                        disabled={replySlipLoading === item.tracker.id}
+                        title="View Reply Slip"
+                      >
+                        {replySlipLoading === item.tracker.id ? (
+                          <FontAwesomeIcon icon={faSpinner} spin />
+                        ) : (
+                          <FontAwesomeIcon icon={faCheck} className="text-primary" />
                         )}
                       </Button>
                     )}
@@ -576,6 +620,7 @@ const RecipientDashboardScreen = () => {
         handleClose={handleClosePdfModal}
         pdfUrl={selectedPdfUrl}
         serialNumber={selectedSerialNumber}
+        showQrCode={showQrCodeInModal}
       />
 
       {/* Pagination */}

@@ -28,8 +28,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// All routes in this file are protected and require a role of 'receiving', 'admin', or 'superadmin'
-router.use(verifyToken, requireRole(['receiving', 'admin', 'superadmin']));
+// Routes accessible by all authorized roles
+router.use(verifyToken);
+
+// Serve attachment files
+router.get('/attachment/:id', requireRole(['receiving', 'admin', 'superadmin', 'recipient', 'monitor']), serveAttachment);
+router.get('/reply-slip-attachment/:id', requireRole(['receiving', 'admin', 'superadmin', 'recipient', 'monitor']), serveReplySlipAttachment);
+
+// All other routes in this file require 'receiving', 'admin', or 'superadmin'
+router.use(requireRole(['receiving', 'admin', 'superadmin']));
 
 // Get all trackers without pagination (use with caution)
 router.get('/all', getAllTrackers);
