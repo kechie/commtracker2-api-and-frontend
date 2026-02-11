@@ -63,7 +63,7 @@ const PublicTrackingScreen = () => {
   return (
     <Container className="py-4">
       <div className="d-print-none mb-4 d-flex justify-content-between align-items-center">
-        <Button variant="light" onClick={() => navigate(-1)}>
+        <Button variant="light" onClick={() => navigate('/')}>
           <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
           Back
         </Button>
@@ -78,9 +78,9 @@ const PublicTrackingScreen = () => {
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
               <div className="bg-white p-2 rounded me-3 d-flex align-items-center justify-content-center">
-                <QRCodeSVG 
-                  value={window.location.href} 
-                  size={60} 
+                <QRCodeSVG
+                  value={window.location.href}
+                  size={60}
                   level="H"
                 />
               </div>
