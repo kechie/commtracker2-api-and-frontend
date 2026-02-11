@@ -326,7 +326,6 @@ const TrackersScreen = () => {
                 <th>LCE Action, Date</th>
                 {/* <th>Confidential</th> */}
                 <th>LCE Reply, Date</th>
-                <th>Reply Slip</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -382,9 +381,6 @@ const TrackersScreen = () => {
                     <td>{tracker.lceAction === 'others' ? tracker.lceKeyedInAction : tracker.lceAction} , {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
                     {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
                     <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply == 'pending' ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
-                    <td className="text-center">
-
-                    </td>
                     <td>
                       <div className="d-flex gap-1">
                         <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
