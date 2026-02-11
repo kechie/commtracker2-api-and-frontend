@@ -89,6 +89,8 @@ export const createTracker = async (trackerData) => {
           trackerData[key].forEach(id => formData.append('recipientIds[]', id));
         } else if (key === 'attachment' && trackerData[key]) {
           formData.append('attachment', trackerData[key]);
+        } else if (key === 'replySlipAttachment' && trackerData[key]) {
+          formData.append('replySlipAttachment', trackerData[key]);
         } else {
           formData.append(key, trackerData[key]);
         }
@@ -109,7 +111,26 @@ export const createTracker = async (trackerData) => {
 
 export const updateTracker = async (id, trackerData) => {
   try {
-    const response = await api.put(`/trackers/${id}`, trackerData);
+    const formData = new FormData();
+    for (const key in trackerData) {
+      if (Object.hasOwn(trackerData, key)) {
+        if (key === 'recipientIds' && Array.isArray(trackerData[key])) {
+          trackerData[key].forEach(id => formData.append('recipientIds[]', id));
+        } else if (key === 'attachment' && trackerData[key]) {
+          formData.append('attachment', trackerData[key]);
+        } else if (key === 'replySlipAttachment' && trackerData[key]) {
+          formData.append('replySlipAttachment', trackerData[key]);
+        } else if (trackerData[key] !== null && trackerData[key] !== undefined) {
+          formData.append(key, trackerData[key]);
+        }
+      }
+    }
+
+    const response = await api.put(`/trackers/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('API Update Tracker Error:', error.response?.data || error.message);
@@ -255,6 +276,18 @@ export const getTrackerAttachment = async (trackerId) => {
     return response.data;
   } catch (error) {
     console.error('API Download Tracker Attachment Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const getTrackerReplySlipAttachment = async (trackerId) => {
+  try {
+    const response = await api.get(`/trackers/reply-slip-attachment/${trackerId}`, {
+      responseType: 'blob', // Important for file downloads
+    });
+    return response.data;
+  } catch (error) {
+    console.error('API Download Tracker Reply Slip Attachment Error:', error.response?.data || error.message);
     throw error.response?.data || error;
   }
 };

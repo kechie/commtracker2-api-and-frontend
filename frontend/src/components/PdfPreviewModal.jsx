@@ -15,7 +15,7 @@ import Draggable from 'react-draggable';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber }) => {
+const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber, showQrCode = true }) => {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -100,7 +100,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber }) => {
             {!loading && !error && <Page pageNumber={pageNumber} rotate={rotation} renderAnnotationLayer={false} renderTextLayer={false} />}
           </Document>
 
-          {!loading && !error && serialNumber && (
+          {!loading && !error && serialNumber && showQrCode && (
             <Draggable bounds="parent" nodeRef={nodeRef}>
               <div 
                 ref={nodeRef}

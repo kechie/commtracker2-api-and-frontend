@@ -74,6 +74,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       field: 'lce_reply_date'
     },
+    replySlipAttachment: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'reply_slip_attachment'
+    },
+    replySlipAttachmentMimeType: {
+      type: DataTypes.STRING,
+      field: 'reply_slip_attachment_mime_type'
+    },
   }, {
     tableName: 'trackers',
     timestamps: true,

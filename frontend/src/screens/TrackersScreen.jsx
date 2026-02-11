@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, FloatingLabel, Alert, Container, Card, Row, Col, Badge, Pagination, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipients, getTrackerAttachment } from '../utils/api';
+import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipients, getTrackerAttachment, getTrackerReplySlipAttachment } from '../utils/api';
 import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 //import { faPlus, faEdit, faTrash, faArrowLeft, faEye, faInfoCircle, faFileText } from '@fortawesome/free-solid-svg-icons';
-import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faSearch, faTimes, faReply } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
 
@@ -23,6 +23,7 @@ const TrackersScreen = () => {
   //const [pdfUrl, setPdfUrl] = useState(null);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
   const [selectedSerialNumber, setSelectedSerialNumber] = useState(null);
+  const [showQrCodeInModal, setShowQrCodeInModal] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -42,6 +43,8 @@ const TrackersScreen = () => {
     lceRemarks: '',
     attachment: null,
     attachmentMimeType: '',
+    replySlipAttachment: null,
+    replySlipAttachmentMimeType: '',
     isConfidential: false,
     recipientIds: [], // Array of recipient IDs to assign
   });
@@ -120,6 +123,10 @@ const TrackersScreen = () => {
       lceAction: '',
       lceKeyedInAction: '',
       lceActionDate: '',
+      attachment: null,
+      attachmentMimeType: '',
+      replySlipAttachment: null,
+      replySlipAttachmentMimeType: '',
       recipientIds: [],
     });
   };
@@ -134,12 +141,32 @@ const TrackersScreen = () => {
       }
       setSelectedPdfUrl(blob);
       setSelectedSerialNumber(tracker.serialNumber);
+      setShowQrCodeInModal(true);
       setShowPdfModal(true);
     } catch (err) {
       console.error('View attachment failed:', err);
       setError(err?.response?.data?.message || 'Could not load attachment.');
     }
   }
+
+  const handleShowReplySlipPreview = async (tracker) => {
+    if (!tracker || !tracker.id) return;
+    setError(null);
+    try {
+      const blob = await getTrackerReplySlipAttachment(tracker.id);
+      if (!blob) {
+        throw new Error('No reply slip attachment found');
+      }
+      setSelectedPdfUrl(blob);
+      setSelectedSerialNumber(tracker.serialNumber);
+      setShowQrCodeInModal(false);
+      setShowPdfModal(true);
+    } catch (err) {
+      console.error('View reply slip failed:', err);
+      setError(err?.response?.data?.message || 'Could not load reply slip.');
+    }
+  }
+
   const handleClosePdfPreview = () => {
     setShowPdfModal(false);
     setSelectedSerialNumber(null);
@@ -163,6 +190,8 @@ const TrackersScreen = () => {
         lceKeyedInAction: tracker.lceKeyedInAction || '',
         lceActionDate: tracker.lceActionDate ? new Date(tracker.lceActionDate).toISOString().split('T')[0] : '',
         recipientIds: recipientIds,
+        replySlipAttachment: tracker.replySlipAttachment || null,
+        replySlipAttachmentMimeType: tracker.replySlipAttachmentMimeType || '',
       });
     }
     setShowModal(true);
@@ -183,7 +212,7 @@ const TrackersScreen = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       if (editingTracker) {
         await updateTracker(editingTracker.id, formData);
@@ -297,6 +326,7 @@ const TrackersScreen = () => {
                 <th>LCE Action, Date</th>
                 {/* <th>Confidential</th> */}
                 <th>LCE Reply, Date</th>
+                <th>Reply Slip</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -352,19 +382,30 @@ const TrackersScreen = () => {
                     <td>{tracker.lceAction === 'others' ? tracker.lceKeyedInAction : tracker.lceAction} , {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
                     {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
                     <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply == 'pending' ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
+                    <td className="text-center">
+
+                    </td>
                     <td>
                       <div className="d-flex gap-1">
                         <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
                           <FontAwesomeIcon icon={faEdit} />
                         </Button>
                         {tracker.attachment && (
-                          <Button
-                            variant="light"
+                          <Button variant='outline-success'
                             size="sm"
                             onClick={() => handleShowPdfPreview(tracker)}
                             title="View Attachment"
                           >
                             <FontAwesomeIcon icon={faFileText} />
+                          </Button>
+                        )}
+                        {tracker.replySlipAttachment && (
+                          <Button variant='outline-success'
+                            size="sm"
+                            onClick={() => handleShowReplySlipPreview(tracker)}
+                            title="View Reply Slip"
+                          >
+                            <FontAwesomeIcon icon={faReply} />
                           </Button>
                         )}
                         <OverlayTrigger
@@ -657,21 +698,32 @@ const TrackersScreen = () => {
               <Card>
                 <Card.Header>Attachment</Card.Header>
                 <Card.Body>
-                  <FloatingLabel controlId="attachment" label="Attachment" className="mb-3">
-                    <Form.Control type="file" name="attachment" onChange={(e) => {
-                      const file = e.target.files[0];
-                      setFormData(prev => ({
-                        ...prev,
-                        attachment: file,
-                        attachmentMimeType: file ? file.type : '',
-                      }));
-                    }} />
-                  </FloatingLabel>
-                  {/*
-                  <Form.Group className="mb-3" controlId="attachment">
-                    <Form.Control type="file" name="attachment" />
-                    <Form.Text className="text-muted">DocTrkr2 Attachment (PDF)</Form.Text>
-                  </Form.Group>*/}
+                  <Row>
+                    <Col md={6}>
+                      <FloatingLabel controlId="attachment" label="Main Attachment" className="mb-3">
+                        <Form.Control type="file" name="attachment" onChange={(e) => {
+                          const file = e.target.files[0];
+                          setFormData(prev => ({
+                            ...prev,
+                            attachment: file,
+                            attachmentMimeType: file ? file.type : '',
+                          }));
+                        }} />
+                      </FloatingLabel>
+                    </Col>
+                    <Col md={6}>
+                      <FloatingLabel controlId="replySlipAttachment" label="Reply Slip Attachment" className="mb-3">
+                        <Form.Control type="file" name="replySlipAttachment" onChange={(e) => {
+                          const file = e.target.files[0];
+                          setFormData(prev => ({
+                            ...prev,
+                            replySlipAttachment: file,
+                            replySlipAttachmentMimeType: file ? file.type : '',
+                          }));
+                        }} />
+                      </FloatingLabel>
+                    </Col>
+                  </Row>
                 </Card.Body>
               </Card>
               <Form.Group className="mb-3" controlId="isConfidential">
@@ -691,6 +743,7 @@ const TrackersScreen = () => {
         handleClose={handleClosePdfPreview}
         pdfUrl={selectedPdfUrl}
         serialNumber={selectedSerialNumber}
+        showQrCode={showQrCodeInModal}
       />
     </Container >
   );

@@ -150,29 +150,38 @@ exports.createTracker = async (req, res) => {
   try {
     const { recipientIds, serialNumber: incomingSerialNumber, ...trackerData } = req.body;
 
-    // Validate file if provided
-    if (req.file) {
-      const fileValidation = validateFile(req.file);
+    // Validate files if provided
+    const files = req.files || {};
+    const attachmentFile = files.attachment ? files.attachment[0] : null;
+    const replySlipFile = files.replySlipAttachment ? files.replySlipAttachment[0] : null;
+
+    if (attachmentFile) {
+      const fileValidation = validateFile(attachmentFile);
       if (!fileValidation.valid) {
         await transaction.rollback();
-        // Clean up uploaded file
-        await deleteFile(req.file.filename);
-        return res.status(400).json({
-          success: false,
-          message: fileValidation.error
-        });
+        await deleteFile(attachmentFile.filename);
+        if (replySlipFile) await deleteFile(replySlipFile.filename);
+        return res.status(400).json({ success: false, message: `Attachment: ${fileValidation.error}` });
       }
+      trackerData.attachment = attachmentFile.filename;
+      trackerData.attachmentMimeType = attachmentFile.mimetype;
+    }
+
+    if (replySlipFile) {
+      const fileValidation = validateFile(replySlipFile);
+      if (!fileValidation.valid) {
+        await transaction.rollback();
+        await deleteFile(replySlipFile.filename);
+        if (attachmentFile) await deleteFile(attachmentFile.filename);
+        return res.status(400).json({ success: false, message: `Reply Slip: ${fileValidation.error}` });
+      }
+      trackerData.replySlipAttachment = replySlipFile.filename;
+      trackerData.replySlipAttachmentMimeType = replySlipFile.mimetype;
     }
 
     let finalSerialNumber = incomingSerialNumber;
     if (!finalSerialNumber) {
       finalSerialNumber = await generateSerialNumber(transaction);
-    }
-
-    // Handle file upload
-    if (req.file) {
-      trackerData.attachment = req.file.filename;
-      trackerData.attachmentMimeType = req.file.mimetype;
     }
 
     // Create the tracker within the transaction
@@ -224,9 +233,10 @@ exports.createTracker = async (req, res) => {
     await transaction.rollback(); // Rollback on error
     console.error('Create tracker error:', error);
 
-    // Clean up file on error
-    if (req.file) {
-      await deleteFile(req.file.filename);
+    // Clean up files on error
+    if (req.files) {
+      if (req.files.attachment) await deleteFile(req.files.attachment[0].filename);
+      if (req.files.replySlipAttachment) await deleteFile(req.files.replySlipAttachment[0].filename);
     }
 
     // Log failed tracker creation
@@ -394,9 +404,10 @@ exports.updateTracker = async (req, res) => {
   try {
     const tracker = await Tracker.findByPk(req.params.id);
     if (!tracker) {
-      // Clean up uploaded file if tracker not found
-      if (req.file) {
-        await deleteFile(req.file.filename);
+      // Clean up uploaded files if tracker not found
+      if (req.files) {
+        if (req.files.attachment) await deleteFile(req.files.attachment[0].filename);
+        if (req.files.replySlipAttachment) await deleteFile(req.files.replySlipAttachment[0].filename);
       }
       return res.status(404).json({
         success: false,
@@ -404,35 +415,40 @@ exports.updateTracker = async (req, res) => {
       });
     }
 
-    // Validate file if provided
-    if (req.file) {
-      const fileValidation = validateFile(req.file);
-      if (!fileValidation.valid) {
-        // Clean up uploaded file
-        await deleteFile(req.file.filename);
-        return res.status(400).json({
-          success: false,
-          message: fileValidation.error
-        });
-      }
-    }
+    const files = req.files || {};
+    const attachmentFile = files.attachment ? files.attachment[0] : null;
+    const replySlipFile = files.replySlipAttachment ? files.replySlipAttachment[0] : null;
 
     const { recipientIds, ...trackerData } = req.body;
+
+    // Validate files if provided
+    if (attachmentFile) {
+      const fileValidation = validateFile(attachmentFile);
+      if (!fileValidation.valid) {
+        await deleteFile(attachmentFile.filename);
+        return res.status(400).json({ success: false, message: `Attachment: ${fileValidation.error}` });
+      }
+      const oldFileName = tracker.attachment;
+      trackerData.attachment = attachmentFile.filename;
+      trackerData.attachmentMimeType = attachmentFile.mimetype;
+      if (oldFileName) deleteFile(oldFileName);
+    }
+
+    if (replySlipFile) {
+      const fileValidation = validateFile(replySlipFile);
+      if (!fileValidation.valid) {
+        await deleteFile(replySlipFile.filename);
+        return res.status(400).json({ success: false, message: `Reply Slip: ${fileValidation.error}` });
+      }
+      const oldFileName = tracker.replySlipAttachment;
+      trackerData.replySlipAttachment = replySlipFile.filename;
+      trackerData.replySlipAttachmentMimeType = replySlipFile.mimetype;
+      if (oldFileName) deleteFile(oldFileName);
+    }
 
     // serialNumber should not be updated after creation, unless specifically allowed by logic
     if (trackerData.serialNumber) {
       delete trackerData.serialNumber;
-    }
-
-    // Handle file update - delete old file if new one is being uploaded
-    if (req.file) {
-      const oldFileName = tracker.attachment;
-      trackerData.attachment = req.file.filename;
-      trackerData.attachmentMimeType = req.file.mimetype;
-      // Delete old file asynchronously (don't wait for it)
-      if (oldFileName) {
-        deleteFile(oldFileName);
-      }
     }
 
     // Update tracker's own fields
@@ -464,9 +480,10 @@ exports.updateTracker = async (req, res) => {
     });
   } catch (error) {
     console.error('Update tracker error:', error);
-    // Clean up file on error
-    if (req.file) {
-      await deleteFile(req.file.filename);
+    // Clean up files on error
+    if (req.files) {
+      if (req.files.attachment) await deleteFile(req.files.attachment[0].filename);
+      if (req.files.replySlipAttachment) await deleteFile(req.files.replySlipAttachment[0].filename);
     }
     res.status(500).json({
       success: false,
@@ -489,15 +506,15 @@ exports.deleteTracker = async (req, res) => {
       });
     }
 
-    // Delete associated file before deleting tracker
+    // Delete associated files before deleting tracker
     const fileName = tracker.attachment;
+    const replySlipFileName = tracker.replySlipAttachment;
 
     await tracker.destroy();
 
-    // Delete file asynchronously (don't wait for it)
-    if (fileName) {
-      deleteFile(fileName);
-    }
+    // Delete files asynchronously (don't wait for them)
+    if (fileName) deleteFile(fileName);
+    if (replySlipFileName) deleteFile(replySlipFileName);
 
     // Log tracker deletion
     await logTrackerActivity({
@@ -541,6 +558,26 @@ exports.serveAttachment = async (req, res) => {
     });
   } catch (error) {
     console.error('Serve attachment error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.serveReplySlipAttachment = async (req, res) => {
+  try {
+    const tracker = await Tracker.findByPk(req.params.id);
+    if (!tracker || !tracker.replySlipAttachment) {
+      return res.status(404).json({ error: 'Reply slip attachment not found' });
+    }
+
+    const filePath = path.join(UPLOADS_DIR, tracker.replySlipAttachment);
+    res.download(filePath, tracker.replySlipAttachment, (err) => {
+      if (err) {
+        console.error('File download error:', err);
+        res.status(500).json({ error: 'Error downloading file' });
+      }
+    });
+  } catch (error) {
+    console.error('Serve reply slip attachment error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

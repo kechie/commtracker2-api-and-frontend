@@ -338,6 +338,7 @@ const RecipientTrackerDetailsScreen = () => {
           handleClose={handleClosePdfModal}
           pdfUrl={trackerData.attachmentUrl}
           serialNumber={trackerData.serialNumber}
+          showQrCode={true}
         />
       )}
     </Container>

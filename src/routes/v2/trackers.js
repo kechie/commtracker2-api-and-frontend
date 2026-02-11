@@ -9,6 +9,7 @@ const {
   updateTracker,
   deleteTracker,
   serveAttachment,
+  serveReplySlipAttachment,
   trackerValidation,
 } = require('../../controllers/v2/trackerController');
 const { verifyToken, requireRole } = require('../../middleware/authMiddleware');
@@ -34,15 +35,16 @@ router.use(verifyToken, requireRole(['receiving', 'admin', 'superadmin']));
 router.get('/all', getAllTrackers);
 // Serve attachment files
 router.get('/attachment/:id', serveAttachment);
+router.get('/reply-slip-attachment/:id', serveReplySlipAttachment);
 
 // Get paginated trackers and create new tracker
-router.route('/').post(upload.single('attachment'), trackerValidation, createTracker).get(getTrackers);
+router.route('/').post(upload.fields([{ name: 'attachment', maxCount: 1 }, { name: 'replySlipAttachment', maxCount: 1 }]), trackerValidation, createTracker).get(getTrackers);
 
 // Get, update, delete specific tracker
 router
   .route('/:id')
   .get(getTrackerById)
-  .put(trackerValidation, updateTracker)
+  .put(upload.fields([{ name: 'attachment', maxCount: 1 }, { name: 'replySlipAttachment', maxCount: 1 }]), trackerValidation, updateTracker)
   .delete(deleteTracker);
 
 module.exports = router;
