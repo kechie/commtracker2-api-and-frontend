@@ -385,6 +385,18 @@ exports.updateTrackerRecipientStatus = async (req, res) => {
     await trackerRecipient.update(updateData, { transaction });
     await transaction.commit();
 
+    // Log the activity
+    await logRecipientTrackerActivity({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      entityId: id,
+      description: `Updated tracker-recipient status to ${status}`,
+      details: { status, remarks, dueDate },
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
+
     const updatedRecord = await TrackerRecipient.findByPk(id, {
       include: [
         {
@@ -403,6 +415,17 @@ exports.updateTrackerRecipientStatus = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error('Error updating tracker-recipient status:', error);
+
+    await logRecipientTrackerActivity({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      entityId: req.params.id,
+      description: `Failed to update tracker-recipient status: ${error.message}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'failure'
+    });
+
     res.status(500).json({
       success: false,
       message: 'Error updating tracker-recipient status',
@@ -453,6 +476,18 @@ exports.bulkUpdateTrackerRecipients = async (req, res) => {
 
     await transaction.commit();
 
+    // Log the activity
+    await logRecipientTrackerActivity({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      entityId: trackerId,
+      description: `Bulk updated ${updatedCount} tracker-recipients for tracker ${trackerId}`,
+      details: { status, action, updatedCount },
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
+
     const updatedRecords = await TrackerRecipient.findAll({
       where: { trackerId },
       include: [
@@ -472,6 +507,17 @@ exports.bulkUpdateTrackerRecipients = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error('Error bulk updating tracker-recipients:', error);
+
+    await logRecipientTrackerActivity({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      entityId: req.params.trackerId,
+      description: `Failed to bulk update tracker-recipients: ${error.message}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'failure'
+    });
+
     res.status(500).json({
       success: false,
       message: 'Error bulk updating tracker-recipients',
@@ -501,6 +547,17 @@ exports.deleteTrackerRecipient = async (req, res) => {
     await trackerRecipient.destroy({ transaction });
     await transaction.commit();
 
+    // Log the activity
+    await logRecipientTrackerActivity({
+      userId: req.user?.id,
+      action: 'DELETE',
+      entityId: id,
+      description: `Deleted tracker-recipient entry with ID ${id}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
+
     res.json({
       success: true,
       message: 'Tracker-recipient deleted successfully'
@@ -508,6 +565,17 @@ exports.deleteTrackerRecipient = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error('Error deleting tracker-recipient:', error);
+
+    await logRecipientTrackerActivity({
+      userId: req.user?.id,
+      action: 'DELETE',
+      entityId: req.params.id,
+      description: `Failed to delete tracker-recipient entry: ${error.message}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'failure'
+    });
+
     res.status(500).json({
       success: false,
       message: 'Error deleting tracker-recipient',

@@ -19,7 +19,7 @@ const ALLOWED_MIME_TYPES = [
 ];
 
 const { Op } = require('sequelize');
-// ... (imports)
+const { logRecipientTrackerActivity } = require('../../utils/activityLogger');
 
 /**
  * @desc    Get paginated list of trackers received by a specific recipient
@@ -253,6 +253,23 @@ exports.updateReceivedTracker = async (req, res) => {
     await trackerRecipient.update(updateData, { transaction });
     await transaction.commit();
 
+    // Log the activity
+    await logRecipientTrackerActivity({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      entityId: `${trackerId}-${recipientId}`,
+      description: `Recipient updated tracker status to ${status || trackerRecipient.status}`,
+      details: { 
+        trackerId, 
+        recipientId, 
+        status, 
+        remarks 
+      },
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'success'
+    });
+
     const updatedRecord = await TrackerRecipient.findOne({
       where: { recipientId, trackerId },
       include: [
@@ -275,6 +292,17 @@ exports.updateReceivedTracker = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error('Error updating tracker-recipient status:', error);
+
+    await logRecipientTrackerActivity({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      entityId: `${req.params.trackerId}-${req.params.recipientId}`,
+      description: `Failed to update tracker status: ${error.message}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'failure'
+    });
+
     res.status(500).json({
       success: false,
       message: 'Error updating tracker-recipient status',

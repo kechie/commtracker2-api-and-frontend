@@ -134,16 +134,49 @@ exports.updateRecipient = async (req, res) => {
     const { recipientCode, recipientName, initial } = req.body;
     const recipient = await Recipient.findByPk(id);
     if (recipient) {
+      const oldValues = {
+        recipientCode: recipient.recipientCode,
+        recipientName: recipient.recipientName,
+        initial: recipient.initial
+      };
+
       recipient.recipientCode = recipientCode;
       recipient.recipientName = recipientName;
       recipient.initial = initial;
       await recipient.save();
+
+      // Log recipient update
+      await logRecipientActivity({
+        userId: req.user?.id,
+        action: 'UPDATE',
+        entityId: recipient.id,
+        description: `Updated recipient: ${recipientName}`,
+        details: {
+          old: oldValues,
+          new: { recipientCode, recipientName, initial }
+        },
+        ipAddress: req.clientIp,
+        userAgent: req.clientUserAgent,
+        status: 'success'
+      });
+
       res.json(recipient);
     } else {
       res.status(404).json({ error: 'Recipient not found' });
     }
   } catch (error) {
     console.error('Update recipient error:', error);
+
+    await logRecipientActivity({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      entityId: req.params.id,
+      description: `Failed to update recipient: ${error.message}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'failure'
+    });
+
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -157,13 +190,37 @@ exports.deleteRecipient = async (req, res) => {
     const { id } = req.params;
     const recipient = await Recipient.findByPk(id);
     if (recipient) {
+      const recipientName = recipient.recipientName;
       await recipient.destroy();
+
+      // Log recipient deletion
+      await logRecipientActivity({
+        userId: req.user?.id,
+        action: 'DELETE',
+        entityId: id,
+        description: `Deleted recipient: ${recipientName}`,
+        ipAddress: req.clientIp,
+        userAgent: req.clientUserAgent,
+        status: 'success'
+      });
+
       res.json({ message: 'Recipient removed' });
     } else {
       res.status(404).json({ error: 'Recipient not found' });
     }
   } catch (error) {
     console.error('Delete recipient error:', error);
+
+    await logRecipientActivity({
+      userId: req.user?.id,
+      action: 'DELETE',
+      entityId: req.params.id,
+      description: `Failed to delete recipient: ${error.message}`,
+      ipAddress: req.clientIp,
+      userAgent: req.clientUserAgent,
+      status: 'failure'
+    });
+
     res.status(500).json({ error: 'Internal server error' });
   }
 };
