@@ -20,17 +20,10 @@ const DashboardScreen = () => {
     <Container>
       <Row className="align-items-left mb-3">
         <Col>
-          <h1>Main Dashboard</h1>
+          {/* <h1>Main Dashboard</h1>
           {user && (
             <p>Hello, {user.fullname || user.userId}, {role}!</p>
-          )}<br />
-          {role === 'receiving' && <Link to="/trackers">Manage Document Tracking</Link>}<br />
-          {role === 'receiving' && <Link to="/receiving-dashboard">Receiving Dashboard</Link>}<br />
-          {(role === 'admin' || role === 'superadmin') && <Link to="/admin">Admin Panel</Link>}<br />
-          {role === 'recipient' && <Link to="/recipient-dashboard">Recipient Dashboard</Link>}<br />
-          {role === 'lcestaff' && <Link to="/lcestaff-dashboard">LCE Staff Dashboard</Link>}<br />
-          {role === 'lce' && <Link to="/lce-dashboard">LCE Dashboard</Link>}<br />
-          {role === 'monitor' && <Link to="/activity-logs-dashboard">Activity Logs Dashboard</Link>}<br />
+          )}<br />*/}
 
           {['monitor', 'admin', 'superadmin'].includes(role) && (
             <div className="mt-4">
@@ -38,6 +31,15 @@ const DashboardScreen = () => {
             </div>
           )}
         </Col>
+      </Row>
+      <Row>
+        {role === 'receiving' && <Link to="/trackers">Manage Document Tracking</Link>}<br />
+        {role === 'receiving' && <Link to="/receiving-dashboard">Receiving Dashboard</Link>}<br />
+        {(role === 'admin' || role === 'superadmin') && <Link to="/admin">Admin Panel</Link>}<br />
+        {role === 'recipient' && <Link to="/recipient-dashboard">Recipient Dashboard</Link>}<br />
+        {role === 'lcestaff' && <Link to="/lcestaff-dashboard">LCE Staff Dashboard</Link>}<br />
+        {role === 'lce' && <Link to="/lce-dashboard">LCE Dashboard</Link>}<br />
+        {role === 'monitor' && <Link to="/activity-logs-dashboard">Activity Logs Dashboard</Link>}<br />
       </Row>
     </Container>
   );

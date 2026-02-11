@@ -118,8 +118,9 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber, showQrCode =
                 }}
                 title={`Serial Number: ${serialNumber} (Drag to move)`}
               >
-                <div style={{ fontSize: '10px', marginTop: '2px', fontWeight: 'bold', userSelect: 'none' }}>RECEIVED</div>
-                <div style={{ fontSize: '10px', marginTop: '2px', fontWeight: 'bold', userSelect: 'none' }}>CMO ADMIN</div>
+                <div style={{ fontSize: '9px', fontWeight: 'bold', userSelect: 'none' }}>CITY MAYOR'S OFFICE</div>
+                <div style={{ fontSize: '9px', fontWeight: 'bold', userSelect: 'none' }}>ADMIN DIVISION</div>
+                <div style={{ fontSize: '9px', fontWeight: 'bold', userSelect: 'none' }}>RECEIVED</div>
                               <QRCodeSVG
                                 value={trackingUrl || serialNumber}
                                 size={80}
