@@ -85,7 +85,6 @@ exports.getReceivedTrackers = async (req, res) => {
       limit,
       distinct: true,
       col: 'id',
-      subQuery: false, // Prevent issues with joined where clauses
     });
 
     res.json({

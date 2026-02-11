@@ -281,12 +281,18 @@ exports.getTrackers = async (req, res) => {
     // Build where clause for search
     const where = {};
     if (search) {
+      const escapedSearch = search.replace(/'/g, "''");
       where[Op.or] = [
         { serialNumber: { [Op.iLike]: `%${search}%` } },
         { fromName: { [Op.iLike]: `%${search}%` } },
         { documentTitle: { [Op.iLike]: `%${search}%` } },
-        { '$trackerRecipients.recipient.recipient_name$': { [Op.iLike]: `%${search}%` } },
-        { '$trackerRecipients.recipient.initial$': { [Op.iLike]: `%${search}%` } },
+        // Use a subquery for recipient search to allow Sequelize to use subqueries for pagination
+        sequelize.literal(`EXISTS (
+          SELECT 1 FROM tracker_recipients tr
+          JOIN recipients r ON tr.recipient_id = r.id
+          WHERE tr.tracker_id = trackers.id
+          AND (r.recipient_name ILIKE '%${escapedSearch}%' OR r.initial ILIKE '%${escapedSearch}%')
+        )`)
       ];
     }
 
@@ -296,7 +302,6 @@ exports.getTrackers = async (req, res) => {
       where,
       distinct: true,
       col: 'id',
-      subQuery: false,
       include: [
         {
           association: 'trackerRecipients',
