@@ -41,7 +41,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber, showQrCode =
   const rotateLeft = () => setRotation(prev => (prev - 90 + 360) % 360);
   const rotateRight = () => setRotation(prev => (prev + 90) % 360);
 
-  const trackingUrl = serialNumber 
+  const trackingUrl = serialNumber
     ? `${window.location.origin}/public/tracking/${encodeURIComponent(serialNumber)}`
     : null;
 
@@ -102,12 +102,12 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber, showQrCode =
 
           {!loading && !error && serialNumber && showQrCode && (
             <Draggable bounds="parent" nodeRef={nodeRef}>
-              <div 
+              <div
                 ref={nodeRef}
-                style={{ 
-                  position: 'absolute', 
-                  top: '10px', 
-                  right: '10px', 
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
                   zIndex: 10,
                   background: 'white',
                   padding: '5px',
@@ -118,13 +118,16 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber, showQrCode =
                 }}
                 title={`Serial Number: ${serialNumber} (Drag to move)`}
               >
-                              <QRCodeSVG 
-                                value={trackingUrl || serialNumber} 
-                                size={80} 
+                <div style={{ fontSize: '10px', marginTop: '2px', fontWeight: 'bold', userSelect: 'none' }}>RECEIVED</div>
+                <div style={{ fontSize: '10px', marginTop: '2px', fontWeight: 'bold', userSelect: 'none' }}>CMO ADMIN</div>
+                              <QRCodeSVG
+                                value={trackingUrl || serialNumber}
+                                size={80}
                                 level="H"
                                 includeMargin={true}
                               />
-                
+
+
                 <div style={{ fontSize: '10px', marginTop: '2px', fontWeight: 'bold', userSelect: 'none' }}>{serialNumber}</div>
               </div>
             </Draggable>
