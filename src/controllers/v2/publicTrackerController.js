@@ -2,7 +2,7 @@ const { Tracker, TrackerRecipient, Recipient } = require('../../db');
 
 /**
  * @desc    Get routing/tracking slip for a tracker by serial number
- * @route   GET /api/v2/public/trackers/:serialNumber/routing-slip
+ * @route   GET /api/v2/public/:serialNumber/routing-slip
  * @access  Public
  */
 exports.getRoutingSlip = async (req, res) => {

@@ -323,7 +323,7 @@ export const getRecipientAnalytics = async (recipientId) => {
 
 export const getPublicRoutingSlip = async (serialNumber) => {
   try {
-    const response = await api.get(`/public/trackers/${encodeURIComponent(serialNumber)}/routing-slip`);
+    const response = await api.get(`/public/${encodeURIComponent(serialNumber)}/routing-slip`);
     return response.data;
   } catch (error) {
     console.error('API Get Public Routing Slip Error:', error.response?.data || error.message);
