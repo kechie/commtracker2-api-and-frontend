@@ -5,6 +5,7 @@ import { Container, Row, Col, Table, Button } from 'react-bootstrap';
 //import { useNavigate, Link } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import Analytics from '../components/Analytics';
 
 
 const DashboardScreen = () => {
@@ -21,38 +22,21 @@ const DashboardScreen = () => {
         <Col>
           <h1>Main Dashboard</h1>
           {user && (
-            <p>Hello, {user.userId},{role}!</p>
+            <p>Hello, {user.fullname || user.userId}, {role}!</p>
           )}<br />
           {role === 'receiving' && <Link to="/trackers">Manage Document Tracking</Link>}<br />
           {role === 'receiving' && <Link to="/receiving-dashboard">Receiving Dashboard</Link>}<br />
-          {/*(role === 'receiving' &&
-            <Container className="mt-4">
-              Add receiving-specific content here
-              Analytics, recent activities, quick actions, etc.
-              link to tracker management screen
-            </Container>*/}
           {(role === 'admin' || role === 'superadmin') && <Link to="/admin">Admin Panel</Link>}<br />
-          {/*(role === 'admin' || role === 'superadmin') &&
-            <Container className="mt-4">
-              Add admin -specific content here
-              recent activities, quick actions, etc.
-              link to tracker management screen
-            </Container>*/}
-          {['recipient'].includes(role) && <Link to="/recipient-dashboard">Your DocTrkr2s</Link>}<br />
-          {role === 'monitor' && <Link to="/analytics">Analytics Dashboard</Link>}<br />
+          {role === 'recipient' && <Link to="/recipient-dashboard">Recipient Dashboard</Link>}<br />
+          {role === 'lcestaff' && <Link to="/lcestaff-dashboard">LCE Staff Dashboard</Link>}<br />
+          {role === 'lce' && <Link to="/lce-dashboard">LCE Dashboard</Link>}<br />
           {role === 'monitor' && <Link to="/activity-logs-dashboard">Activity Logs Dashboard</Link>}<br />
-          {/*role === 'recipient' &&
-            <Container className="mt-4">
-              Add recipient-specific content here
-              brief analytics, recent activities, quick actions, etc.
-            </Container>*/}
-          {/*role === 'monitor' &&
-            <Container className="mt-4">
-              Add monitor-specific content here
-              brief analytics, recent activities, quick actions, etc.
-            </Container>*/}
-          {['lcestaff', 'lce'].includes(role) && <Link to="/lce-dashboard">Your DocTrkr2s</Link>}<br />
-          <p>This will contain analytics for the monitor and recipient role in the future.</p>
+
+          {['monitor', 'admin', 'superadmin'].includes(role) && (
+            <div className="mt-4">
+              <Analytics />
+            </div>
+          )}
         </Col>
       </Row>
     </Container>

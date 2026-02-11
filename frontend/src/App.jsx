@@ -10,6 +10,8 @@ import ProfileScreen from './screens/ProfileScreen';
 import TrackersScreen from './screens/TrackersScreen';
 import ReceivingDashboardScreen from './screens/ReceivingDashboardScreen'; // Import ReceivingDashboardScreen
 import RecipientDashboardScreen from './screens/RecipientDashboardScreen';
+import LceStaffDashboardScreen from './screens/LceStaffDashboardScreen';
+import LceDashboardScreen from './screens/LceDashboardScreen';
 import RecipientTrackerDetailsScreen from './screens/RecipientTrackerDetailsScreen';
 import UserManagementScreen from './screens/UserManagementScreen'; // Import UserManagementScreen
 import RecipientManagementScreen from './screens/RecipientManagementScreen';
@@ -104,8 +106,22 @@ const App = () => {
             />
             <Route path="/recipient-dashboard"
               element={
-                <ProtectedRoute allowedRoles={['recipient', 'admin', 'superadmin', 'lcestaff', 'lce']}>
+                <ProtectedRoute allowedRoles={['recipient', 'admin', 'superadmin']}>
                   <RecipientDashboardScreen />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/lcestaff-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['lcestaff', 'admin', 'superadmin']}>
+                  <LceStaffDashboardScreen />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/lce-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['lce', 'admin', 'superadmin']}>
+                  <LceDashboardScreen />
                 </ProtectedRoute>
               }
             />
