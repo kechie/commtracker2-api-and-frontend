@@ -32,8 +32,8 @@ const upload = multer({ storage });
 router.use(verifyToken);
 
 // Serve attachment files
-router.get('/attachment/:id', requireRole(['receiving', 'admin', 'superadmin', 'recipient', 'monitor']), serveAttachment);
-router.get('/reply-slip-attachment/:id', requireRole(['receiving', 'admin', 'superadmin', 'recipient', 'monitor']), serveReplySlipAttachment);
+router.get('/attachment/:id', requireRole(['receiving', 'admin', 'superadmin', 'recipient', 'monitor', 'lcestaff', 'lce']), serveAttachment);
+router.get('/reply-slip-attachment/:id', requireRole(['receiving', 'admin', 'superadmin', 'recipient', 'monitor', 'lcestaff', 'lce']), serveReplySlipAttachment);
 
 // All other routes in this file require 'receiving', 'admin', or 'superadmin'
 router.use(requireRole(['receiving', 'admin', 'superadmin']));

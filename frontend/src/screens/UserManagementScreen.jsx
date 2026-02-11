@@ -447,6 +447,8 @@ const UserManagementScreen = () => {
                 <option value="user">User</option>
                 <option value="receiving">Receiving</option>
                 <option value="recipient">Recipient</option>
+                <option value="lcestaff">LCE Staff</option>
+                <option value="lce">LCE</option>
                 <option value="admin">Admin</option>
                 <option value="viewer">Viewer</option>
                 <option value="monitor">Monitor</option>
@@ -547,6 +549,8 @@ const UserManagementScreen = () => {
                 <option value="user">User</option>
                 <option value="receiving">Receiving</option>
                 <option value="recipient">Recipient</option>
+                <option value="lcestaff">LCE Staff</option>
+                <option value="lce">LCE</option>
                 {role === 'superadmin' && <option value="admin">Admin</option>}
                 <option value="viewer">Viewer</option>
                 <option value="monitor">Monitor</option>

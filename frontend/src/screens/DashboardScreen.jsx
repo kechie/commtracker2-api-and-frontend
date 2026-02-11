@@ -38,7 +38,7 @@ const DashboardScreen = () => {
               recent activities, quick actions, etc.
               link to tracker management screen
             </Container>*/}
-          {role === 'recipient' && <Link to="/recipient-dashboard">Your DocTrkr2s</Link>}<br />
+          {['recipient', 'lcestaff', 'lce'].includes(role) && <Link to="/recipient-dashboard">Your DocTrkr2s</Link>}<br />
           {/*role === 'recipient' &&
             <Container className="mt-4">
               Add recipient-specific content here

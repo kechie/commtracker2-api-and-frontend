@@ -33,7 +33,7 @@ const App = () => {
             <Route
               path="/"
               element={
-                <ProtectedRoute allowedRoles={['monitor', 'receiving', 'admin', 'superadmin', 'recipient']}>
+                <ProtectedRoute allowedRoles={['monitor', 'receiving', 'admin', 'superadmin', 'recipient', 'lcestaff', 'lce']}>
                   <DashboardScreen />
                 </ProtectedRoute>
               }
@@ -41,7 +41,7 @@ const App = () => {
             <Route
               path="/calendar"
               element={
-                <ProtectedRoute allowedRoles={['recipient', 'admin', 'superadmin']}>
+                <ProtectedRoute allowedRoles={['recipient', 'admin', 'superadmin','monitor', 'lcestaff', 'lce']}>
                   <CalendarScreen />
                 </ProtectedRoute>
               }
@@ -49,7 +49,7 @@ const App = () => {
             <Route
               path="/admin"
               element={
-                <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+                <ProtectedRoute allowedRoles={['admin', 'superadmin','monitor']}>
                   <AdminScreen />
                 </ProtectedRoute>
               }
@@ -57,7 +57,7 @@ const App = () => {
             <Route
               path="/analytics"
               element={
-                <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+                <ProtectedRoute allowedRoles={['admin', 'superadmin','monitor']}>
                   <AnalyticsScreen />
                 </ProtectedRoute>
               }
@@ -104,13 +104,13 @@ const App = () => {
             />
             <Route path="/recipient-dashboard"
               element={
-                <ProtectedRoute allowedRoles={['recipient', 'admin', 'superadmin']}>
+                <ProtectedRoute allowedRoles={['recipient', 'admin', 'superadmin', 'lcestaff', 'lce']}>
                   <RecipientDashboardScreen />
                 </ProtectedRoute>
               }
             />
             <Route path="/recipients/:recipientId/trackers/:trackerId"
-              element={<ProtectedRoute allowedRoles={['recipient', 'admin', 'superadmin', 'monitor', 'receiving']}>
+              element={<ProtectedRoute allowedRoles={['recipient', 'admin', 'superadmin', 'monitor', 'receiving', 'lcestaff', 'lce']}>
                 <RecipientTrackerDetailsScreen />
               </ProtectedRoute>}
             />
@@ -123,7 +123,7 @@ const App = () => {
             />
             {/* Public Routes */}
             <Route path="/public/tracking/:serialNumber" element={<PublicTrackingScreen />} />
-            
+
             <Route path="*" element={<h2>404 - Page Not Found</h2>} />
           </Routes>
         </Container>

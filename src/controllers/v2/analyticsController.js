@@ -161,7 +161,7 @@ exports.getRecipientStats = async (req, res) => {
     //   req.user.role !== "admin" &&
     //   req.user.role !== "superadmin" &&
 
-    if (req.user.role !== "recipient" && req.user.recipientId !== recipientId)
+    if (!['recipient', 'lcestaff', 'lce'].includes(req.user.role) && req.user.recipientId !== recipientId)
       {
         console.error("Reached access control error");
       return res
@@ -241,7 +241,7 @@ exports.getRecipientStatsTest = async (req, res) => {
     console.log(req.params)
     console.log(req.user.role)
     console.log(req.user.recipientId)
-    if (req.user.role !== "superadmin" && req.user.recipientId !== recipientId)
+    if (!['superadmin', 'lcestaff', 'lce'].includes(req.user.role) && req.user.recipientId !== recipientId)
       {
         console.error("Reached access control error");
       return res
