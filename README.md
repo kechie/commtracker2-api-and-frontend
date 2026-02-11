@@ -153,3 +153,55 @@ This project is licensed under the MIT License.
 
 - GET /api/v1/users/:id: Get user by ID.
 - PUT /api/v1/users/:id: Update user by ID.
+
+## VAPID
+
+- To test the implementation, follow these steps:
+
+
+  1. Restart the Backend
+  Ensure your backend server is restarted so it loads the new VAPID keys from the .env file and registers the new routes.
+
+
+  2. Verify Frontend Registration
+   1. Open your browser's Developer Tools (F12).
+   2. Go to the Application tab and select Service Workers in the left sidebar.
+   3. You should see sw.js registered and running.
+   4. Check the Console. You should see:
+       * Service Worker registered with scope: ...
+       * User subscribed to push notifications (This happens after you log in).
+
+  3. Check the Database
+  Verify that the subscription was saved by running a query on your database:
+   1 SELECT * FROM push_subscriptions;
+  If you see a row with your user_id and an endpoint URL, the registration was successful.
+
+
+  4. Trigger a Test Notification
+  You can trigger a notification using curl or Postman. Since the test endpoint is protected, you'll need your JWT token.
+
+  Using Curl:
+
+
+   1 curl -X POST http://localhost:5007/v2/push/test \
+   2      -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE" \
+   3      -H "Content-Type: application/json"
+
+
+  5. Quick UI Test (Optional)
+  If you want to test it directly from the UI, you can temporarily add a button to any screen (e.g., DashboardScreen.jsx):
+
+   1 import api from '../utils/api';
+   2
+   3 // Inside your component:
+   4 <button onClick={() => api.post('/push/test')}>
+   5   Send Test Notification
+   6 </button>
+
+
+  Important Troubleshooting Tips:
+   * Browser Permissions: Ensure you haven't blocked notifications for localhost. Click the "Lock" icon in the address bar to check
+     permissions.
+   * Localhost vs IP: Browsers only allow Service Workers on localhost or https. If you are accessing the site via an IP address (e.g.,
+     http://192.168.1.5:5173), push notifications will fail unless you use HTTPS.
+   * Incognito Mode: Some browsers disable the Push API in Incognito/Private mode. Test in a normal window.

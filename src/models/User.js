@@ -68,6 +68,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'recipientId',
       as: 'recipient'  // Access via await user.getRecipient() or include: { model: Recipient, as: 'recipient' }
     });
+    User.hasMany(models.PushSubscription, {
+      foreignKey: 'userId',
+      as: 'pushSubscriptions'
+    });
   };
 
   return User;

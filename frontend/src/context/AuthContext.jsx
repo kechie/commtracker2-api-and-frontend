@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { login as apiLogin } from '../utils/api'; // Import the login function from api.js
+import { subscribeUserToPush } from '../utils/push';
 import { AuthContext } from './useAuth';
 
 export const AuthProvider = ({ children }) => {
@@ -21,6 +22,8 @@ export const AuthProvider = ({ children }) => {
           // If not, we might need to decode the JWT token here to get the role.
           setRole(parsedUserInfo.role || (parsedUserInfo.token ? JSON.parse(atob(parsedUserInfo.token.split('.')[1])).role : null));
           setIsAuthenticated(true);
+          // Trigger push subscription (silently fails if permission denied or not supported)
+          subscribeUserToPush();
         }
       } catch (error) {
         console.error('Failed to load user from localStorage:', error);
@@ -41,6 +44,7 @@ export const AuthProvider = ({ children }) => {
       setUser(response.user);
       setRole(response.role || (response.token ? JSON.parse(atob(response.token.split('.')[1])).role : null));
       setIsAuthenticated(true);
+      subscribeUserToPush();
       return response;
     } catch (error) {
       console.error('Login failed in AuthProvider:', error);
