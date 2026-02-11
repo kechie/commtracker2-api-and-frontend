@@ -38,7 +38,9 @@ const DashboardScreen = () => {
               recent activities, quick actions, etc.
               link to tracker management screen
             </Container>*/}
-          {['recipient', 'lcestaff', 'lce'].includes(role) && <Link to="/recipient-dashboard">Your DocTrkr2s</Link>}<br />
+          {['recipient'].includes(role) && <Link to="/recipient-dashboard">Your DocTrkr2s</Link>}<br />
+          {role === 'monitor' && <Link to="/analytics">Analytics Dashboard</Link>}<br />
+          {role === 'monitor' && <Link to="/activity-logs-dashboard">Activity Logs Dashboard</Link>}<br />
           {/*role === 'recipient' &&
             <Container className="mt-4">
               Add recipient-specific content here
@@ -49,6 +51,7 @@ const DashboardScreen = () => {
               Add monitor-specific content here
               brief analytics, recent activities, quick actions, etc.
             </Container>*/}
+          {['lcestaff', 'lce'].includes(role) && <Link to="/lce-dashboard">Your DocTrkr2s</Link>}<br />
           <p>This will contain analytics for the monitor and recipient role in the future.</p>
         </Col>
       </Row>
