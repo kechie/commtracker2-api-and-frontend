@@ -134,8 +134,8 @@ exports.trackerValidation = [
   body('documentTitle').trim().notEmpty().withMessage('Document Title is required'),
   body('fromName').trim().notEmpty().withMessage('From Name is required'),
   body('dateReceived').optional().isISO8601().toDate(),
-  body('recipientIds').isArray({ min: 1 }).withMessage('At least one recipient is required'),
-  body('recipientIds.*').isUUID(4).withMessage('Invalid recipient ID'),
+  body('recipientIds').optional().isArray().withMessage('Recipient IDs must be an array'),
+  body('recipientIds.*').optional().isUUID(4).withMessage('Invalid recipient ID'),
 ];
 // @desc    Create a tracker
 // @route   POST /api/v2/trackers

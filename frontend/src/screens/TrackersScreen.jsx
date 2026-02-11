@@ -184,11 +184,6 @@ const TrackersScreen = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.recipientIds || formData.recipientIds.length === 0) {
-      setError('Please select at least one recipient.');
-      return;
-    }
-
     try {
       if (editingTracker) {
         await updateTracker(editingTracker.id, formData);
