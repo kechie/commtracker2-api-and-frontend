@@ -58,7 +58,7 @@ const RecipientDashboardScreen = () => {
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
   const [selectedSerialNumber, setSelectedSerialNumber] = useState(null);
-  const [showQrCodeInModal, setShowQrCodeInModal] = useState(true);
+  const [showQrCodeInModal, setShowQrCodeInModal] = useState(false);
 
   // Pagination & filters
   const [currentPage, setCurrentPage] = useState(1);
