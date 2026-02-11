@@ -205,7 +205,7 @@ const RecipientDashboardScreen = () => {
       const url = URL.createObjectURL(blob);
       setSelectedPdfUrl(url);
       setSelectedSerialNumber(item.tracker.serialNumber);
-      setShowQrCodeInModal(true);
+      setShowQrCodeInModal(false);
       setShowPdfModal(true);
 
       // Mark as seen and read after viewing/downloading
