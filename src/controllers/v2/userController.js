@@ -132,11 +132,23 @@ exports.getAllUsers = async (req, res) => {
     // WHERE conditions
     const where = {};
     if (search) {
-      const searchTerm = `%${search.trim()}%`;
+      const escapedSearch = search.trim().replace(/'/g, "''");
+      const searchTerm = `%${escapedSearch}%`;
       where[Op.or] = [
         { username: { [Op.iLike]: searchTerm } },
         { fullname: { [Op.iLike]: searchTerm } },
-        { email: { [Op.iLike]: searchTerm } }
+        { email: { [Op.iLike]: searchTerm } },
+        // Use a subquery to search by recipient name or initial
+        {
+          id: {
+            [Op.in]: sequelize.literal(`(
+              SELECT u.id FROM users u
+              LEFT JOIN recipients r ON u.recipient_id = r.id
+              WHERE r.recipient_name ILIKE '%${escapedSearch}%' 
+              OR r.initial ILIKE '%${escapedSearch}%'
+            )`)
+          }
+        }
       ];
     }
 
