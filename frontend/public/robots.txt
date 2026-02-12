@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://commtracker.laoagcity.gov.ph/sitemap.xml
+Sitemap: https://dtsv2.laoagcity.gov.ph/sitemap.xml
