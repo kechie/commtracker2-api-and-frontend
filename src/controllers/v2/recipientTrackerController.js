@@ -227,11 +227,19 @@ exports.updateReceivedTracker = async (req, res) => {
 
     // If only updating timestamps, retain status
     if (status === 'seen') {
-      updateData.seenAt = now;
-      updateData.isSeen = true;
+      if (!trackerRecipient.seenAt) {
+        updateData.seenAt = now;
+      }
+      if (!trackerRecipient.isSeen) {
+        updateData.isSeen = true;
+      }
     } else if (status === 'read') {
-      updateData.readAt = now;
-      updateData.isRead = true;
+      if (!trackerRecipient.readAt) {
+        updateData.readAt = now;
+      }
+      if (!trackerRecipient.isRead) {
+        updateData.isRead = true;
+      }
       if (!trackerRecipient.seenAt) {
         updateData.seenAt = now;
       }

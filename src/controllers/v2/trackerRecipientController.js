@@ -255,17 +255,12 @@ exports.upsertTrackerRecipient = async (req, res) => {
 
     // Prepare update data
     const updateData = {};
+    const now = new Date();
     if (status) {
       updateData.status = status;
 
       // Set timestamp based on status
-      const now = new Date();
-      if (status === 'seen') {
-        updateData.seenAt = now;
-      } else if (status === 'read') {
-        updateData.readAt = now;
-        if (!updateData.seenAt) updateData.seenAt = now;
-      } else if (status === 'acknowledged') {
+      if (status === 'acknowledged') {
         updateData.acknowledgedAt = now;
       } else if (status === 'completed') {
         updateData.completedAt = now;
@@ -287,13 +282,28 @@ exports.upsertTrackerRecipient = async (req, res) => {
         status: status || 'pending',
         action: action || null,
         remarks: remarks || null,
-        dueDate: dueDate || null
+        dueDate: dueDate || null,
+        seenAt: (status === 'seen' || status === 'read') ? now : null,
+        isSeen: (status === 'seen' || status === 'read'),
+        readAt: status === 'read' ? now : null,
+        isRead: status === 'read',
+        acknowledgedAt: status === 'acknowledged' ? now : null,
+        completedAt: status === 'completed' ? now : null
       },
       transaction
     });
 
     // If not created, update it
     if (!created) {
+      if (status === 'seen') {
+        if (!trackerRecipient.seenAt) updateData.seenAt = now;
+        if (!trackerRecipient.isSeen) updateData.isSeen = true;
+      } else if (status === 'read') {
+        if (!trackerRecipient.readAt) updateData.readAt = now;
+        if (!trackerRecipient.isRead) updateData.isRead = true;
+        if (!trackerRecipient.seenAt) updateData.seenAt = now;
+        if (!trackerRecipient.isSeen) updateData.isSeen = true;
+      }
       await trackerRecipient.update(updateData, { transaction });
     }
 
@@ -367,11 +377,24 @@ exports.updateTrackerRecipientStatus = async (req, res) => {
     // Set timestamp based on status
     const now = new Date();
     if (status === 'seen') {
-      updateData.seenAt = now;
-    } else if (status === 'read') {
-      updateData.readAt = now;
       if (!trackerRecipient.seenAt) {
         updateData.seenAt = now;
+      }
+      if (!trackerRecipient.isSeen) {
+        updateData.isSeen = true;
+      }
+    } else if (status === 'read') {
+      if (!trackerRecipient.readAt) {
+        updateData.readAt = now;
+      }
+      if (!trackerRecipient.isRead) {
+        updateData.isRead = true;
+      }
+      if (!trackerRecipient.seenAt) {
+        updateData.seenAt = now;
+      }
+      if (!trackerRecipient.isSeen) {
+        updateData.isSeen = true;
       }
     } else if (status === 'acknowledged') {
       updateData.acknowledgedAt = now;
@@ -458,9 +481,13 @@ exports.bulkUpdateTrackerRecipients = async (req, res) => {
 
       const now = new Date();
       if (status === 'seen') {
-        updateData.seenAt = now;
+        updateData.seenAt = sequelize.fn('COALESCE', sequelize.col('seen_at'), now);
+        updateData.isSeen = true;
       } else if (status === 'read') {
-        updateData.readAt = now;
+        updateData.readAt = sequelize.fn('COALESCE', sequelize.col('read_at'), now);
+        updateData.isRead = true;
+        updateData.seenAt = sequelize.fn('COALESCE', sequelize.col('seen_at'), now);
+        updateData.isSeen = true;
       } else if (status === 'acknowledged') {
         updateData.acknowledgedAt = now;
       } else if (status === 'completed') {
