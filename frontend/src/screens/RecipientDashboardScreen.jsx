@@ -36,6 +36,7 @@ import {
 } from '../utils/api';
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
+import { subscribeUserToPush } from '../utils/push';
 
 const RecipientDashboardScreen = () => {
   const { user } = useAuth();
@@ -47,6 +48,10 @@ const RecipientDashboardScreen = () => {
   const [success, setSuccess] = useState(null);
   const [recipientTrackers, setRecipientTrackers] = useState([]);
   const [stats, setStats] = useState(null);
+  const [notificationPermission, setNotificationPermission] = useState(
+    'Notification' in window ? Notification.permission : 'unsupported'
+  );
+  const [showNotificationReminder, setShowNotificationReminder] = useState(true);
 
   // Modal + action state
   const [showActionModal, setShowActionModal] = useState(false);
@@ -287,21 +292,69 @@ const RecipientDashboardScreen = () => {
     return 'primary';
   };
 
+  const handleEnableNotifications = async () => {
+    if (!('Notification' in window)) {
+      setError('Notifications are not supported in this browser.');
+      return;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+      
+      if (permission === 'granted') {
+        await subscribeUserToPush();
+        setSuccess('Notifications enabled and subscribed successfully!');
+      } else if (permission === 'denied') {
+        setError('Notification permission was denied. Please enable it in your browser settings to receive alerts.');
+      }
+    } catch (err) {
+      console.error('Error enabling notifications:', err);
+      setError('Failed to enable notifications.');
+    }
+  };
+
+  const NotificationStatus = () => {
+    if (notificationPermission === 'unsupported' || !showNotificationReminder) return null;
+
+    if (notificationPermission === 'granted') {
+      return (
+        <Alert variant="success" dismissible onClose={() => setShowNotificationReminder(false)} className="py-2 mb-4 d-flex align-items-center justify-content-between">
+          <span><FontAwesomeIcon icon={faCheck} className="me-2" /> Notifications are enabled. You will receive alerts for new trackers.</span>
+        </Alert>
+      );
+    }
+
+    if (notificationPermission === 'denied') {
+      return (
+        <Alert variant="warning" dismissible onClose={() => setShowNotificationReminder(false)} className="py-2 mb-4">
+          <FontAwesomeIcon icon={faTimes} className="me-2" /> 
+          Notifications are blocked. To receive alerts, please allow notifications in your browser's site settings.
+        </Alert>
+      );
+    }
+
+    return (
+      <Alert variant="info" dismissible onClose={() => setShowNotificationReminder(false)} className="py-2 mb-4 d-flex align-items-center justify-content-between">
+        <div className="d-flex align-items-center flex-grow-1">
+          <span>Notifications are currently disabled. Enable them to receive real-time alerts for new trackers.</span>
+        </div>
+        <Button variant="primary" size="sm" onClick={handleEnableNotifications} className="ms-3">
+          Enable Notifications
+        </Button>
+      </Alert>
+    );
+  };
+
   return (
     <Container>
       <h1>Recipient Dashboard</h1>
 
-{/*       <Row className="align-items-center mb-4">
-        <Col xs="auto">
-          <Button variant="light" onClick={handleBack} className="d-flex align-items-center gap-2">
-            <FontAwesomeIcon icon={faArrowLeft} /> Back
-          </Button>
-        </Col>
-      </Row> */}
-
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)} className="mb-3">{error}</Alert>}
       {success && <Alert variant="success" dismissible onClose={() => setSuccess(null)} className="mb-3">{success}</Alert>}
-      {/*<Row><p>{recipientId}</p></Row>*/}
+      
+      <NotificationStatus />
+
       {/* Metrics Section */}
       {stats && (
         <Row className="mb-4 g-3">

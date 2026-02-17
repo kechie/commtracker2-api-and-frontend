@@ -2,6 +2,7 @@
 const { TrackerRecipient, Tracker, Recipient, sequelize } = require('../../db');
 const { Op } = require('sequelize');
 const { logRecipientTrackerActivity } = require('../../utils/activityLogger');
+const { notifyRecipients } = require('../../utils/push');
 
 // ───────────────────────────────────────────────
 //  NEW: List all trackers assigned to a specific recipient
@@ -309,6 +310,11 @@ exports.upsertTrackerRecipient = async (req, res) => {
 
     await transaction.commit();
 
+    // Notify recipient after commit
+    notifyRecipients(tracker, [recipientId], created ? 'CREATE' : 'UPDATE').catch(err => 
+      console.error('Failed to notify recipient on upsert:', err)
+    );
+
     // Log the activity
     await logRecipientTrackerActivity({
       userId: req.user?.id,
@@ -362,7 +368,10 @@ exports.updateTrackerRecipientStatus = async (req, res) => {
     const { id } = req.params;
     const { status, remarks, dueDate } = req.body;
 
-    const trackerRecipient = await TrackerRecipient.findByPk(id, { transaction });
+    const trackerRecipient = await TrackerRecipient.findByPk(id, { 
+      include: [{ model: Tracker, as: 'tracker' }],
+      transaction 
+    });
 
     if (!trackerRecipient) {
       await transaction.rollback();
@@ -407,6 +416,13 @@ exports.updateTrackerRecipientStatus = async (req, res) => {
 
     await trackerRecipient.update(updateData, { transaction });
     await transaction.commit();
+
+    // Notify recipient after commit
+    if (trackerRecipient.tracker) {
+      notifyRecipients(trackerRecipient.tracker, [trackerRecipient.recipientId], 'UPDATE').catch(err => 
+        console.error('Failed to notify recipient on status update:', err)
+      );
+    }
 
     // Log the activity
     await logRecipientTrackerActivity({
@@ -502,6 +518,18 @@ exports.bulkUpdateTrackerRecipients = async (req, res) => {
     });
 
     await transaction.commit();
+
+    // Notify all recipients after commit
+    const trackerRecipients = await TrackerRecipient.findAll({
+      where: { trackerId },
+      attributes: ['recipientId']
+    });
+    if (trackerRecipients.length > 0) {
+      const recipientIds = trackerRecipients.map(tr => tr.recipientId);
+      notifyRecipients(tracker, recipientIds, 'UPDATE').catch(err => 
+        console.error('Failed to notify recipients on bulk update:', err)
+      );
+    }
 
     // Log the activity
     await logRecipientTrackerActivity({

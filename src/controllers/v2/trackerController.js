@@ -5,6 +5,7 @@ const { Tracker, Recipient, TrackerRecipient, sequelize } = require('../../db');
 const { Op, fn, col, literal } = require('sequelize'); // Import Op for operators
 const { body, validationResult } = require('express-validator'); // ← add this dependency
 const { logTrackerActivity } = require('../../utils/activityLogger');
+const { notifyRecipients } = require('../../utils/push');
 
 // File configuration
 const UPLOADS_DIR = path.join(__dirname, '../../..', 'uploads');
@@ -196,6 +197,13 @@ exports.createTracker = async (req, res) => {
     }
 
     await transaction.commit(); // Commit the transaction
+
+    // Notify recipients after commit
+    if (recipientIds && recipientIds.length > 0) {
+      notifyRecipients(tracker, recipientIds, 'CREATE').catch(err => 
+        console.error('Failed to notify recipients on create:', err)
+      );
+    }
 
     // Reload the tracker with nested trackerRecipients (includes recipients and their actions)
     const result = await Tracker.findByPk(tracker.id, {
@@ -484,6 +492,14 @@ exports.updateTracker = async (req, res) => {
         }
       ],
     });
+
+    // Notify current recipients after update
+    if (result.trackerRecipients && result.trackerRecipients.length > 0) {
+      const currentRecipientIds = result.trackerRecipients.map(tr => tr.recipientId);
+      notifyRecipients(result, currentRecipientIds, 'UPDATE').catch(err => 
+        console.error('Failed to notify recipients on update:', err)
+      );
+    }
 
     res.json({
       success: true,
