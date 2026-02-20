@@ -37,19 +37,70 @@ const sendNotification = async (subscription, payload) => {
 };
 
 /**
+ * Notify specific users about tracker events.
+ * @param {Array} userIds - Array of user IDs to notify.
+ * @param {object} tracker - The tracker instance.
+ * @param {string} title - Notification title.
+ * @param {string} body - Notification body.
+ * @param {string} url - Redirection URL.
+ * @param {string} senderId - ID of user who triggered the event (to exclude).
+ */
+const notifyUsers = async (userIds, title, body, url, senderId = null) => {
+  if (!userIds || userIds.length === 0) return;
+
+  try {
+    const { PushSubscription } = require('../db');
+
+    // Filter out sender
+    const targetUserIds = senderId ? userIds.filter(id => id !== senderId) : userIds;
+    if (targetUserIds.length === 0) return;
+
+    const subscriptions = await PushSubscription.findAll({
+      where: {
+        userId: targetUserIds
+      }
+    });
+
+    if (subscriptions.length === 0) return;
+
+    const payload = JSON.stringify({
+      title,
+      body,
+      icon: '/android-chrome-192x192.png',
+      badge: '/android-chrome-192x192.png',
+      url
+    });
+
+    await Promise.all(subscriptions.map(async (sub) => {
+      const result = await sendNotification({
+        endpoint: sub.endpoint,
+        keys: { p256dh: sub.p256dh, auth: sub.auth }
+      }, payload);
+
+      if (result === 'gone') {
+        await sub.destroy();
+      }
+    }));
+  } catch (error) {
+    console.error('Notify users error:', error);
+  }
+};
+
+/**
  * Notify recipients about tracker events.
  * @param {object} tracker - The tracker instance.
  * @param {Array} recipientIds - Array of recipient IDs to notify.
  * @param {string} action - Action type (CREATE, UPDATE, etc).
+ * @param {string} senderId - ID of user who triggered the event (to exclude).
  */
-const notifyRecipients = async (tracker, recipientIds, action = 'CREATE') => {
+const notifyRecipients = async (tracker, recipientIds, action = 'CREATE', senderId = null) => {
   if (!recipientIds || recipientIds.length === 0) return;
 
   try {
     // Lazy load db to avoid circular dependencies
-    const { User, PushSubscription } = require('../db');
+    const { User } = require('../db');
 
-    // Find all users associated with these recipients, including their recipientId
+    // Find all users associated with these recipients
     const users = await User.findAll({
       where: {
         recipientId: recipientIds
@@ -59,56 +110,59 @@ const notifyRecipients = async (tracker, recipientIds, action = 'CREATE') => {
 
     if (users.length === 0) return;
 
-    // Group users by recipientId
+    const title = action === 'CREATE' ? 'New Document Tracker' : 'Updated Document Tracker';
+    const body = `${tracker.serialNumber || 'No Serial'}: ${tracker.documentTitle || 'Untitled'}`;
+
+    // Group users by recipientId to provide correct URL for each
     const usersByRecipient = users.reduce((acc, user) => {
       if (!acc[user.recipientId]) acc[user.recipientId] = [];
       acc[user.recipientId].push(user.id);
       return acc;
     }, {});
 
-    const title = action === 'CREATE' ? 'New Document Tracker' : 'Updated Document Tracker';
-    const body = `${tracker.serialNumber || 'No Serial'}: ${tracker.documentTitle || 'Untitled'}`;
-
-    // For each recipient, find their users' subscriptions and send notifications
     for (const recipientId of Object.keys(usersByRecipient)) {
       const userIds = usersByRecipient[recipientId];
-      
-      const subscriptions = await PushSubscription.findAll({
-        where: {
-          userId: userIds
-        }
-      });
-
-      if (subscriptions.length === 0) continue;
-
       const url = `/recipients/${recipientId}/trackers/${tracker.id}`;
-      
-      const payload = JSON.stringify({
-        title,
-        body,
-        icon: '/android-chrome-192x192.png',
-        badge: '/android-chrome-192x192.png',
-        url
-      });
-
-      await Promise.all(subscriptions.map(async (sub) => {
-        const result = await sendNotification({
-          endpoint: sub.endpoint,
-          keys: { p256dh: sub.p256dh, auth: sub.auth }
-        }, payload);
-
-        if (result === 'gone') {
-          await sub.destroy();
-        }
-      }));
+      await notifyUsers(userIds, title, body, url, senderId);
     }
   } catch (error) {
     console.error('Notify recipients error:', error);
   }
 };
 
+/**
+ * Notify users with specific roles.
+ * @param {Array} roles - Array of roles to notify.
+ * @param {string} title - Notification title.
+ * @param {string} body - Notification body.
+ * @param {string} url - Redirection URL.
+ * @param {string} senderId - ID of user who triggered the event (to exclude).
+ */
+const notifyRoles = async (roles, title, body, url, senderId = null) => {
+  if (!roles || roles.length === 0) return;
+
+  try {
+    const { User } = require('../db');
+    const users = await User.findAll({
+      where: {
+        role: roles
+      },
+      attributes: ['id']
+    });
+
+    if (users.length === 0) return;
+
+    const userIds = users.map(u => u.id);
+    await notifyUsers(userIds, title, body, url, senderId);
+  } catch (error) {
+    console.error('Notify roles error:', error);
+  }
+};
+
 module.exports = {
   webpush,
   sendNotification,
-  notifyRecipients
+  notifyUsers,
+  notifyRecipients,
+  notifyRoles
 };

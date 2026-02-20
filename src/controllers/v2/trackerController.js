@@ -200,9 +200,19 @@ exports.createTracker = async (req, res) => {
 
     // Notify recipients after commit
     if (recipientIds && recipientIds.length > 0) {
-      notifyRecipients(tracker, recipientIds, 'CREATE').catch(err => 
+      notifyRecipients(tracker, recipientIds, 'CREATE', req.user?.id).catch(err => 
         console.error('Failed to notify recipients on create:', err)
       );
+
+      // Also notify staff and LCE users on tracker creation
+      const { notifyRoles } = require('../../utils/push');
+      notifyRoles(
+        ['staff', 'lce', 'lcestaff'], 
+        'New Document Tracker Created',
+        `${tracker.serialNumber}: ${tracker.documentTitle}`,
+        `/trackers/${tracker.id}`,
+        req.user?.id
+      ).catch(err => console.error('Failed to notify roles on create:', err));
     }
 
     // Reload the tracker with nested trackerRecipients (includes recipients and their actions)
@@ -496,7 +506,7 @@ exports.updateTracker = async (req, res) => {
     // Notify current recipients after update
     if (result.trackerRecipients && result.trackerRecipients.length > 0) {
       const currentRecipientIds = result.trackerRecipients.map(tr => tr.recipientId);
-      notifyRecipients(result, currentRecipientIds, 'UPDATE').catch(err => 
+      notifyRecipients(result, currentRecipientIds, 'UPDATE', req.user?.id).catch(err => 
         console.error('Failed to notify recipients on update:', err)
       );
     }

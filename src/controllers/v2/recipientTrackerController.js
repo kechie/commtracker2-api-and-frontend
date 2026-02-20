@@ -261,6 +261,27 @@ exports.updateReceivedTracker = async (req, res) => {
     await trackerRecipient.update(updateData, { transaction });
     await transaction.commit();
 
+    // Notify relevant roles and recipients
+    const { notifyRoles, notifyRecipients } = require('../../utils/push');
+    
+    // Always notify the recipient (in case multiple users share the recipient account)
+    if (updatedRecord && updatedRecord.tracker) {
+      notifyRecipients(updatedRecord.tracker, [recipientId], 'UPDATE', req.user?.id).catch(err => 
+        console.error('Failed to notify recipient on status update:', err)
+      );
+    }
+
+    // If update is from a recipient, notify admins/receiving/staff
+    if (req.user?.role === 'recipient') {
+      notifyRoles(
+        ['receiving', 'staff', 'lce', 'lcestaff', 'admin', 'superadmin'],
+        `Recipient Status Update`,
+        `${updatedRecord?.tracker?.serialNumber || 'Tracker'}: Status updated to ${status || trackerRecipient.status} by recipient`,
+        `/trackers/${trackerId}`,
+        req.user?.id
+      ).catch(err => console.error('Failed to notify roles on status update:', err));
+    }
+
     // Log the activity
     await logRecipientTrackerActivity({
       userId: req.user?.id,

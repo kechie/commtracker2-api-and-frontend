@@ -27,7 +27,12 @@ exports.verifyToken = async (req, res, next) => {
       if (db && db.User && decoded && decoded.userId) {
         const user = await db.User.findByPk(decoded.userId);
         if (!user) return res.status(401).json({ error: 'User not found' });
-        req.user = { id: user.id, role: user.role, username: user.username };
+        req.user = { 
+          id: user.id, 
+          role: user.role, 
+          username: user.username,
+          recipientId: user.recipientId
+        };
         return next();
       }
     } catch (fetchErr) {

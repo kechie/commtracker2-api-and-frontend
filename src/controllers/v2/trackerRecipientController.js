@@ -311,9 +311,21 @@ exports.upsertTrackerRecipient = async (req, res) => {
     await transaction.commit();
 
     // Notify recipient after commit
-    notifyRecipients(tracker, [recipientId], created ? 'CREATE' : 'UPDATE').catch(err => 
+    notifyRecipients(tracker, [recipientId], created ? 'CREATE' : 'UPDATE', req.user?.id).catch(err => 
       console.error('Failed to notify recipient on upsert:', err)
     );
+
+    // If update is from a recipient, notify staff/lce/receiving/admin
+    if (req.user?.role === 'recipient') {
+      const { notifyRoles } = require('../../utils/push');
+      notifyRoles(
+        ['receiving', 'staff', 'lce', 'lcestaff', 'admin', 'superadmin'],
+        `Recipient Updated Tracker`,
+        `${tracker.serialNumber}: Status changed to ${status || 'updated'} by recipient`,
+        `/trackers/${trackerId}`,
+        req.user?.id
+      ).catch(err => console.error('Failed to notify roles on upsert:', err));
+    }
 
     // Log the activity
     await logRecipientTrackerActivity({
@@ -419,9 +431,21 @@ exports.updateTrackerRecipientStatus = async (req, res) => {
 
     // Notify recipient after commit
     if (trackerRecipient.tracker) {
-      notifyRecipients(trackerRecipient.tracker, [trackerRecipient.recipientId], 'UPDATE').catch(err => 
+      notifyRecipients(trackerRecipient.tracker, [trackerRecipient.recipientId], 'UPDATE', req.user?.id).catch(err => 
         console.error('Failed to notify recipient on status update:', err)
       );
+
+      // If update is from a recipient, notify staff/lce/receiving/admin
+      if (req.user?.role === 'recipient') {
+        const { notifyRoles } = require('../../utils/push');
+        notifyRoles(
+          ['receiving', 'staff', 'lce', 'lcestaff', 'admin', 'superadmin'],
+          `Recipient Status Update`,
+          `${trackerRecipient.tracker.serialNumber}: Status set to ${status} by recipient`,
+          `/trackers/${trackerRecipient.tracker.id}`,
+          req.user?.id
+        ).catch(err => console.error('Failed to notify roles on status update:', err));
+      }
     }
 
     // Log the activity
@@ -526,7 +550,7 @@ exports.bulkUpdateTrackerRecipients = async (req, res) => {
     });
     if (trackerRecipients.length > 0) {
       const recipientIds = trackerRecipients.map(tr => tr.recipientId);
-      notifyRecipients(tracker, recipientIds, 'UPDATE').catch(err => 
+      notifyRecipients(tracker, recipientIds, 'UPDATE', req.user?.id).catch(err => 
         console.error('Failed to notify recipients on bulk update:', err)
       );
     }
