@@ -43,7 +43,7 @@ export async function registerServiceWorker() {
 
 let isSubscribing = false;
 
-export async function subscribeUserToPush() {
+export async function subscribeUserToPush(recipientId = null) {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     console.warn('Push notifications not supported');
     return;
@@ -118,15 +118,21 @@ export async function subscribeUserToPush() {
     console.log('Subscription successful:', subscription);
 
     // 4. Send to backend
-    await api.post(SUBSCRIBE_URL, {
-        endpoint: subscription.endpoint,
-        keys: {
-            p256dh: subscription.toJSON().keys ? subscription.toJSON().keys.p256dh : null,
-            auth: subscription.toJSON().keys ? subscription.toJSON().keys.auth : null
-        }
-    });
+    const payload = {
+      endpoint: subscription.endpoint,
+      keys: {
+        p256dh: subscription.toJSON().keys ? subscription.toJSON().keys.p256dh : null,
+        auth: subscription.toJSON().keys ? subscription.toJSON().keys.auth : null,
+      },
+    };
+
+    if (recipientId) {
+      payload.recipientId = recipientId;
+    }
+
+    await api.post(SUBSCRIBE_URL, payload);
     
-    console.log('User subscribed to push notifications and sent to backend');
+    console.log('User subscribed to push notifications and sent to backend', payload);
     isSubscribing = false;
     return subscription;
   } catch (error) {

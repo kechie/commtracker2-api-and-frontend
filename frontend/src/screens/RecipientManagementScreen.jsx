@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Container, Table, Button, Row, Col, Alert, Modal, Form, Pagination } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faPlus, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrash, faPlus, faArrowLeft, faBell } from '@fortawesome/free-solid-svg-icons'; // Import faBell
 
-import api from '../utils/api';
+import api, { sendNotificationToRecipient } from '../utils/api'; // Import sendNotificationToRecipient
 
 const RecipientManagementScreen = () => {
   const navigate = useNavigate();
   const [recipients, setRecipients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null); // Add success state
   const [showAlert, setShowAlert] = useState(false);
 
   // Pagination and Search state
@@ -36,6 +37,13 @@ const RecipientManagementScreen = () => {
     initial: '',
   });
 
+  // Notification modal state
+  const [showNotifyModal, setShowNotifyModal] = useState(false);
+  const [currentRecipientForNotification, setCurrentRecipientForNotification] = useState(null);
+  const [notificationTitle, setNotificationTitle] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationLoading, setNotificationLoading] = useState(false);
+
   // Auto-close alert after 5 seconds
   useEffect(() => {
     if (showAlert) {
@@ -45,6 +53,15 @@ const RecipientManagementScreen = () => {
       return () => clearTimeout(timer);
     }
   }, [showAlert]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+      }, 3000); // Clear success message after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const fetchRecipients = async (pageNum = 1, pageLimit = 10, search = '') => {
     try {
@@ -121,12 +138,23 @@ const RecipientManagementScreen = () => {
     setShowEditModal(true);
   };
 
+  const handleNotifyClick = (recipient) => {
+    setCurrentRecipientForNotification(recipient);
+    setNotificationTitle('');
+    setNotificationMessage('');
+    setShowNotifyModal(true);
+  };
+
   const handleModalClose = () => {
     setShowEditModal(false);
     setShowCreateModal(false);
+    setShowNotifyModal(false); // Reset notification modal state
     setCurrentRecipient(null);
+    setCurrentRecipientForNotification(null); // Reset notification recipient
     setFormData({ recipientCode: '', recipientName: '', initial: '' });
     setCreateFormData({ recipientCode: '', recipientName: '', initial: '' });
+    setNotificationTitle(''); // Reset notification form
+    setNotificationMessage(''); // Reset notification form
   };
 
   const handleFormChange = (e) => {
@@ -156,6 +184,27 @@ const RecipientManagementScreen = () => {
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create recipient');
       setShowAlert(true);
+    }
+  };
+
+  const handleSendNotification = async () => {
+    if (!currentRecipientForNotification || !notificationTitle || !notificationMessage) {
+      setError('Please provide a title and message for the notification.');
+      setShowAlert(true);
+      return;
+    }
+    setNotificationLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      await sendNotificationToRecipient(currentRecipientForNotification.id, notificationTitle, notificationMessage);
+      setSuccess(`Notification sent to ${currentRecipientForNotification.recipientName}!`);
+      handleModalClose();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to send notification.');
+      setShowAlert(true);
+    } finally {
+      setNotificationLoading(false);
     }
   };
 
@@ -210,6 +259,11 @@ const RecipientManagementScreen = () => {
           {error}
         </Alert>
       )}
+      {success && (
+        <Alert variant="success" dismissible onClose={() => setSuccess(null)}>
+          {success}
+        </Alert>
+      )}
       <Table striped bordered hover responsive className="table-sm">
         <thead>
           <tr>
@@ -217,7 +271,7 @@ const RecipientManagementScreen = () => {
             <th>RECIPIENT CODE</th>
             <th>RECIPIENT NAME</th>
             <th>INITIAL</th>
-            <th></th>
+            <th>Actions</th> {/* Updated to "Actions" */}
           </tr>
         </thead>
         <tbody>
@@ -235,6 +289,14 @@ const RecipientManagementScreen = () => {
                   title="Edit recipient"
                 >
                   <FontAwesomeIcon icon={faEdit} />
+                </Button>
+                <Button
+                  variant="info"
+                  className="btn-sm mx-1"
+                  onClick={() => handleNotifyClick(recipient)}
+                  title="Send Notification to Recipient Users"
+                >
+                  <FontAwesomeIcon icon={faBell} />
                 </Button>
 {/*                <Button
                   variant="danger"
@@ -380,6 +442,46 @@ const RecipientManagementScreen = () => {
           </Button>
           <Button variant="primary" onClick={handleCreateRecipient}>
             Create Recipient
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Notify Modal */}
+      <Modal show={showNotifyModal} onHide={handleModalClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Send Notification to {currentRecipientForNotification?.recipientName}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3" controlId="notificationTitle">
+              <Form.Label>Notification Title</Form.Label>
+              <Form.Control
+                type="text"
+                value={notificationTitle}
+                onChange={(e) => setNotificationTitle(e.target.value)}
+                placeholder="Enter notification title"
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="notificationMessage">
+              <Form.Label>Notification Message</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={notificationMessage}
+                onChange={(e) => setNotificationMessage(e.target.value)}
+                placeholder="Enter notification message"
+                required
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleModalClose} disabled={notificationLoading}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSendNotification} disabled={notificationLoading}>
+            {notificationLoading ? 'Sending...' : 'Send Notification'}
           </Button>
         </Modal.Footer>
       </Modal>

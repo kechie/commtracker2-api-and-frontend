@@ -9,6 +9,7 @@ import {
   faCheckDouble,
   faPaperclip,
   faForward,
+  faBell,
 } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -264,6 +265,33 @@ const RecipientDashboardScreen = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
+  const handleTestPush = async () => {
+    if (!('serviceWorker' in navigator)) {
+      setError('Service Workers not supported');
+      return;
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      if (registration.showNotification) {
+        await registration.showNotification('Recipient Test Notification', {
+          body: 'This is a test notification for the Recipient Dashboard.',
+          icon: '/android-chrome-192x192.png',
+          badge: '/android-chrome-192x192.png',
+          data: {
+            url: '/recipient-dashboard'
+          }
+        });
+        setSuccess('Test notification triggered!');
+      } else {
+        setError('showNotification not available on registration');
+      }
+    } catch (err) {
+      console.error('Test push failed:', err);
+      setError('Failed to trigger test notification: ' + err.message);
+    }
+  };
+
   const resetFilters = () => {
     setSearchTerm('');
     setDebouncedSearchTerm('');
@@ -303,8 +331,8 @@ const RecipientDashboardScreen = () => {
       setNotificationPermission(permission);
       
       if (permission === 'granted') {
-        await subscribeUserToPush();
-        setSuccess('Notifications enabled and subscribed successfully!');
+        await subscribeUserToPush(recipientId);
+        setSuccess('Notifications enabled and subscribed successfully for this recipient!');
       } else if (permission === 'denied') {
         setError('Notification permission was denied. Please enable it in your browser settings to receive alerts.');
       }
@@ -348,7 +376,12 @@ const RecipientDashboardScreen = () => {
 
   return (
     <Container>
-      <h1>Recipient Dashboard</h1>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1>Recipient Dashboard</h1>
+        <Button variant="outline-info" onClick={handleTestPush}>
+          <FontAwesomeIcon icon={faBell} className="me-2" />Test Push
+        </Button>
+      </div>
 
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)} className="mb-3">{error}</Alert>}
       {success && <Alert variant="success" dismissible onClose={() => setSuccess(null)} className="mb-3">{success}</Alert>}
