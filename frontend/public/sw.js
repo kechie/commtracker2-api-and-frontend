@@ -1,11 +1,14 @@
 self.addEventListener('push', function(event) {
+  console.log('Push notification received:', event);
   if (event.data) {
     let data;
     try {
       data = event.data.json();
     } catch (e) {
       data = { body: event.data.text() };
+      console.log(e)
     }
+    console.log('Push data:', data);
 
     const options = {
       body: data.body,

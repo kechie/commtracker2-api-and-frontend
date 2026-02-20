@@ -5,7 +5,7 @@ import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 //import { faPlus, faEdit, faTrash, faArrowLeft, faEye, faInfoCircle, faFileText } from '@fortawesome/free-solid-svg-icons';
-import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faSearch, faTimes, faReply } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faSearch, faTimes, faReply, faBell } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
 
@@ -242,6 +242,34 @@ const TrackersScreen = () => {
   const handleBack = () => {
     navigate('/receiving-dashboard');
   }
+
+  const handleTestPush = async () => {
+    if (!('serviceWorker' in navigator)) {
+      setError('Service Workers not supported');
+      return;
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      if (registration.showNotification) {
+        await registration.showNotification('Local Test Notification', {
+          body: 'This is a test notification triggered from the UI.',
+          icon: '/android-chrome-192x192.png',
+          badge: '/android-chrome-192x192.png',
+          data: {
+            url: '/trackers'
+          }
+        });
+        setSuccess('Test notification triggered!');
+      } else {
+        setError('showNotification not available on registration');
+      }
+    } catch (err) {
+      console.error('Test push failed:', err);
+      setError('Failed to trigger test notification: ' + err.message);
+    }
+  };
+
   return (
     <Container>
       {/*console.log('Rendering TrackersScreen with trackers:', trackers)*/}
@@ -302,9 +330,11 @@ const TrackersScreen = () => {
             </div>
           </Form.Group>
         </Col>
-        <Col md={4} className="text-end">
+        <Col md={4} className="text-end d-flex justify-content-end gap-2 align-items-start">
+          <Button variant="outline-info" className="mb-3" onClick={handleTestPush}>
+            <FontAwesomeIcon icon={faBell} className="me-2" />Test Push
+          </Button>
           <Button variant="primary" className="mb-3" onClick={() => handleShow()}>
-            <i className="fas fa-plus"></i>
             <FontAwesomeIcon icon={faPlus} className="me-2" />New DocTrkr2
           </Button>
         </Col>
