@@ -4,7 +4,7 @@ import { Container, Table, Button, Row, Col, Alert, Modal, Form, Pagination } fr
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash, faPlus, faArrowLeft, faBell } from '@fortawesome/free-solid-svg-icons'; // Import faBell
 
-import api, { sendNotificationToRecipient } from '../utils/api'; // Import sendNotificationToRecipient
+import api from '../utils/api'; // Import sendNotificationToRecipient
 
 const RecipientManagementScreen = () => {
   const navigate = useNavigate();
