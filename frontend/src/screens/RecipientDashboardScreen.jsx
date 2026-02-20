@@ -329,7 +329,7 @@ const RecipientDashboardScreen = () => {
     try {
       const permission = await Notification.requestPermission();
       setNotificationPermission(permission);
-      
+
       if (permission === 'granted') {
         await subscribeUserToPush(recipientId);
         setSuccess('Notifications enabled and subscribed successfully for this recipient!');
@@ -356,7 +356,7 @@ const RecipientDashboardScreen = () => {
     if (notificationPermission === 'denied') {
       return (
         <Alert variant="warning" dismissible onClose={() => setShowNotificationReminder(false)} className="py-2 mb-4">
-          <FontAwesomeIcon icon={faTimes} className="me-2" /> 
+          <FontAwesomeIcon icon={faTimes} className="me-2" />
           Notifications are blocked. To receive alerts, please allow notifications in your browser's site settings.
         </Alert>
       );
@@ -376,16 +376,17 @@ const RecipientDashboardScreen = () => {
 
   return (
     <Container>
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      {/*<div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Recipient Dashboard</h1>
         <Button variant="outline-info" onClick={handleTestPush}>
           <FontAwesomeIcon icon={faBell} className="me-2" />Test Push
         </Button>
       </div>
+      */}
 
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)} className="mb-3">{error}</Alert>}
       {success && <Alert variant="success" dismissible onClose={() => setSuccess(null)} className="mb-3">{success}</Alert>}
-      
+
       <NotificationStatus />
 
       {/* Metrics Section */}

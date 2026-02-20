@@ -331,9 +331,9 @@ const TrackersScreen = () => {
           </Form.Group>
         </Col>
         <Col md={4} className="text-end d-flex justify-content-end gap-2 align-items-start">
-          <Button variant="outline-info" className="mb-3" onClick={handleTestPush}>
+          {/*<Button variant="outline-info" className="mb-3" onClick={handleTestPush}>
             <FontAwesomeIcon icon={faBell} className="me-2" />Test Push
-          </Button>
+          </Button>*/}
           <Button variant="primary" className="mb-3" onClick={() => handleShow()}>
             <FontAwesomeIcon icon={faPlus} className="me-2" />New DocTrkr2
           </Button>
