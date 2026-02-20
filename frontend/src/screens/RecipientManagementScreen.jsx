@@ -158,6 +158,7 @@ const RecipientManagementScreen = () => {
       setShowAlert(true);
     }
   };
+
   const handleBack = () => {
     navigate('/admin');
   };
