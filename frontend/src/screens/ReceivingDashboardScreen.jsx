@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Button } from 'react-bootstrap';
+import Analytics from '../components/Analytics';
 //import { useAuth } from '../context/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,7 +39,7 @@ const ReceivingDashboardScreen = () => {
       </Row>
       <Link to="/trackers">Manage Documents</Link>
       <br />
-      <p>This will contain receiving-specific analytics</p>
+    <Analytics />
     </Container>
   );
 };
