@@ -26,6 +26,8 @@ import {
   DropdownButton,
   Modal,
   Alert,
+  Tabs,
+  Tab,
 } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import {
@@ -64,7 +66,7 @@ const RecipientDashboardScreen = () => {
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
   const [selectedSerialNumber, setSelectedSerialNumber] = useState(null);
-  const [showQrCodeInModal, setShowQrCodeInModal] = useState(false);
+  const [showQrCodeInModal, setShowQrCodeInModal] = useState(true);
 
   // Pagination & filters
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,6 +80,7 @@ const RecipientDashboardScreen = () => {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [activeTab, setActiveTab] = useState('active');
 
   useEffect(() => {
     if (error) {
@@ -125,6 +128,7 @@ const RecipientDashboardScreen = () => {
         search: debouncedSearchTerm.trim() || undefined,
         dateFrom: dateFrom || undefined,
         dateTo: dateTo || undefined,
+        status: activeTab,
       };
 
       try {
@@ -146,7 +150,7 @@ const RecipientDashboardScreen = () => {
     };
 
     fetchData();
-  }, [recipientId, currentPage, pageSize, sortBy, sortOrder, debouncedSearchTerm, dateFrom, dateTo, refreshTrigger]);
+  }, [recipientId, currentPage, pageSize, sortBy, sortOrder, debouncedSearchTerm, dateFrom, dateTo, refreshTrigger, activeTab]);
 
   const openConfirmModal = (trackerId, newStatus) => {
     const tracker = recipientTrackers.find(t => t.tracker.id === trackerId);
@@ -211,7 +215,7 @@ const RecipientDashboardScreen = () => {
       const url = URL.createObjectURL(blob);
       setSelectedPdfUrl(url);
       setSelectedSerialNumber(item.tracker.serialNumber);
-      setShowQrCodeInModal(false);
+      setShowQrCodeInModal(true);
       setShowPdfModal(true);
 
       // Mark as seen and read after viewing/downloading
@@ -241,7 +245,7 @@ const RecipientDashboardScreen = () => {
       const url = URL.createObjectURL(blob);
       setSelectedPdfUrl(url);
       setSelectedSerialNumber(item.tracker.serialNumber);
-      setShowQrCodeInModal(false);
+      setShowQrCodeInModal(true);
       setShowPdfModal(true);
     } catch (err) {
       console.error('View reply slip failed:', err);
@@ -498,6 +502,18 @@ const RecipientDashboardScreen = () => {
         </Col>
       </Row>
 
+      <Tabs
+        activeKey={activeTab}
+        onSelect={(k) => {
+          setActiveTab(k);
+          setCurrentPage(1);
+        }}
+        className="mb-4"
+      >
+        <Tab eventKey="active" title={`Active Documents (${stats?.trackersByStatus?.filter(s => s.status !== 'completed').reduce((acc, curr) => acc + parseInt(curr.count), 0) || 0})`} />
+        <Tab eventKey="completed" title={`Completed (${stats?.trackersByStatus?.find(s => s.status === 'completed')?.count || 0})`} />
+      </Tabs>
+
       {loading ? (
         <div className="text-center my-5">
           <div className="spinner-border text-primary" role="status" />
@@ -520,7 +536,7 @@ const RecipientDashboardScreen = () => {
               <th className="text-center">Status</th>
               <th>LCE Action / Date</th>
               <th>Last Updated</th>
-              <th>Actions</th>
+              {activeTab === 'active' && <th>Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -600,50 +616,52 @@ const RecipientDashboardScreen = () => {
                   <td>
                     {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : '—'}
                   </td>
-                  <td>
-                    <DropdownButton
-                      id={`actions-${item.id}`}
-                      title={isLoading ? 'Updating…' : 'Actions'}
-                      size="sm"
-                      variant="outline-primary"
-                      disabled={isLoading}
-                    >
-                      {['approved', 'noted', 'in-progress', 'rejected'].map(st => {
-                        const { icon, color, label } = getActionConfig(st);
-                        const disabled = item.status === st || isLoading;
-                        return (
-                          <Dropdown.Item
-                            key={st}
-                            onClick={() => openConfirmModal(item.tracker.id, st)}
-                            disabled={disabled}
-                          >
-                            <FontAwesomeIcon icon={icon} className={`me-2 text-${color}`} />
-                            {label}
-                          </Dropdown.Item>
-                        );
-                      })}
+                  {activeTab === 'active' && (
+                    <td>
+                      <DropdownButton
+                        id={`actions-${item.id}`}
+                        title={isLoading ? 'Updating…' : 'Actions'}
+                        size="sm"
+                        variant="outline-primary"
+                        disabled={isLoading}
+                      >
+                        {['approved', 'noted', 'in-progress', 'rejected'].map(st => {
+                          const { icon, color, label } = getActionConfig(st);
+                          const disabled = item.status === st || isLoading;
+                          return (
+                            <Dropdown.Item
+                              key={st}
+                              onClick={() => openConfirmModal(item.tracker.id, st)}
+                              disabled={disabled}
+                            >
+                              <FontAwesomeIcon icon={icon} className={`me-2 text-${color}`} />
+                              {label}
+                            </Dropdown.Item>
+                          );
+                        })}
 
-                      {item.status !== 'completed' && (
-                        <>
-                          {/*console.log('Rendering Mark Completed option for tracker:', item.id, item.tracker.id, item.tracker?.documentTitle)*/}
-                          <Dropdown.Divider />
-                          <Dropdown.Item
-                            onClick={() => openConfirmModal(item.tracker.id, 'completed')}
-                            className="text-success"
-                            disabled={isLoading}
-                          >
-                            <FontAwesomeIcon icon={faCheckDouble} className="me-2" />
-                            Mark Completed
-                          </Dropdown.Item>
-                        </>
-                      )}
+                        {item.status !== 'completed' && (
+                          <>
+                            {/*console.log('Rendering Mark Completed option for tracker:', item.id, item.tracker.id, item.tracker?.documentTitle)*/}
+                            <Dropdown.Divider />
+                            <Dropdown.Item
+                              onClick={() => openConfirmModal(item.tracker.id, 'completed')}
+                              className="text-success"
+                              disabled={isLoading}
+                            >
+                              <FontAwesomeIcon icon={faCheckDouble} className="me-2" />
+                              Mark Completed
+                            </Dropdown.Item>
+                          </>
+                        )}
 
-                      <Dropdown.Divider />
-                      <Dropdown.Item onClick={() => handleViewDetails(recipientId, item.tracker.id)} className="text-info">
-                        View Details / Remarks
-                      </Dropdown.Item>
-                    </DropdownButton>
-                  </td>
+                        <Dropdown.Divider />
+                        <Dropdown.Item onClick={() => handleViewDetails(recipientId, item.tracker.id)} className="text-info">
+                          View Details / Remarks
+                        </Dropdown.Item>
+                      </DropdownButton>
+                    </td>
+                  )}
                 </tr>
               );
             })}

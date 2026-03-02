@@ -34,10 +34,20 @@ exports.getReceivedTrackers = async (req, res) => {
     const limit = Math.max(1, Math.min(100, isNaN(limitParam) ? 10 : limitParam));
     const offset = (page - 1) * limit;
 
-    const { search, sort = 'dateReceived', order = 'DESC', dateFrom, dateTo } = req.query;
+    const { search, sort = 'dateReceived', order = 'DESC', dateFrom, dateTo, status } = req.query;
 
     const where = { recipientId };
     const trackerWhere = {};
+
+    // Status filtering
+    if (status) {
+      if (status === 'active') {
+        // Everything except completed
+        where.status = { [Op.ne]: 'completed' };
+      } else {
+        where.status = status;
+      }
+    }
 
     // Search functionality
     if (search) {
@@ -261,6 +271,20 @@ exports.updateReceivedTracker = async (req, res) => {
     await trackerRecipient.update(updateData, { transaction });
     await transaction.commit();
 
+    const updatedRecord = await TrackerRecipient.findOne({
+      where: { recipientId, trackerId },
+      include: [
+        {
+          model: Tracker,
+          as: 'tracker',
+        },
+        {
+          model: Recipient,
+          as: 'recipient',
+        },
+      ],
+    });
+
     // Notify relevant roles and recipients
     const { notifyRoles, notifyRecipients } = require('../../utils/push');
     
@@ -299,27 +323,15 @@ exports.updateReceivedTracker = async (req, res) => {
       status: 'success'
     });
 
-    const updatedRecord = await TrackerRecipient.findOne({
-      where: { recipientId, trackerId },
-      include: [
-        {
-          model: Tracker,
-          as: 'tracker',
-        },
-        {
-          model: Recipient,
-          as: 'recipient',
-        },
-      ],
-    });
-
     res.json({
       success: true,
       data: updatedRecord,
       message: 'Status updated successfully',
     });
   } catch (error) {
-    await transaction.rollback();
+    if (transaction && !transaction.finished) {
+      await transaction.rollback();
+    }
     console.error('Error updating tracker-recipient status:', error);
 
     await logRecipientTrackerActivity({
