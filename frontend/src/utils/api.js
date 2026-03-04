@@ -50,7 +50,7 @@ export const login = async (username, password) => {
 }; */
 
 // Tracker API calls
-export const getTrackers = async (page = 1, limit = 10, sortBy = 'dateReceived', sortOrder = 'DESC', search = '') => {
+export const getTrackers = async (page = 1, limit = 10, sortBy = 'dateReceived', sortOrder = 'DESC', search = '', hasRecipients = '') => {
   try {
     // Ensure numeric parameters are actually numbers
     const response = await api.get('/trackers', {
@@ -59,7 +59,8 @@ export const getTrackers = async (page = 1, limit = 10, sortBy = 'dateReceived',
         limit: parseInt(limit, 10),
         sortBy: sortBy || 'dateReceived',
         sortOrder: sortOrder || 'DESC',
-        search: search || ''
+        search: search || '',
+        hasRecipients: hasRecipients || ''
       }
     });
     return response.data;

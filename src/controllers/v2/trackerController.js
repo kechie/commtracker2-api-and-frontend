@@ -287,6 +287,7 @@ exports.getTrackers = async (req, res) => {
     const sortBy = req.query.sortBy || 'dateReceived';
     const sortOrder = (req.query.sortOrder || 'DESC').toUpperCase();
     const search = req.query.search || '';
+    const hasRecipients = req.query.hasRecipients; // 'true', 'false', or undefined
 
     // Validate sortOrder
     if (!['ASC', 'DESC'].includes(sortOrder)) {
@@ -311,8 +312,20 @@ exports.getTrackers = async (req, res) => {
     // Calculate offset
     const offset = (page - 1) * limit;
 
-    // Build where clause for search
+    // Build where clause for search and filters
     const where = {};
+
+    // Filter by hasRecipients
+    if (hasRecipients === 'true') {
+      where.id = {
+        [Op.in]: sequelize.literal(`(SELECT tracker_id FROM tracker_recipients)`)
+      };
+    } else if (hasRecipients === 'false') {
+      where.id = {
+        [Op.notIn]: sequelize.literal(`(SELECT tracker_id FROM tracker_recipients)`)
+      };
+    }
+
     if (search) {
       const escapedSearch = search.replace(/'/g, "''");
       where[Op.or] = [

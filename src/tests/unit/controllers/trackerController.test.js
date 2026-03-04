@@ -1,16 +1,14 @@
 // tests/unit/controllers/trackerController.test.js
 
 const { Tracker, sequelize } = require('../../../db');
+const { Op } = require('sequelize');
 const trackerController = require('../../../controllers/v2/trackerController');
 
 // Mock dependencies
 jest.mock('../../../db', () => {
+  const { Op } = require('sequelize');
   const SequelizeMock = {
-    Op: {
-      or: Symbol('or'),
-      in: Symbol('in'),
-      iLike: Symbol('iLike'),
-    },
+    Op,
     literal: jest.fn(val => val),
   };
   return {
@@ -19,7 +17,7 @@ jest.mock('../../../db', () => {
     },
     sequelize: SequelizeMock,
     Sequelize: SequelizeMock,
-    Op: SequelizeMock.Op,
+    Op,
   };
 });
 
@@ -101,6 +99,26 @@ describe('Tracker Controller (v2)', () => {
           offset: 25,
         })
       );
+    });
+
+    it('should filter by hasRecipients=true', async () => {
+      mockReq.query.hasRecipients = 'true';
+      Tracker.findAndCountAll.mockResolvedValue({ count: 0, rows: [] });
+
+      await trackerController.getTrackers(mockReq, mockRes);
+
+      const callArgs = Tracker.findAndCountAll.mock.calls[0][0];
+      expect(callArgs.where.id[sequelize.Op.in]).toBeDefined();
+    });
+
+    it('should filter by hasRecipients=false', async () => {
+      mockReq.query.hasRecipients = 'false';
+      Tracker.findAndCountAll.mockResolvedValue({ count: 0, rows: [] });
+
+      await trackerController.getTrackers(mockReq, mockRes);
+
+      const callArgs = Tracker.findAndCountAll.mock.calls[0][0];
+      expect(callArgs.where.id[sequelize.Op.notIn]).toBeDefined();
     });
   });
 });

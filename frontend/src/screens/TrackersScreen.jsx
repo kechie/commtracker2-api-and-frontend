@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, FloatingLabel, Alert, Container, Card, Row, Col, Badge, Pagination, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Table, Button, Modal, Form, FloatingLabel, Alert, Container, Card, Row, Col, Badge, Pagination, OverlayTrigger, Tooltip, Tabs, Tab } from 'react-bootstrap';
 import { getTrackers, createTracker, updateTracker, deleteTracker, getAllRecipients, getTrackerAttachment, getTrackerReplySlipAttachment } from '../utils/api';
 import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
@@ -32,6 +32,7 @@ const TrackersScreen = () => {
   const [sortOrder, setSortOrder] = useState('DESC');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [hasRecipients, setHasRecipients] = useState('true');
   const [formData, setFormData] = useState({
     serialNumber: '',
     fromName: '',
@@ -66,7 +67,7 @@ const TrackersScreen = () => {
       try {
         setLoading(true);
         const [trackersData, recipientsData] = await Promise.all([
-          getTrackers(currentPage, pageSize, sortBy, sortOrder, debouncedSearch),
+          getTrackers(currentPage, pageSize, sortBy, sortOrder, debouncedSearch, hasRecipients === 'all' ? '' : hasRecipients),
           getAllRecipients()
         ]);
 
@@ -95,10 +96,10 @@ const TrackersScreen = () => {
       }
     };
     loadData();
-  }, [currentPage, pageSize, sortBy, sortOrder, debouncedSearch]);
+  }, [currentPage, pageSize, sortBy, sortOrder, debouncedSearch, hasRecipients]);
 
   const fetchTrackers = async () => {
-    const data = await getTrackers(currentPage, pageSize, sortBy, sortOrder, debouncedSearch);
+    const data = await getTrackers(currentPage, pageSize, sortBy, sortOrder, debouncedSearch, hasRecipients === 'all' ? '' : hasRecipients);
     const trackersList = data.data || data;
     setTrackers(Array.isArray(trackersList) ? trackersList : []);
     if (data.pagination) {
@@ -365,6 +366,15 @@ const TrackersScreen = () => {
           </Button>
         </Col>
       </Row>
+      <Tabs
+        activeKey={hasRecipients}
+        onSelect={(k) => { setHasRecipients(k); setCurrentPage(1); }}
+        className="mb-3"
+      >
+        <Tab eventKey="all" title="All Trackers" />
+        <Tab eventKey="true" title="With Recipients" />
+        <Tab eventKey="false" title="Without Recipients" />
+      </Tabs>
       <Row>
         {error && <Alert variant="danger" dismissible>{error}</Alert>}
         {success && <Alert variant="success" dismissible>{success}</Alert>}
