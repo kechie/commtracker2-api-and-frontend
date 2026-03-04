@@ -293,6 +293,21 @@ exports.getTrackers = async (req, res) => {
       return res.status(400).json({ error: 'Invalid sortOrder. Must be ASC or DESC' });
     }
 
+    // Determine order clause
+    let order;
+    if (sortBy === 'latestRecipientUpdate') {
+      order = [[sequelize.literal(`(
+        SELECT MAX(updated_at)
+        FROM tracker_recipients AS tr
+        WHERE tr.tracker_id = "Tracker".id
+      )`), sortOrder]];
+    } else {
+      // Validate sortBy to prevent SQL injection or bad queries
+      const allowedSortFields = ['dateReceived', 'serialNumber', 'fromName', 'documentTitle', 'createdAt', 'updatedAt'];
+      const validatedSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'dateReceived';
+      order = [[validatedSortBy, sortOrder]];
+    }
+
     // Calculate offset
     const offset = (page - 1) * limit;
 
@@ -337,7 +352,7 @@ exports.getTrackers = async (req, res) => {
           ]
         }
       ],
-      order: [[sortBy, sortOrder]],
+      order,
       limit,
       offset,
     });

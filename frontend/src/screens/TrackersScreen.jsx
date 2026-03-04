@@ -28,8 +28,8 @@ const TrackersScreen = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalTrackers, setTotalTrackers] = useState(0);
-  const [sortBy] = useState('createdAt');
-  const [sortOrder] = useState('DESC');
+  const [sortBy, setSortBy] = useState('latestRecipientUpdate');
+  const [sortOrder, setSortOrder] = useState('DESC');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [formData, setFormData] = useState({
@@ -302,39 +302,65 @@ const TrackersScreen = () => {
           </Button>
         </Col>
       </Row>*/}
-      <Row className="align-items-left mb-3">
-        <Col md={8}>
-          <Form.Group className="d-flex gap-2">
-            <div className="input-group">
-              <span className="input-group-text bg-light">
-                <FontAwesomeIcon icon={faSearch} />
-              </span>
-              <Form.Control
-                type="text"
-                placeholder="Find serial, from, title, or recipient..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              {search && (
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => {
-                    setSearch('');
-                    setDebouncedSearch('');
-                    setCurrentPage(1);
-                  }}
-                >
-                  <FontAwesomeIcon icon={faTimes} />
-                </Button>
-              )}
-            </div>
-          </Form.Group>
+      <Row className="align-items-end mb-3">
+        <Col md={4}>
+          <Form.Label className="mb-1 small">Search</Form.Label>
+          <div className="input-group">
+            <span className="input-group-text bg-light">
+              <FontAwesomeIcon icon={faSearch} />
+            </span>
+            <Form.Control
+              type="text"
+              placeholder="Find serial, from, title, or recipient..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <Button
+                variant="outline-secondary"
+                onClick={() => {
+                  setSearch('');
+                  setDebouncedSearch('');
+                  setCurrentPage(1);
+                }}
+              >
+                <FontAwesomeIcon icon={faTimes} />
+              </Button>
+            )}
+          </div>
         </Col>
-        <Col md={4} className="text-end d-flex justify-content-end gap-2 align-items-start">
-          {/*<Button variant="outline-info" className="mb-3" onClick={handleTestPush}>
-            <FontAwesomeIcon icon={faBell} className="me-2" />Test Push
-          </Button>*/}
-          <Button variant="primary" className="mb-3" onClick={() => handleShow()}>
+        <Col md={3}>
+          <Form.Label className="mb-1 small">Sort by</Form.Label>
+          <Form.Select
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="dateReceived">Date Received</option>
+            <option value="createdAt">Created</option>
+            <option value="updatedAt">Tracker Last Updated</option>
+            <option value="latestRecipientUpdate">Latest Recipient Update</option>
+            <option value="serialNumber">Serial Number</option>
+            <option value="documentTitle">Document Title</option>
+          </Form.Select>
+        </Col>
+        <Col md={2}>
+          <Form.Label className="mb-1 small">Order</Form.Label>
+          <Form.Select
+            value={sortOrder}
+            onChange={(e) => {
+              setSortOrder(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="DESC">Descending</option>
+            <option value="ASC">Ascending</option>
+          </Form.Select>
+        </Col>
+        <Col md={3} className="text-end d-flex justify-content-end gap-2 align-items-end">
+          <Button variant="primary" onClick={() => handleShow()}>
             <FontAwesomeIcon icon={faPlus} className="me-2" />New DocTrkr2
           </Button>
         </Col>
