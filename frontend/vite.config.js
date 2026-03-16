@@ -7,10 +7,17 @@ export default defineConfig({
     chunkSizeWarningLimit: 1600,
     rollupOptions: {
       output: {
-      manualChunks: undefined, // Remove manualChunks
-      advancedChunks: {
-        groups: [{ name: 'vendor', test:  /[\\/]node_modules[\\/](react|react-dom)[\\/]/ }]
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react')) {
+              return 'vendor-react';
+            }
+            if (id.includes('bootstrap') || id.includes('fontawesome') || id.includes('recharts')) {
+              return 'vendor-ui';
+            }
+            return 'vendor';
           }
+        }
       }
     }
   },

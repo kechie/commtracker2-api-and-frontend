@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Container, Table, Button, Row, Col, Alert, Modal, Form, Pagination } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faPlus, faArrowLeft, faBell } from '@fortawesome/free-solid-svg-icons'; // Import faBell
+import { faEdit, faPlus, faArrowLeft, faBell } from '@fortawesome/free-solid-svg-icons'; // Import faBell
 
-import api from '../utils/api'; // Import sendNotificationToRecipient
+import api, { sendNotificationToRecipient } from '../utils/api'; // Import sendNotificationToRecipient
 
 const RecipientManagementScreen = () => {
   const navigate = useNavigate();
@@ -115,7 +115,7 @@ const RecipientManagementScreen = () => {
     setPage(1);
   };
 
-  const deleteHandler = async (id) => {
+  /* const deleteHandler = async (id) => {
     if (window.confirm('Are you sure you want to delete this recipient?')) {
       try {
         await api.delete(`/recipients/${id}`);
@@ -125,7 +125,7 @@ const RecipientManagementScreen = () => {
         setShowAlert(true);
       }
     }
-  };
+  }; */
 
   const handleEditClick = (recipient) => {
     setCurrentRecipient(recipient);

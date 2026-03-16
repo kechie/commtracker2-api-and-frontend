@@ -365,4 +365,14 @@ export const getPublicRoutingSlip = async (serialNumber) => {
   }
 };
 
+export const sendNotificationToRecipient = async (recipientId, title, message) => {
+  try {
+    const response = await api.post('/push/notify-recipient', { recipientId, title, message });
+    return response.data;
+  } catch (error) {
+    console.error('API Send Notification Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
 export default api;

@@ -91,7 +91,7 @@ const UserManagementScreen = () => {
     // console.log(role);
     // console.log(users)
     loadUsers();
-  }, [page, limit]);
+  }, [page, limit, searchTerm]);
 
   const handleSearch = (e) => {
     e.preventDefault();

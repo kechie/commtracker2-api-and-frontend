@@ -5,7 +5,7 @@ import DualListBox from '../components/DualListBox';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 //import { faPlus, faEdit, faTrash, faArrowLeft, faEye, faInfoCircle, faFileText } from '@fortawesome/free-solid-svg-icons';
-import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faSearch, faTimes, faReply, faBell } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faSearch, faTimes, faReply } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
 
@@ -243,33 +243,6 @@ const TrackersScreen = () => {
   const handleBack = () => {
     navigate('/receiving-dashboard');
   }
-
-  const handleTestPush = async () => {
-    if (!('serviceWorker' in navigator)) {
-      setError('Service Workers not supported');
-      return;
-    }
-
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      if (registration.showNotification) {
-        await registration.showNotification('Local Test Notification', {
-          body: 'This is a test notification triggered from the UI.',
-          icon: '/android-chrome-192x192.png',
-          badge: '/android-chrome-192x192.png',
-          data: {
-            url: '/trackers'
-          }
-        });
-        setSuccess('Test notification triggered!');
-      } else {
-        setError('showNotification not available on registration');
-      }
-    } catch (err) {
-      console.error('Test push failed:', err);
-      setError('Failed to trigger test notification: ' + err.message);
-    }
-  };
 
   return (
     <Container>

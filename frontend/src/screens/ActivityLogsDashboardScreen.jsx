@@ -1,15 +1,12 @@
 // frontend/src/screens/AdminScreen.jsx
 //import React from 'react';
-import { useAuth } from '../context/useAuth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Table, Button, Modal, Pagination, Form, Row, Col } from 'react-bootstrap';
 import { getActivityLogs } from '../utils/api';
-import { useNavigate } from 'react-router-dom';
 const ActivityLogsDashboardScreen = () => {
-  const { user, role } = useAuth();
   const [logs, setLogs] = useState([]);
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);

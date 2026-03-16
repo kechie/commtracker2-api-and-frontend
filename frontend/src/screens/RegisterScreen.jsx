@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
-import { Container, Form, Button, Row, Col } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
-import api from '../utils/api'; // Import the API service
+import React from 'react';
+import { Container } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 const RegisterScreen = () => {
   /*   const [name, setName] = useState('');

@@ -34,7 +34,6 @@ import {
   updateRecipientTrackerStatus,
   getAttachment,
   getRecipientAnalytics,
-  getTrackerReplySlipAttachment,
 } from '../utils/api';
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
@@ -54,22 +53,19 @@ const LceStaffDashboardScreen = () => {
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedTracker, setSelectedTracker] = useState(null); // { id, currentStatus, newStatus }
   const [remark, setRemark] = useState('');
-  const [actionLoading, setActionLoading] = useState({});
-  const [attachmentLoading, setAttachmentLoading] = useState(null);
-  const [replySlipLoading, setReplySlipLoading] = useState(null);
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
   const [selectedSerialNumber, setSelectedSerialNumber] = useState(null);
 
   // Pagination & filters
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const pageSize = 10;
+  // const [totalPages, setTotalPages] = useState(1);
+  const [_totalItems, _setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('DESC');
+  const sortBy = 'createdAt';
+  const sortOrder = 'DESC';
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
@@ -107,12 +103,13 @@ const LceStaffDashboardScreen = () => {
         const [trackersRes, statsRes] = await Promise.all([
           getRecipientTrackers(recipientId, params),
           getRecipientAnalytics(recipientId)
-        ]);
-        setRecipientTrackers(trackersRes.data || []);
-        setTotalItems(trackersRes.pagination?.total || trackersRes.data?.length || 0);
-        setTotalPages(trackersRes.pagination?.totalPages || 1);
-        setStats(statsRes);
+          ]);
+          setRecipientTrackers(trackersRes.data || []);
+          _setTotalItems(trackersRes.pagination?.total || trackersRes.data?.length || 0);
+          // setTotalPages(trackersRes.pagination?.totalPages || 1);
+          setStats(statsRes);
       } catch (err) {
+        console.error(err);
         setError('Failed to load dashboard data.');
       } finally {
         setLoading(false);
@@ -138,7 +135,7 @@ const LceStaffDashboardScreen = () => {
   const confirmStatusChange = async () => {
     if (!selectedTracker || !recipientId) return;
     const { id: trackerId, newStatus } = selectedTracker;
-    setActionLoading(prev => ({ ...prev, [trackerId]: true }));
+    // setActionLoading(prev => ({ ...prev, [trackerId]: true }));
     setShowActionModal(false);
 
     try {
@@ -147,15 +144,16 @@ const LceStaffDashboardScreen = () => {
       setSuccess(`Status updated to ${newStatus}`);
       setRefreshTrigger(prev => prev + 1);
     } catch (err) {
+      console.error(err);
       setError('Could not update status');
     } finally {
-      setActionLoading(prev => ({ ...prev, [trackerId]: false }));
+      // setActionLoading(prev => ({ ...prev, [trackerId]: false }));
     }
   };
 
   const handleViewAttachment = async (item) => {
     const trackerId = item.tracker.id;
-    setAttachmentLoading(trackerId);
+    // setAttachmentLoading(trackerId);
     try {
       const blob = await getAttachment(recipientId, trackerId);
       const url = URL.createObjectURL(blob);
@@ -163,9 +161,10 @@ const LceStaffDashboardScreen = () => {
       setSelectedSerialNumber(item.tracker.serialNumber);
       setShowPdfModal(true);
     } catch (err) {
+      console.error(err);
       setError('Could not load attachment.');
     } finally {
-      setAttachmentLoading(null);
+      // setAttachmentLoading(null);
     }
   };
 

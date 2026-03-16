@@ -15,7 +15,7 @@ function parseJwt(token) {
     }).join(''));
 
     return JSON.parse(jsonPayload);
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
 }

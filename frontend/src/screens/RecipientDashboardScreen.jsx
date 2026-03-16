@@ -9,7 +9,6 @@ import {
   faCheckDouble,
   faPaperclip,
   faForward,
-  faBell,
 } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -267,33 +266,6 @@ const RecipientDashboardScreen = () => {
     setSelectedPdfUrl(null);
     setSelectedSerialNumber(null);
     setRefreshTrigger(prev => prev + 1);
-  };
-
-  const handleTestPush = async () => {
-    if (!('serviceWorker' in navigator)) {
-      setError('Service Workers not supported');
-      return;
-    }
-
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      if (registration.showNotification) {
-        await registration.showNotification('Recipient Test Notification', {
-          body: 'This is a test notification for the Recipient Dashboard.',
-          icon: '/android-chrome-192x192.png',
-          badge: '/android-chrome-192x192.png',
-          data: {
-            url: '/recipient-dashboard'
-          }
-        });
-        setSuccess('Test notification triggered!');
-      } else {
-        setError('showNotification not available on registration');
-      }
-    } catch (err) {
-      console.error('Test push failed:', err);
-      setError('Failed to trigger test notification: ' + err.message);
-    }
   };
 
   const resetFilters = () => {

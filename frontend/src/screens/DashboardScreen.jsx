@@ -9,7 +9,7 @@ import Analytics from '../components/Analytics';
 
 
 const DashboardScreen = () => {
-  const { user, role } = useAuth();
+  const { role } = useAuth();
   /*   const navigate = useNavigate();
     const handleBack = () => {
       navigate('/');
