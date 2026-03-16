@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Modal, Button, Spinner, Alert } from 'react-bootstrap';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,13 +7,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import Draggable from 'react-draggable';
 
 // Required for react-pdf to work
-//pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-//   'pdfjs-dist/build/pdf.worker.min.js',
-//   import.meta.url
-// ).toString();
-
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber, showQrCode = true }) => {
   const [numPages, setNumPages] = useState(null);
@@ -22,6 +16,12 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber, showQrCode =
   const [error, setError] = useState(null);
   const [rotation, setRotation] = useState(0);
   const nodeRef = useRef(null);
+
+  // Memoize options to prevent unnecessary re-renders and potential ArrayBuffer detachment
+  const options = useMemo(() => ({
+    cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+    cMapPacked: true,
+  }), []);
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -92,10 +92,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber, showQrCode =
             onLoadSuccess={onDocumentLoadSuccess}
             onLoadError={onDocumentLoadError}
             onLoadStart={() => setLoading(true)}
-            options={{
-              cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
-              cMapPacked: true,
-            }}
+            options={options}
           >
             {!loading && !error && <Page pageNumber={pageNumber} rotate={rotation} renderAnnotationLayer={false} renderTextLayer={false} />}
           </Document>
