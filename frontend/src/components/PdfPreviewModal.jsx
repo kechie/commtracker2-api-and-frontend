@@ -15,6 +15,7 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber, showQrCode =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rotation, setRotation] = useState(0);
+  const [qrPosition, setQrPosition] = useState({ x: 0, y: 0 }); // State to track QR code position
   const nodeRef = useRef(null);
 
   // Memoize options to prevent unnecessary re-renders and potential ArrayBuffer detachment
@@ -98,7 +99,11 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber, showQrCode =
           </Document>
 
           {!loading && !error && serialNumber && showQrCode && (
-            <Draggable bounds="parent" nodeRef={nodeRef}>
+            <Draggable
+              bounds="parent"
+              nodeRef={nodeRef}
+              onStop={(e, data) => setQrPosition({ x: data.x, y: data.y })} // Capture position on drag stop
+            >
               <div
                 ref={nodeRef}
                 style={{
@@ -131,6 +136,30 @@ const PdfPreviewModal = ({ show, handleClose, pdfUrl, serialNumber, showQrCode =
             </Draggable>
           )}
         </div>
+
+        {/* This block is for printing the QR code on a separate page */}
+        {!loading && !error && serialNumber && showQrCode && (
+          <div className="print-only-qr-page">
+            <div
+              className="qr-code-print-container"
+              style={{
+                top: `calc(10px + ${qrPosition.y}px)`,
+                right: `calc(10px - ${qrPosition.x}px)`,
+              }}
+            >
+              <div style={{ fontSize: '9px', fontWeight: 'bold' }}>CITY MAYOR'S OFFICE</div>
+              <div style={{ fontSize: '9px', fontWeight: 'bold' }}>ADMIN DIVISION</div>
+              <div style={{ fontSize: '9px', fontWeight: 'bold', marginBottom: '0.25rem' }}>RECEIVED</div>
+              <QRCodeSVG
+                value={trackingUrl || serialNumber}
+                size={80}
+                level="H"
+                includeMargin={true}
+              />
+              <div style={{ fontSize: '10px', marginTop: '2px', fontWeight: 'bold' }}>{serialNumber}</div>
+            </div>
+          </div>
+        )}
       </Modal.Body>
       <Modal.Footer>
         <div className="d-flex justify-content-between align-items-center w-100">

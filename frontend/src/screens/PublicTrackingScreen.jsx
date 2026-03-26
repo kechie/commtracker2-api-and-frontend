@@ -73,7 +73,7 @@ const PublicTrackingScreen = () => {
         </Button>
       </div>
 
-      <Card className="shadow-sm mb-4">
+      <Card className="shadow-sm mb-4 printable-content">
         <Card.Header className="bg-primary text-white py-3">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">

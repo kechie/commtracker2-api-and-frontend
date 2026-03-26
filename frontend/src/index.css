@@ -1,54 +1,122 @@
+/* Default state for the print-only QR page is hidden */
+.print-only-qr-page, .qr-code-print-container {
+  display: none;
+}
+
 @media print {
+  /* When a modal is open, hide everything else. This is key for printing attachments. */
+  body.modal-open > *:not(.modal) {
+    display: none !important;
+  }
+
+  /* Hide non-essential elements */
+  header, 
+  footer, 
+  .d-print-none, 
+  .btn, 
+  .spinner-border, 
+  .alert,
+  .modal-header, /* Hide the whole modal header, not just the button */
+  .modal-footer {
+    display: none !important;
+  }
+
+  /* Reset layout for print */
   body {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: white !important;
   }
 
-  /* Hide everything by default */
-  body * {
-    visibility: hidden;
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* Show only the printable area */
-  .modal-content,
-  .modal-content * {
-    visibility: visible;
+  .container {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
+  /* Handle Printable Area */
+  .printable-content,
   .modal-content {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
+    visibility: visible !important;
+    display: block !important;
+    position: static !important; /* Allow natural flow for multi-page */
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
   }
 
-  /* Hide UI elements that shouldn't be printed */
-  .modal-footer,
-  .modal-header,
-  .d-print-none,
-  .btn,
-  .spinner-border,
-  .alert {
-    display: none !important;
+  /* If it's a modal, we might need to force it to show since its parents might be hidden */
+  .modal {
+    position: static !important;
+    display: block !important;
+    opacity: 1 !important;
   }
 
-  /* Ensure the QR code is visible and correctly positioned */
-  .react-draggable {
-    visibility: visible !important;
+  .modal-dialog {
+    margin: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
   }
 
-  /* Adjust Modal Body for print */
+  /* THIS IS THE FIX: Ensure modal body doesn't scroll and shows all content */
   .modal-body {
     max-height: none !important;
     overflow: visible !important;
-    padding: 0 !important;
+    padding: 1em !important; /* Add some padding back for aesthetics */
   }
 
-  /* Remove scrollbars and other artifacts */
+  /* Ensure table content is visible and fits */
+  .table-responsive {
+    overflow: visible !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  /* Ensure QR code and other important graphics print */
   canvas, svg {
     max-width: 100% !important;
     height: auto !important;
+  }
+
+  /* Avoid breaking inside important sections */
+  .card, tr, .row {
+    page-break-inside: avoid;
+  }
+
+  /* Specifically show the printable area even if parents are visibility: hidden */
+  /* (Though we removed the global visibility: hidden, let's be safe) */
+  .printable-content *,
+  .modal-content * {
+    visibility: visible !important;
+  }
+
+  /* Styles for the second, QR-code-only print page. */
+  .print-only-qr-page {
+    display: block !important;
+    page-break-before: always;
+    height: 100vh;
+    width: 100%;
+    position: relative; /* Parent for absolute positioning */
+  }
+
+  .qr-code-print-container {
+    display: block !important;
+    position: absolute;
+    /* top and right are now set by inline style */
+    background: white;
+    padding: 5px;
+    border: 1px solid #ccc;
+    text-align: center;
   }
 }
