@@ -334,9 +334,11 @@ const TrackersScreen = () => {
           </Form.Select>
         </Col>
         <Col md={3} className="text-end d-flex justify-content-end gap-2 align-items-end">
-          <Button variant="primary" onClick={() => handleShow()}>
-            <FontAwesomeIcon icon={faPlus} className="me-2" />New DocTrkr2
-          </Button>
+          {['receiving', 'admin', 'superadmin'].includes(role) && (
+            <Button variant="primary" onClick={() => handleShow()}>
+              <FontAwesomeIcon icon={faPlus} className="me-2" />New DocTrkr2
+            </Button>
+          )}
         </Col>
       </Row>
       <Tabs
@@ -422,9 +424,11 @@ const TrackersScreen = () => {
                     <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply == 'pending' ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
                     <td>
                       <div className="d-flex gap-1">
-                        <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
-                          <FontAwesomeIcon icon={faEdit} />
-                        </Button>
+                        {['receiving', 'admin', 'superadmin'].includes(role) && (
+                          <Button variant="light" size="sm" onClick={() => handleShow(tracker)} title="Edit">
+                            <FontAwesomeIcon icon={faEdit} />
+                          </Button>
+                        )}
                         {tracker.attachment && (
                           <Button variant='outline-success'
                             size="sm"

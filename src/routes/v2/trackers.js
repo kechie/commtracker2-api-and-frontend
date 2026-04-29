@@ -35,23 +35,23 @@ router.use(verifyToken);
 router.get('/attachment/:id', requireRole(['receiving', 'admin', 'superadmin', 'recipient', 'monitor', 'lcestaff', 'lce']), serveAttachment);
 router.get('/reply-slip-attachment/:id', requireRole(['receiving', 'admin', 'superadmin', 'recipient', 'monitor', 'lcestaff', 'lce']), serveReplySlipAttachment);
 
-// All other routes in this file require 'receiving', 'admin', or 'superadmin'
-router.use(requireRole(['receiving', 'admin', 'superadmin']));
+// Role groups
+const readRoles = ['receiving', 'admin', 'superadmin', 'monitor', 'lcestaff', 'lce'];
+const writeRoles = ['receiving', 'admin', 'superadmin'];
+const deleteRoles = ['admin', 'superadmin'];
 
 // Get all trackers without pagination (use with caution)
-router.get('/all', getAllTrackers);
-// Serve attachment files
-router.get('/attachment/:id', serveAttachment);
-router.get('/reply-slip-attachment/:id', serveReplySlipAttachment);
+router.get('/all', requireRole(readRoles), getAllTrackers);
 
 // Get paginated trackers and create new tracker
-router.route('/').post(upload.fields([{ name: 'attachment', maxCount: 1 }, { name: 'replySlipAttachment', maxCount: 1 }]), trackerValidation, createTracker).get(getTrackers);
+router.route('/')
+  .post(requireRole(writeRoles), upload.fields([{ name: 'attachment', maxCount: 1 }, { name: 'replySlipAttachment', maxCount: 1 }]), trackerValidation, createTracker)
+  .get(requireRole(readRoles), getTrackers);
 
 // Get, update, delete specific tracker
-router
-  .route('/:id')
-  .get(getTrackerById)
-  .put(upload.fields([{ name: 'attachment', maxCount: 1 }, { name: 'replySlipAttachment', maxCount: 1 }]), trackerValidation, updateTracker)
-  .delete(deleteTracker);
+router.route('/:id')
+  .get(requireRole(readRoles), getTrackerById)
+  .put(requireRole(writeRoles), upload.fields([{ name: 'attachment', maxCount: 1 }, { name: 'replySlipAttachment', maxCount: 1 }]), trackerValidation, updateTracker)
+  .delete(requireRole(deleteRoles), deleteTracker);
 
 module.exports = router;

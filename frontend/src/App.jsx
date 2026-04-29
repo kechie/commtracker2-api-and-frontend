@@ -91,7 +91,7 @@ const App = () => {
             <Route
               path="/users-management"
               element={
-                <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+                <ProtectedRoute allowedRoles={['admin', 'superadmin', 'monitor']}>
                   <UserManagementScreen />
                 </ProtectedRoute>
               }
@@ -99,7 +99,7 @@ const App = () => {
             <Route
               path="/recipients-management"
               element={
-                <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+                <ProtectedRoute allowedRoles={['admin', 'superadmin', 'monitor']}>
                   <RecipientManagementScreen />
                 </ProtectedRoute>
               }

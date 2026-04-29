@@ -151,23 +151,19 @@ exports.getSystemStats = async (req, res) => {
 exports.getRecipientStats = async (req, res) => {
   try {
     const { recipientId } = req.params;
-    console.log("Recipient ID:", recipientId)
-    console.log(req.params)
-    console.log(req.user.role)
-    //console.log(req.user.recipientId)
+    const { role, recipientId: userRecipientId } = req.user;
 
-    // Check if the user is authorized to view these stats
-    // Assuming req.user is populated by middleware
-    //   req.user.role !== "admin" &&
-    //   req.user.role !== "superadmin" &&
+    // Admin, superadmin, and monitor can see anyone's stats
+    const isAdministrative = ['admin', 'superadmin', 'monitor'].includes(role);
+    const isRecipientRelated = ['recipient', 'lcestaff', 'lce'].includes(role);
 
-    if (!['recipient', 'lcestaff', 'lce'].includes(req.user.role) && req.user.recipientId !== recipientId)
-      {
-        console.error("Reached access control error");
-      return res
-        .status(403)
-        .json({ error: "Unauthorized to view these statistics" });
+    if (!isAdministrative) {
+      if (!isRecipientRelated || userRecipientId !== recipientId) {
+        return res.status(403).json({
+          error: "Unauthorized: You can only view your own department statistics",
+        });
       }
+    }
 
     // 1. Counts by Status
     const trackersByStatus = await TrackerRecipient.findAll({
@@ -237,23 +233,25 @@ exports.getRecipientStats = async (req, res) => {
 exports.getRecipientStatsTest = async (req, res) => {
   try {
     const { recipientId } = req.params;
-    console.log("Recipient ID:", recipientId)
-    console.log(req.params)
-    console.log(req.user.role)
-    console.log(req.user.recipientId)
-    if (!['superadmin', 'lcestaff', 'lce'].includes(req.user.role) && req.user.recipientId !== recipientId)
-      {
-        console.error("Reached access control error");
-      return res
-        .status(403)
-        .json({ error: "Unauthorized to view these statistics" });
+    const { role, recipientId: userRecipientId } = req.user;
+
+    const isAdministrative = ['admin', 'superadmin', 'monitor'].includes(role);
+    const isRecipientRelated = ['recipient', 'lcestaff', 'lce'].includes(role);
+
+    if (!isAdministrative) {
+      if (!isRecipientRelated || userRecipientId !== recipientId) {
+        return res.status(403).json({
+          error: "Unauthorized: You can only view your own department statistics",
+        });
       }
+    }
 
     return res.json({
       "result": "Test OK"
     })
   } catch (error){
-    console.log(req.user.recipientId, error)
-    }
+    console.error("Recipient analytics test error:", error);
+    res.status(500).json({ error: "Test endpoint failed" });
+  }
 };
 

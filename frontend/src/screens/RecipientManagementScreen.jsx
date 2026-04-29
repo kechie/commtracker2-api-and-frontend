@@ -249,9 +249,11 @@ const RecipientManagementScreen = () => {
           </Form>
         </Col>
         <Col md={3} className="text-end">
-          <Button className="my-3" onClick={() => setShowCreateModal(true)}>
-            <FontAwesomeIcon icon={faPlus} /> New Recipient
-          </Button>
+          {(role === 'admin' || role === 'superadmin') && (
+            <Button className="my-3" onClick={() => setShowCreateModal(true)}>
+              <FontAwesomeIcon icon={faPlus} /> New Recipient
+            </Button>
+          )}
         </Col>
       </Row>
       {showAlert && error && (
@@ -282,22 +284,26 @@ const RecipientManagementScreen = () => {
               <td>{recipient.recipientName}</td>
               <td>{recipient.initial}</td>
               <td>
-                <Button
-                  variant="light"
-                  className="btn-sm mx-1"
-                  onClick={() => handleEditClick(recipient)}
-                  title="Edit recipient"
-                >
-                  <FontAwesomeIcon icon={faEdit} />
-                </Button>
-                <Button
-                  variant="info"
-                  className="btn-sm mx-1"
-                  onClick={() => handleNotifyClick(recipient)}
-                  title="Send Notification to Recipient Users"
-                >
-                  <FontAwesomeIcon icon={faBell} />
-                </Button>
+                {(role === 'admin' || role === 'superadmin') && (
+                  <>
+                    <Button
+                      variant="light"
+                      className="btn-sm mx-1"
+                      onClick={() => handleEditClick(recipient)}
+                      title="Edit recipient"
+                    >
+                      <FontAwesomeIcon icon={faEdit} />
+                    </Button>
+                    <Button
+                      variant="info"
+                      className="btn-sm mx-1"
+                      onClick={() => handleNotifyClick(recipient)}
+                      title="Send Notification to Recipient Users"
+                    >
+                      <FontAwesomeIcon icon={faBell} />
+                    </Button>
+                  </>
+                )}
 {/*                <Button
                   variant="danger"
                   className="btn-sm mx-1"

@@ -14,7 +14,7 @@ const Header = () => {
     navigate('/login'); // Redirect to login after logout
   };
 
-  const canAccessTrackers = ['receiving', 'admin', 'superadmin'].includes(role);
+  const canAccessTrackers = ['receiving', 'admin', 'superadmin', 'monitor'].includes(role);
   const canAccessReceivingDashboard = ['receiving', 'admin', 'superadmin'].includes(role);
   const canAccessCalendar = ['recipient', 'admin', 'superadmin'].includes(role);
 

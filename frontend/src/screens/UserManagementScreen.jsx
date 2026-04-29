@@ -281,9 +281,11 @@ const UserManagementScreen = () => {
           </Form>
         </Col>
         <Col md={3} className="text-end">
-          <Button onClick={() => setShowCreateModal(true)}>
-            <FontAwesomeIcon icon={faPlus} /> Create User Account
-          </Button>
+          {(role === 'admin' || role === 'superadmin') && (
+            <Button onClick={() => setShowCreateModal(true)}>
+              <FontAwesomeIcon icon={faPlus} /> Create User Account
+            </Button>
+          )}
         </Col>
       </Row>
       {showAlert && error && (
@@ -322,19 +324,23 @@ const UserManagementScreen = () => {
               <td>{userdata.fullname}</td>
               <td>{userdata.role}</td>
               <td>
-                <Button variant="light" className="btn-sm mx-1" onClick={() => handleEditClick(userdata)}>
-                  <i className="fas fa-edit"></i>
-                  <FontAwesomeIcon icon={faEdit} />
-                </Button>
-                <Button
-                  variant="outline-warning"
-                  size="sm"
-                  className="btn-sm mx-1"
-                  onClick={() => handleResetPasswordClick(userdata)}
-                  title="Reset password"
-                >
-                  <FontAwesomeIcon icon={faKey} />
-                </Button>
+                {(role === 'admin' || role === 'superadmin') && (
+                  <>
+                    <Button variant="light" className="btn-sm mx-1" onClick={() => handleEditClick(userdata)}>
+                      <i className="fas fa-edit"></i>
+                      <FontAwesomeIcon icon={faEdit} />
+                    </Button>
+                    <Button
+                      variant="outline-warning"
+                      size="sm"
+                      className="btn-sm mx-1"
+                      onClick={() => handleResetPasswordClick(userdata)}
+                      title="Reset password"
+                    >
+                      <FontAwesomeIcon icon={faKey} />
+                    </Button>
+                  </>
+                )}
                 {role == 'superadmin' &&
                   <Button
                     variant="danger"

@@ -2,10 +2,14 @@
 const express = require('express');
 const router = express.Router();
 const activityLogController = require('../../controllers/v2/activityLogController');
-const { verifyToken } = require('../../middleware/authMiddleware');
+const { verifyToken, requireRole } = require('../../middleware/authMiddleware');
 
 // All routes require authentication
 router.use(verifyToken);
+
+// Role groups
+const readRoles = ['admin', 'superadmin', 'monitor'];
+const adminRoles = ['admin', 'superadmin'];
 
 /**
  * @route GET /v2/activity-logs
@@ -20,7 +24,7 @@ router.use(verifyToken);
  * @query sortOrder - Sort order (default: DESC)
  * @access Private
  */
-router.get('/', activityLogController.getAllActivityLogs);
+router.get('/', requireRole(readRoles), activityLogController.getAllActivityLogs);
 
 /**
  * @route GET /v2/activity-logs/user/:userId
@@ -32,7 +36,7 @@ router.get('/', activityLogController.getAllActivityLogs);
  * @query sortOrder - Sort order (default: DESC)
  * @access Private
  */
-router.get('/user/:userId', activityLogController.getUserActivityLogs);
+router.get('/user/:userId', requireRole(readRoles), activityLogController.getUserActivityLogs);
 
 /**
  * @route GET /v2/activity-logs/entity/:entityType/:entityId
@@ -45,7 +49,7 @@ router.get('/user/:userId', activityLogController.getUserActivityLogs);
  * @query sortOrder - Sort order (default: DESC)
  * @access Private
  */
-router.get('/entity/:entityType/:entityId', activityLogController.getEntityActivityLogs);
+router.get('/entity/:entityType/:entityId', requireRole(readRoles), activityLogController.getEntityActivityLogs);
 
 /**
  * @route GET /v2/activity-logs/:logId
@@ -53,7 +57,7 @@ router.get('/entity/:entityType/:entityId', activityLogController.getEntityActiv
  * @param logId - Activity log ID
  * @access Private
  */
-router.get('/:logId', activityLogController.getActivityLog);
+router.get('/:logId', requireRole(readRoles), activityLogController.getActivityLog);
 
 /**
  * @route GET /v2/activity-logs/summary/statistics
@@ -63,14 +67,14 @@ router.get('/:logId', activityLogController.getActivityLog);
  * @query entityType - Filter by entity type
  * @access Private
  */
-router.get('/summary/statistics', activityLogController.getActivitySummary);
+router.get('/summary/statistics', requireRole(readRoles), activityLogController.getActivitySummary);
 
 /**
  * @route DELETE /v2/activity-logs/cleanup/old
  * @desc Delete activity logs older than specified days
  * @body daysOld - Number of days (default: 90)
- * @access Private (Admin only recommended)
+ * @access Private (Admin only)
  */
-router.delete('/cleanup/old', activityLogController.deleteOldActivityLogs);
+router.delete('/cleanup/old', requireRole(adminRoles), activityLogController.deleteOldActivityLogs);
 
 module.exports = router;

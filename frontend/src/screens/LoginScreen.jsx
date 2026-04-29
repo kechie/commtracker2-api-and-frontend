@@ -47,17 +47,19 @@ const LoginScreen = () => {
       // Role-based redirect
       switch (role) {
         case 'receiving':
-          navigate('/trackers', { replace: true });
-          break;
         case 'admin':
         case 'superadmin':
-          navigate('/admin', { replace: true });
+        case 'monitor':
+          navigate('/trackers', { replace: true });
           break;
         case 'recipient':
           navigate('/recipient-dashboard', { replace: true });
           break;
-        case 'monitor':
-          navigate('/', { replace: true });
+        case 'lcestaff':
+          navigate('/lcestaff-dashboard', { replace: true });
+          break;
+        case 'lce':
+          navigate('/lce-dashboard', { replace: true });
           break;
         default:
           navigate('/', { replace: true });
