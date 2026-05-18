@@ -418,7 +418,7 @@ const TrackersScreen = () => {
                         )}
                       </div>
                     </td>
-                    <td>{new Date(tracker.dateReceived).toLocaleDateString()}</td>
+                    <td>{new Date(tracker.dateReceived).toLocaleDateString()} {new Date(tracker.dateReceived).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                     <td>{tracker.lceAction === 'others' ? tracker.lceKeyedInAction : tracker.lceAction} , {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
                     {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
                     <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply == 'pending' ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>

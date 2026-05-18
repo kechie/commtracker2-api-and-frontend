@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     dateReceived: {
       type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
       field: 'date_received'
     },
     // stores filename only (e.g. <uuid>_attachment.pdf). Public URL is constructed from env `STATIC_BASE_URL` or served path.

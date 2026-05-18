@@ -522,9 +522,14 @@ const RecipientDashboardScreen = () => {
                   <td>{item.tracker?.documentTitle || '—'}</td>
                   <td>{item.tracker?.fromName || '—'}</td>
                   <td>
-                    {item.tracker?.dateReceived
-                      ? new Date(item.tracker.dateReceived).toLocaleDateString()
-                      : '—'}
+                    {item.tracker?.dateReceived ? (
+                      <>
+                        {new Date(item.tracker.dateReceived).toLocaleDateString()}
+                        <div className="small text-muted">
+                          {new Date(item.tracker.dateReceived).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </>
+                    ) : '—'}
                   </td>
                   <td className="text-center">
                     {item.tracker?.attachment && (
@@ -581,9 +586,16 @@ const RecipientDashboardScreen = () => {
                     )}
                   </td>
                   <td>
-                    {item.tracker?.dateReceived
-                      ? new Date(item.tracker.dateReceived).toLocaleDateString()
-                      : '—'}
+                    {item.tracker?.lceAction ? (
+                      <>
+                        <Badge bg="info" className="mb-1">{item.tracker.lceAction === 'others' ? item.tracker.lceKeyedInAction : item.tracker.lceAction}</Badge>
+                        {item.tracker.lceActionDate && (
+                          <div className="small text-muted">
+                            {new Date(item.tracker.lceActionDate).toLocaleDateString()}
+                          </div>
+                        )}
+                      </>
+                    ) : '—'}
                   </td>
                   <td>
                     {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : '—'}

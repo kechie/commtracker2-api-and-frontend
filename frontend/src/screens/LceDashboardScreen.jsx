@@ -253,7 +253,17 @@ const LceDashboardScreen = () => {
                 <td className="fw-bold">{item.tracker?.serialNumber}</td>
                 <td>{item.tracker?.documentTitle}</td>
                 <td>{item.tracker?.fromName}</td>
-                <td className="text-muted small">{item.tracker?.dateReceived ? new Date(item.tracker.dateReceived).toLocaleDateString() : '—'}</td>
+                <td className="text-muted small">
+                  {item.tracker?.dateReceived ? (
+                    <>
+                      {new Date(item.tracker.dateReceived).toLocaleDateString()}
+                      <br />
+                      <span className="text-opacity-50">
+                        {new Date(item.tracker.dateReceived).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </>
+                  ) : '—'}
+                </td>
                 <td className="text-center">
                   {item.tracker?.attachment && (
                     <Button size="sm" variant="outline-primary" className="rounded-circle" onClick={() => handleViewAttachment(item)}>

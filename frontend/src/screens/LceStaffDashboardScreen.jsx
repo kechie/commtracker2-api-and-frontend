@@ -253,7 +253,17 @@ const LceStaffDashboardScreen = () => {
                 <td>{item.tracker?.serialNumber}</td>
                 <td>{item.tracker?.documentTitle}</td>
                 <td>{item.tracker?.fromName}</td>
-                <td>{item.tracker?.dateReceived ? new Date(item.tracker.dateReceived).toLocaleDateString() : '—'}</td>
+                <td>
+                  {item.tracker?.dateReceived ? (
+                    <>
+                      {new Date(item.tracker.dateReceived).toLocaleDateString()}
+                      <br />
+                      <small className="text-muted">
+                        {new Date(item.tracker.dateReceived).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </small>
+                    </>
+                  ) : '—'}
+                </td>
                 <td className="text-center">
                   {item.tracker?.attachment && (
                     <Button size="sm" variant="link" onClick={() => handleViewAttachment(item)}>

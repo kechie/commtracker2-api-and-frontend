@@ -204,7 +204,7 @@ const RecipientTrackerDetailsScreen = () => {
               <h5>Date Received</h5>
               <p className="text-muted">
                 {trackerData.dateReceived
-                  ? new Date(trackerData.dateReceived).toLocaleDateString()
+                  ? `${new Date(trackerData.dateReceived).toLocaleDateString()} ${new Date(trackerData.dateReceived).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
                   : '—'}
               </p>
             </Col>

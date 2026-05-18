@@ -185,6 +185,16 @@ exports.createTracker = async (req, res) => {
       finalSerialNumber = await generateSerialNumber(transaction);
     }
 
+    // Server-side timestamp logic for dateReceived
+    if (trackerData.dateReceived) {
+      const now = new Date();
+      const inputDate = new Date(trackerData.dateReceived);
+      // If the input date is today (ignoring time), or it's a new tracker without explicit time, use current server time
+      if (inputDate.toISOString().split('T')[0] === now.toISOString().split('T')[0]) {
+        trackerData.dateReceived = now;
+      }
+    }
+
     // Create the tracker within the transaction
     const tracker = await Tracker.create({
       ...trackerData,
@@ -506,6 +516,17 @@ exports.updateTracker = async (req, res) => {
     // serialNumber should not be updated after creation, unless specifically allowed by logic
     if (trackerData.serialNumber) {
       delete trackerData.serialNumber;
+    }
+
+    // Server-side timestamp logic for dateReceived
+    if (trackerData.dateReceived) {
+      const now = new Date();
+      const inputDate = new Date(trackerData.dateReceived);
+      // If updating to today's date and time is not provided/midnight, use current server time
+      if (inputDate.toISOString().split('T')[0] === now.toISOString().split('T')[0]) {
+        // Only override if the current time in tracker is significantly different or if we want to refresh it
+        trackerData.dateReceived = now;
+      }
     }
 
     // Update tracker's own fields
