@@ -9,6 +9,13 @@ import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faSearch, faTi
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
 
+// Formats a Date/date-string as "YYYY-MM-DDTHH:mm" in local time for <input type="datetime-local">
+const toDatetimeLocalValue = (date) => {
+  const d = new Date(date);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
 const TrackersScreen = () => {
   //const { user, role } = useAuth();
   const { role } = useAuth();
@@ -38,6 +45,7 @@ const TrackersScreen = () => {
     fromName: '',
     documentTitle: '',
     dateReceived: new Date().toISOString().split('T')[0],
+    dateReleased: '',
     lceAction: null,
     lceKeyedInAction: '',
     lceActionDate: new Date().toISOString().split('T')[0],
@@ -120,6 +128,7 @@ const TrackersScreen = () => {
       fromName: '',
       documentTitle: '',
       dateReceived: '',
+      dateReleased: '',
       isConfidential: false,
       lceAction: '',
       lceKeyedInAction: '',
@@ -186,6 +195,7 @@ const TrackersScreen = () => {
         fromName: tracker.fromName || '',
         documentTitle: tracker.documentTitle || '',
         dateReceived: tracker.dateReceived ? new Date(tracker.dateReceived).toISOString().split('T')[0] : '',
+        dateReleased: tracker.dateReleased ? toDatetimeLocalValue(tracker.dateReleased) : '',
         isConfidential: tracker.isConfidential || false,
         lceAction: tracker.lceAction || '',
         lceKeyedInAction: tracker.lceKeyedInAction || '',
@@ -313,6 +323,7 @@ const TrackersScreen = () => {
             }}
           >
             <option value="dateReceived">Date Received</option>
+            <option value="dateReleased">Date Released</option>
             <option value="createdAt">Created</option>
             <option value="updatedAt">Tracker Last Updated</option>
             <option value="latestRecipientUpdate">Latest Recipient Update</option>
@@ -364,6 +375,7 @@ const TrackersScreen = () => {
                 <th>Title</th>
                 <th>Recipients & Status</th>
                 <th>Date Received</th>
+                <th>Date Released</th>
                 <th>LCE Action, Date</th>
                 {/* <th>Confidential</th> */}
                 <th>LCE Reply, Date</th>
@@ -419,6 +431,7 @@ const TrackersScreen = () => {
                       </div>
                     </td>
                     <td>{new Date(tracker.dateReceived).toLocaleDateString()} {new Date(tracker.dateReceived).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                    <td>{tracker.dateReleased ? `${new Date(tracker.dateReleased).toLocaleDateString()} ${new Date(tracker.dateReleased).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}</td>
                     <td>{tracker.lceAction === 'others' ? tracker.lceKeyedInAction : tracker.lceAction} , {tracker.lceActionDate ? new Date(tracker.lceActionDate).toLocaleDateString() : 'N/A'}</td>
                     {/* <td>{tracker.isConfidential ? 'Yes' : 'No'}</td> */}
                     <td>{tracker.lceReplyDate ? new Date(tracker.lceReplyDate).toLocaleDateString() : ''} {tracker.lceReply == 'pending' ? tracker.lceReply : <span className="text-muted">No reply yet</span>} </td>
@@ -618,6 +631,13 @@ const TrackersScreen = () => {
                     <Col md={6}>
                       <FloatingLabel controlId="dateReceived" label="Date Received" className="mb-3">
                         <Form.Control type="date" name="dateReceived" value={formData.dateReceived} onChange={handleChange} required placeholder="Date Received" />
+                      </FloatingLabel>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col md={6}>
+                      <FloatingLabel controlId="dateReleased" label="Date Released" className="mb-3">
+                        <Form.Control type="datetime-local" name="dateReleased" value={formData.dateReleased} onChange={handleChange} placeholder="Date Released" />
                       </FloatingLabel>
                     </Col>
                   </Row>

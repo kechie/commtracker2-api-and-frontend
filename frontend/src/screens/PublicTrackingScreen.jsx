@@ -125,6 +125,10 @@ const PublicTrackingScreen = () => {
               <h5 className="text-muted small text-uppercase fw-bold">Action Date</h5>
               <p>{data.lceActionDate ? new Date(data.lceActionDate).toLocaleDateString() : '—'}</p>
             </Col>
+            <Col md={4}>
+              <h5 className="text-muted small text-uppercase fw-bold">Date Released</h5>
+              <p>{data.dateReleased ? `${new Date(data.dateReleased).toLocaleDateString()} ${new Date(data.dateReleased).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : '—'}</p>
+            </Col>
           </Row>
 
           <h5 className="text-muted small text-uppercase fw-bold mb-3">Routing History</h5>

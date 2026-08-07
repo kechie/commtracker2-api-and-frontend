@@ -210,6 +210,17 @@ const RecipientTrackerDetailsScreen = () => {
             </Col>
           </Row>
 
+          <Row className="mb-3">
+            <Col md={6}>
+              <h5>Date Released</h5>
+              <p className="text-muted">
+                {trackerData.dateReleased
+                  ? `${new Date(trackerData.dateReleased).toLocaleDateString()} ${new Date(trackerData.dateReleased).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                  : '—'}
+              </p>
+            </Col>
+          </Row>
+
           {tracker.dueDate && (
             <Row className="mb-3">
               <Col md={6}>

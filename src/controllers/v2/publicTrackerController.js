@@ -46,6 +46,7 @@ exports.getRoutingSlip = async (req, res) => {
         documentTitle: tracker.documentTitle,
         fromName: tracker.fromName,
         dateReceived: tracker.dateReceived,
+        dateReleased: tracker.dateReleased,
         lceAction: tracker.lceAction,
         lceKeyedInAction: tracker.lceKeyedInAction,
         lceActionDate: tracker.lceActionDate,

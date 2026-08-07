@@ -135,6 +135,7 @@ exports.trackerValidation = [
   body('documentTitle').trim().notEmpty().withMessage('Document Title is required'),
   body('fromName').trim().notEmpty().withMessage('From Name is required'),
   body('dateReceived').optional().isISO8601().toDate(),
+  body('dateReleased').optional({ checkFalsy: true }).isISO8601().toDate(),
   body('recipientIds').optional().isArray().withMessage('Recipient IDs must be an array'),
   body('recipientIds.*').optional().isUUID(4).withMessage('Invalid recipient ID'),
 ];
@@ -193,6 +194,11 @@ exports.createTracker = async (req, res) => {
       if (inputDate.toISOString().split('T')[0] === now.toISOString().split('T')[0]) {
         trackerData.dateReceived = now;
       }
+    }
+
+    // dateReleased is optional and user-editable (including time); treat an empty string as "not set"
+    if (trackerData.dateReleased === '') {
+      trackerData.dateReleased = null;
     }
 
     // Create the tracker within the transaction
@@ -314,7 +320,7 @@ exports.getTrackers = async (req, res) => {
       )`), sortOrder]];
     } else {
       // Validate sortBy to prevent SQL injection or bad queries
-      const allowedSortFields = ['dateReceived', 'serialNumber', 'fromName', 'documentTitle', 'createdAt', 'updatedAt'];
+      const allowedSortFields = ['dateReceived', 'dateReleased', 'serialNumber', 'fromName', 'documentTitle', 'createdAt', 'updatedAt'];
       const validatedSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'dateReceived';
       order = [[validatedSortBy, sortOrder]];
     }
@@ -527,6 +533,11 @@ exports.updateTracker = async (req, res) => {
         // Only override if the current time in tracker is significantly different or if we want to refresh it
         trackerData.dateReceived = now;
       }
+    }
+
+    // dateReleased is optional and user-editable (including time); treat an empty string as "not set"
+    if (trackerData.dateReleased === '') {
+      trackerData.dateReleased = null;
     }
 
     // Update tracker's own fields
