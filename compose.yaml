@@ -20,3 +20,9 @@ services:
     ports:
       - 3007:3007
     restart: unless-stopped
+    networks:
+      - production-network
+
+networks:
+  production-network:
+    external: true
