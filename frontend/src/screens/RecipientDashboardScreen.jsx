@@ -588,7 +588,7 @@ const RecipientDashboardScreen = () => {
                   <td>
                     {item.tracker?.lceAction ? (
                       <>
-                        <Badge bg="info" className="mb-1">{item.tracker.lceAction === 'others' ? item.tracker.lceKeyedInAction : item.tracker.lceAction}</Badge>
+                        <Badge bg="info" className="mb-1 text-wrap">{item.tracker.lceAction === 'others' ? item.tracker.lceKeyedInAction : item.tracker.lceAction}</Badge>
                         {item.tracker.lceActionDate && (
                           <div className="small text-muted">
                             {new Date(item.tracker.lceActionDate).toLocaleDateString()}

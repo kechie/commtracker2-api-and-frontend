@@ -295,7 +295,7 @@ export const getTrackerReplySlipAttachment = async (trackerId) => {
 
 export const getTrackerDetails = async (recipientId, trackerId) => {
   try {
-    const response = await api.get(`/recipients/${recipientId}/trackers/${trackerId}`);
+    const response = await api.get(`/recipient-trackers/recipients/${recipientId}/trackers/${trackerId}`);
     return response.data;
   } catch (error) {
     console.error('API Get Tracker Details Error:', error.response?.data || error.message);
