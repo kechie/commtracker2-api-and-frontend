@@ -148,6 +148,105 @@ exports.getRecipientTrackers = async (req, res) => {
   }
 };
 
+// ───────────────────────────────────────────────
+//  System-wide, paginated list of tracker-recipient assignments (not scoped
+//  to the logged-in user). Used by staff/receiving to browse items e.g. by
+//  status=pending ("no action taken yet").
+//  GET /api/v2/tracker-recipients
+//  Query params supported:
+//    ?status=pending,approved,completed,...
+//    ?search=keyword (searches documentTitle + fromName + recipientName)
+//    ?sort=createdAt,updatedAt,status,dateReceived
+//    ?order=ASC,DESC
+//    ?page=1
+//    ?limit=10
+// ───────────────────────────────────────────────
+exports.getAllTrackerRecipients = async (req, res) => {
+  try {
+    const {
+      status,
+      search,
+      sort = 'createdAt',
+      order = 'DESC',
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.max(1, Math.min(100, parseInt(limit, 10) || 10));
+    const offset = (pageNum - 1) * limitNum;
+
+    const where = {};
+    if (status) {
+      where.status = status;
+    }
+
+    if (search) {
+      const searchTerm = `%${search.trim()}%`;
+      where[Op.or] = [
+        { '$tracker.documentTitle$': { [Op.iLike]: searchTerm } },
+        { '$tracker.fromName$': { [Op.iLike]: searchTerm } },
+        { '$tracker.serialNumber$': { [Op.iLike]: searchTerm } },
+        { '$recipient.recipientName$': { [Op.iLike]: searchTerm } },
+      ];
+    }
+
+    const allowedSortFields = ['createdAt', 'updatedAt', 'status', 'dateReceived'];
+    const sortField = allowedSortFields.includes(sort) ? sort : 'createdAt';
+    const sortDirection = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    const orderClause = sortField === 'dateReceived'
+      ? [[{ model: Tracker, as: 'tracker' }, sortField, sortDirection]]
+      : [[sortField, sortDirection]];
+
+    const { count, rows } = await TrackerRecipient.findAndCountAll({
+      where,
+      include: [
+        {
+          model: Tracker,
+          as: 'tracker',
+          attributes: ['id', 'serialNumber', 'documentTitle', 'fromName', 'dateReceived'],
+          required: true,
+        },
+        {
+          model: Recipient,
+          as: 'recipient',
+          attributes: ['id', 'recipientName', 'recipientCode', 'initial'],
+          required: true,
+        },
+      ],
+      attributes: ['id', 'status', 'remarks', 'action', 'dueDate', 'createdAt', 'updatedAt'],
+      order: orderClause,
+      limit: limitNum,
+      offset,
+      subQuery: false,
+      distinct: true,
+    });
+
+    const totalPages = Math.ceil(count / limitNum);
+
+    res.json({
+      success: true,
+      data: rows,
+      pagination: {
+        total: count,
+        page: pageNum,
+        limit: limitNum,
+        totalPages,
+        hasNext: pageNum < totalPages,
+        hasPrev: pageNum > 1,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching all tracker recipients:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch tracker recipients',
+      error: error.message,
+    });
+  }
+};
+
 // @desc    Get all tracker-recipient actions for a specific tracker
 // @route   GET /api/v2/trackers/:trackerId/recipients
 // @access  Private

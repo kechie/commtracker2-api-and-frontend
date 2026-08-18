@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faEdit, faTrash, faArrowLeft, faFileText, faEye, faSearch, faTimes, faReply } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/useAuth';
 import PdfPreviewModal from '../components/PdfPreviewModal';
+import PendingActionsPanel from '../components/PendingActionsPanel';
 
 // Formats a Date/date-string as "YYYY-MM-DDTHH:mm" in local time for <input type="datetime-local">
 const toDatetimeLocalValue = (date) => {
@@ -40,6 +41,7 @@ const TrackersScreen = () => {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [hasRecipients, setHasRecipients] = useState('true');
+  const [viewTab, setViewTab] = useState('trackers');
   const [formData, setFormData] = useState({
     serialNumber: '',
     fromName: '',
@@ -286,6 +288,18 @@ const TrackersScreen = () => {
           </Button>
         </Col>
       </Row>*/}
+      <Tabs
+        activeKey={viewTab}
+        onSelect={(k) => setViewTab(k)}
+        className="mb-3"
+      >
+        <Tab eventKey="trackers" title="Trackers" />
+        <Tab eventKey="pending" title="Pending Actions" />
+      </Tabs>
+      {viewTab === 'pending' ? (
+        <PendingActionsPanel />
+      ) : (
+      <>
       <Row className="align-items-end mb-3">
         <Col md={4}>
           <Form.Label className="mb-1 small">Search</Form.Label>
@@ -573,6 +587,8 @@ const TrackersScreen = () => {
             </Pagination>
           </Col>
         </Row>
+      )}
+      </>
       )}
 
       {/* Add/Edit Modal */}

@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const {
+  getAllTrackerRecipients,
   getTrackerRecipients,
   getTrackerRecipientById,
   upsertTrackerRecipient,
@@ -20,6 +21,9 @@ router.use(verifyToken);
 const readRoles = ['receiving', 'admin', 'superadmin', 'monitor', 'lcestaff', 'lce'];
 const writeRoles = ['receiving', 'admin', 'superadmin'];
 const deleteRoles = ['admin', 'superadmin'];
+
+// System-wide, paginated list of tracker-recipient assignments (e.g. ?status=pending)
+router.get('/', requireRole(readRoles), getAllTrackerRecipients);
 
 // Get all tracker-recipients for a specific tracker
 router.get('/trackers/:trackerId/recipients', requireRole(readRoles), getTrackerRecipients);

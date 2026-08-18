@@ -221,6 +221,17 @@ export const getTrackerRecipients = async (trackerId) => {
   }
 };
 
+// System-wide, paginated list of tracker-recipient assignments (e.g. { status: 'pending' })
+export const getAllTrackerRecipients = async (params = {}) => {
+  try {
+    const response = await api.get('/tracker-recipients', { params });
+    return response.data;
+  } catch (error) {
+    console.error('API Get All Tracker Recipients Error:', error.response?.data || error.message);
+    throw error.response?.data || error;
+  }
+};
+
 export const getRecipientTrackers = async (recipientId, params = {}) => {
   try {
     //console.log('Fetching trackers for recipientId:', recipientId);
