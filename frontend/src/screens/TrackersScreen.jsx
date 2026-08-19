@@ -58,6 +58,7 @@ const TrackersScreen = () => {
     documentTitle: '',
     dateReceived: new Date().toISOString().split('T')[0],
     dateReleased: '',
+    replyRequired: false,
     lceAction: null,
     lceKeyedInAction: '',
     lceActionDate: new Date().toISOString().split('T')[0],
@@ -87,7 +88,7 @@ const TrackersScreen = () => {
       try {
         setLoading(true);
         const [trackersData, recipientsData] = await Promise.all([
-          getTrackers(currentPage, pageSize, sortBy, sortOrder, debouncedSearch, hasRecipients === 'all' ? '' : hasRecipients),
+          getTrackers(currentPage, pageSize, sortBy, sortOrder, debouncedSearch, hasRecipients === 'all' ? '' : hasRecipients, viewTab === 'replyRequired' ? 'true' : ''),
           getAllRecipients()
         ]);
 
@@ -116,10 +117,10 @@ const TrackersScreen = () => {
       }
     };
     loadData();
-  }, [currentPage, pageSize, sortBy, sortOrder, debouncedSearch, hasRecipients]);
+  }, [currentPage, pageSize, sortBy, sortOrder, debouncedSearch, hasRecipients, viewTab]);
 
   const fetchTrackers = async () => {
-    const data = await getTrackers(currentPage, pageSize, sortBy, sortOrder, debouncedSearch, hasRecipients === 'all' ? '' : hasRecipients);
+    const data = await getTrackers(currentPage, pageSize, sortBy, sortOrder, debouncedSearch, hasRecipients === 'all' ? '' : hasRecipients, viewTab === 'replyRequired' ? 'true' : '');
     const trackersList = data.data || data;
     setTrackers(Array.isArray(trackersList) ? trackersList : []);
     if (data.pagination) {
@@ -141,6 +142,7 @@ const TrackersScreen = () => {
       documentTitle: '',
       dateReceived: '',
       dateReleased: '',
+      replyRequired: false,
       isConfidential: false,
       lceAction: '',
       lceKeyedInAction: '',
@@ -208,6 +210,7 @@ const TrackersScreen = () => {
         documentTitle: tracker.documentTitle || '',
         dateReceived: tracker.dateReceived ? new Date(tracker.dateReceived).toISOString().split('T')[0] : '',
         dateReleased: tracker.dateReleased ? toDatetimeLocalValue(tracker.dateReleased) : '',
+        replyRequired: tracker.replyRequired || false,
         isConfidential: tracker.isConfidential || false,
         lceAction: tracker.lceAction || '',
         lceKeyedInAction: tracker.lceKeyedInAction || '',
@@ -305,11 +308,12 @@ const TrackersScreen = () => {
       </Row>*/}
       <Tabs
         activeKey={viewTab}
-        onSelect={(k) => setViewTab(k)}
+        onSelect={(k) => { setViewTab(k); setCurrentPage(1); }}
         className="mb-3"
       >
         <Tab eventKey="trackers" title="Trackers" />
         <Tab eventKey="pending" title="Pending Actions" />
+        <Tab eventKey="replyRequired" title="Reply Required" />
       </Tabs>
       {viewTab === 'pending' ? (
         <PendingActionsPanel />
@@ -402,6 +406,7 @@ const TrackersScreen = () => {
                 <th>Serial Number</th>
                 <th>From</th>
                 <th>Title</th>
+                <th>Reply Required</th>
                 <th>Recipients & Status</th>
                 <th>Date Received</th>
                 <th>Date Released</th>
@@ -434,6 +439,11 @@ const TrackersScreen = () => {
                     <td>{tracker.serialNumber}</td>
                     <td>{tracker.fromName}</td>
                     <td>{tracker.documentTitle}</td>
+                    <td>
+                      {tracker.replyRequired
+                        ? <Badge bg="warning" text="dark">Required</Badge>
+                        : <span className="text-muted">—</span>}
+                    </td>
                     <td>
                       <div className="mb-2">
                         <small className="text-muted d-block">{recipientNames}</small>
@@ -670,6 +680,16 @@ const TrackersScreen = () => {
                       <FloatingLabel controlId="dateReleased" label="Date Released" className="mb-3">
                         <Form.Control type="datetime-local" name="dateReleased" value={formData.dateReleased} onChange={handleChange} placeholder="Date Released" />
                       </FloatingLabel>
+                    </Col>
+                    <Col md={6} className="d-flex align-items-center mb-3">
+                      <Form.Check
+                        type="switch"
+                        id="replyRequired"
+                        name="replyRequired"
+                        label="Reply Required"
+                        checked={formData.replyRequired}
+                        onChange={handleChange}
+                      />
                     </Col>
                   </Row>
                   {/* <Row>

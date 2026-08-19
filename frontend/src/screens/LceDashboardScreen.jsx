@@ -305,7 +305,7 @@ const LceDashboardScreen = () => {
           </div>
           <Form.Group>
             <Form.Label className="fw-bold">LCE Remarks / Instructions</Form.Label>
-            <Form.Control as="textarea" rows={4} value={remark} onChange={e => setRemark(e.target.value)} placeholder="Type instructions or remarks here..." />
+            <Form.Control as="textarea" rows={6} value={remark} onChange={e => setRemark(e.target.value)} placeholder="Type instructions or remarks here..." />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer className="bg-light">

@@ -299,7 +299,7 @@ const LceStaffDashboardScreen = () => {
         <Modal.Body>
           <Form.Group>
             <Form.Label>Staff Remarks / Notes</Form.Label>
-            <Form.Control as="textarea" rows={3} value={remark} onChange={e => setRemark(e.target.value)} />
+            <Form.Control as="textarea" rows={6} value={remark} onChange={e => setRemark(e.target.value)} />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>

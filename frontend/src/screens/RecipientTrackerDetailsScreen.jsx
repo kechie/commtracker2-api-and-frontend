@@ -278,7 +278,7 @@ const RecipientTrackerDetailsScreen = () => {
             <Form.Label>Add Remarks (Optional)</Form.Label>
             <Form.Control
               as="textarea"
-              rows={3}
+              rows={6}
               placeholder="Add any remarks or notes..."
               value={remarks}
               onChange={(e) => setRemarks(e.target.value)}

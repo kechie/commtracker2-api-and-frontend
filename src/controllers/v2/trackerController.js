@@ -136,6 +136,7 @@ exports.trackerValidation = [
   body('fromName').trim().notEmpty().withMessage('From Name is required'),
   body('dateReceived').optional().isISO8601().toDate(),
   body('dateReleased').optional({ checkFalsy: true }).isISO8601().toDate(),
+  body('replyRequired').optional().toBoolean(),
   body('recipientIds').optional().isArray().withMessage('Recipient IDs must be an array'),
   body('recipientIds.*').optional().isUUID(4).withMessage('Invalid recipient ID'),
 ];
@@ -304,6 +305,7 @@ exports.getTrackers = async (req, res) => {
     const sortOrder = (req.query.sortOrder || 'DESC').toUpperCase();
     const search = req.query.search || '';
     const hasRecipients = req.query.hasRecipients; // 'true', 'false', or undefined
+    const replyRequired = req.query.replyRequired; // 'true', 'false', or undefined
 
     // Validate sortOrder
     if (!['ASC', 'DESC'].includes(sortOrder)) {
@@ -340,6 +342,13 @@ exports.getTrackers = async (req, res) => {
       where.id = {
         [Op.notIn]: sequelize.literal(`(SELECT tracker_id FROM tracker_recipients)`)
       };
+    }
+
+    // Filter by replyRequired
+    if (replyRequired === 'true') {
+      where.replyRequired = true;
+    } else if (replyRequired === 'false') {
+      where.replyRequired = false;
     }
 
     if (search) {

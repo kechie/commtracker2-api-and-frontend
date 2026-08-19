@@ -673,7 +673,7 @@ const RecipientDashboardScreen = () => {
                 </Form.Label>
                 <Form.Control
                   as="textarea"
-                  rows={3}
+                  rows={6}
                   value={remark}
                   onChange={e => setRemark(e.target.value)}
                   placeholder={

@@ -30,6 +30,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       field: 'date_released'
     },
+    //new column for receiving criteria (needs reply from recipient)
+    replyRequired: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      field: 'reply_required'
+    },
     // stores filename only (e.g. <uuid>_attachment.pdf). Public URL is constructed from env `STATIC_BASE_URL` or served path.
     attachment: {
       type: DataTypes.STRING,
@@ -64,7 +70,7 @@ module.exports = (sequelize, DataTypes) => {
       field: 'lce_action_date'
     },
     lceRemarks: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       field: 'lce_remarks'
     },
     lceReply: {
