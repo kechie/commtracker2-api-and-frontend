@@ -17,6 +17,16 @@ const toDatetimeLocalValue = (date) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
+// <input type="datetime-local"> values ("YYYY-MM-DDTHH:mm") carry no timezone info.
+// Left as-is, `new Date(value)` parses them as local to whatever runs it — the user's
+// browser (Manila) when displayed, but the server (which runs in UTC) when saved,
+// silently shifting the stored instant by 8 hours. Manila has no DST, so pinning the
+// offset explicitly before sending makes the value unambiguous everywhere.
+const withManilaOffset = (localDateTimeValue) => {
+  if (!localDateTimeValue) return localDateTimeValue;
+  return `${localDateTimeValue}:00+08:00`;
+};
+
 const TrackersScreen = () => {
   //const { user, role } = useAuth();
   const { role } = useAuth();
@@ -226,11 +236,16 @@ const TrackersScreen = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const payload = {
+      ...formData,
+      dateReleased: withManilaOffset(formData.dateReleased),
+    };
+
     try {
       if (editingTracker) {
-        await updateTracker(editingTracker.id, formData);
+        await updateTracker(editingTracker.id, payload);
       } else {
-        await createTracker(formData);
+        await createTracker(payload);
         setSuccess('DocTrkr2 created successfully!');
       }
       fetchTrackers();
