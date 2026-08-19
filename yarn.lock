@@ -3186,8 +3186,8 @@ __metadata:
     esbuild: "npm:^0.28.2"
     eslint: "npm:^10.8.1"
     eslint-plugin-react-hooks: "npm:^7.1.1"
-    eslint-plugin-react-refresh: "npm:^0.5.3"
-    globals: "npm:^17.9.0"
+    eslint-plugin-react-refresh: "npm:^0.5.4"
+    globals: "npm:^17.11.0"
     qrcode.react: "npm:^4.2.0"
     react: "npm:^19.2.8"
     react-big-calendar: "npm:^1.20.0"
@@ -3483,12 +3483,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-refresh@npm:^0.5.3":
-  version: 0.5.3
-  resolution: "eslint-plugin-react-refresh@npm:0.5.3"
+"eslint-plugin-react-refresh@npm:^0.5.4":
+  version: 0.5.4
+  resolution: "eslint-plugin-react-refresh@npm:0.5.4"
   peerDependencies:
     eslint: ^9 || ^10
-  checksum: 10c0/b2cda4fe8708f1401a0aaf3ab31fa6c93c283c43fdfa039ec8d27061330848ca3c5148a97b2a249ed228d8072fd971cf83694f555a9f6ec88b3802f22470ab22
+  checksum: 10c0/d3946e703a1d0c4e7d2a67bd73cce6def725a1d38839799b7e5d042fba920d5f5600ef30c6fb24ae595aceaa2d71fe95a09c8bb75d551767f29ca748b988a2f7
   languageName: node
   linkType: hard
 
@@ -4086,10 +4086,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globals@npm:^17.9.0":
-  version: 17.9.0
-  resolution: "globals@npm:17.9.0"
-  checksum: 10c0/776116bffb916e462d548c26a44c9a5d8f4e551935a883991e9f5d68cbcb21b63e4c688e36bbc564f97d3025e304d8b2bb0a611ecf944825aeee164898dcfbdd
+"globals@npm:^17.11.0":
+  version: 17.11.0
+  resolution: "globals@npm:17.11.0"
+  checksum: 10c0/5e1be3d816e04d4d0d01b1cdd40e46b5fb6b5e9f15aece9a5919b060e0fb1b3f1b9e7327dce97ef19e05513a6d65872e0834999ddea251557556dddd0f5fde30
   languageName: node
   linkType: hard
 
