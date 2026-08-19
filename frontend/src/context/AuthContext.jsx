@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { login as apiLogin } from '../utils/api'; // Import the login function from api.js
 import { subscribeUserToPush } from '../utils/push';
+import { isTokenExpired } from '../utils/jwt';
 import { AuthContext } from './useAuth';
 
 export const AuthProvider = ({ children }) => {
@@ -10,12 +11,23 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    localStorage.removeItem('userInfo');
+    setUser(null);
+    setRole(null);
+    setIsAuthenticated(false);
+  };
+
   useEffect(() => {
     const loadUserFromLocalStorage = () => {
       try {
         const userInfo = localStorage.getItem('userInfo');
         if (userInfo) {
           const parsedUserInfo = JSON.parse(userInfo);
+          if (isTokenExpired(parsedUserInfo.token)) {
+            logout();
+            return;
+          }
           setUser(parsedUserInfo);
           // Assuming role is directly available in parsedUserInfo or can be decoded from token
           // For now, let's assume the backend login response directly includes the role.
@@ -53,13 +65,6 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('userInfo');
-    setUser(null);
-    setRole(null);
-    setIsAuthenticated(false);
   };
 
   const value = {

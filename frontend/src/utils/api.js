@@ -1,5 +1,6 @@
 //utils/api.js
 import axios from 'axios';
+import { isTokenExpired } from './jwt';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -15,7 +16,12 @@ api.interceptors.request.use(
       if (userInfo) {
         const { token } = JSON.parse(userInfo);
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+          if (isTokenExpired(token)) {
+            // Stale token: drop it rather than send a request we know will 401
+            localStorage.removeItem('userInfo');
+          } else {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
         }
       }
     } catch (error) {
@@ -25,6 +31,23 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor: catches a token that expires mid-session, or is rejected
+// server-side for any other reason (clock skew, revocation) — the client-side
+// check above can miss these since it only runs before the request is sent.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const isAuthEndpoint = /\/auth\/(login|register)$/.test(error.config?.url || '');
+    if (error.response?.status === 401 && !isAuthEndpoint) {
+      localStorage.removeItem('userInfo');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
     return Promise.reject(error);
   }
 );
